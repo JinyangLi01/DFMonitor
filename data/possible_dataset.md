@@ -9,7 +9,8 @@
 - customer segmentation https://www.kaggle.com/code/fabiendaniel/customer-segmentation/input
 - financial distress prediction https://www.kaggle.com/datasets/shebrahimi/financial-distress
 - flight delay prediction https://www.kaggle.com/code/sohilaamary/classification/notebook
-
+- baby names change https://github.com/hadley/data-baby-names
+- stock up/down https://github.com/LastAncientOne/Deep_Learning_Machine_Learning_Stock/blob/master/Stock_Algorithms/Decision_Trees_Classification.ipynb
 
 
 ## level 2

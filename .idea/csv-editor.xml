@@ -10,14 +10,28 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="/data/compas/cox-parsed_7214rows_with_labels.csv">
+        <entry key="/data/compas/preprocessed/cox-parsed_7214rows_with_labels_sorted_by_dates.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="/data/compas/preprocessed/cox-parsed_7214rows_with_labels_sorted_by_dates.csv">
+        <entry key="/data/name_gender/baby-names-by-state.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/data/name_gender/baby-names.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/data/name_gender/baby-names_predicted.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

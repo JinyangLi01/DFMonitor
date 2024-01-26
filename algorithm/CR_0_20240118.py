@@ -38,7 +38,7 @@ class DF_CR:
         return True
 
     """
-    here we assume that the tuple only satisfies one group
+    here we assume that the tuple can satisfy multiple groups
     """
     def insert(self, tuple_):
         for group_idx, group in enumerate(self.groups):
