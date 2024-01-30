@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from algorithm import CR_0_20240118 as CR
 from algorithm import CR_baseline_0_20240118 as CR_baseline
 
-data = pd.read_csv('../../data/compas/preprocessed/cox-parsed_7214rows_with_labels_sorted_by_dates.csv')
+data = pd.read_csv('../../../data/compas/preprocessed/cox-parsed_7214rows_with_labels_sorted_by_dates.csv')
 # get distribution of compas_screening_date
 data['compas_screening_date'] = pd.to_datetime(data['compas_screening_date'])
 data['compas_screening_date'].hist()

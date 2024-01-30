@@ -1,4 +1,4 @@
-
+import config
 
 
 class DF_FPR:
@@ -21,6 +21,7 @@ class DF_FPR:
         return self.uf[idx]
 
     def print(self):
+        print("FPR, groups: ", self.groups)
         print("uf", self.uf)
         print("delta", self.delta)
 
@@ -38,26 +39,26 @@ class DF_FPR:
     def insert(self, tuple_, label):
         for group_idx, group in enumerate(self.groups):
             if self.belong_to_group(tuple_, group): # for group that the tuple satisfies
-                if not self.uf[group_idx]:
-                    if label == "TN":
-                        self.delta[group_idx] -= self.threshold
+                if label == "TN":
+                    if not self.uf[group_idx]:
+                        self.delta[group_idx] += self.threshold
                     else:
-                        if self.delta[group_idx] <= 1 - self.threshold:
-                            self.uf[group_idx] = True
-                            self.delta[group_idx] = 1 - self.threshold - self.delta[group_idx]
-                        else:
-                            self.delta[group_idx] -= 1 - self.threshold
-                else:
-                    if label == "FP":
-                        self.delta[group_idx] += 1 - self.threshold
-                    else:
-                        if self.delta[group_idx] <= self.threshold:
-                            self.uf[group_idx] = False
-                            self.delta[group_idx] = self.threshold - self.delta[group_idx]
-                        else:
+                        if self.delta[group_idx] >= self.threshold:
                             self.delta[group_idx] -= self.threshold
-
+                        else:
+                            self.delta[group_idx] = self.threshold - self.delta[group_idx]
+                            self.uf[group_idx] = False
+                else:
+                    if not self.uf[group_idx]:
+                        if self.delta[group_idx] > 1 - self.threshold:
+                            self.delta[group_idx] -= 1 - self.threshold
+                        else:  # original unfair
+                            self.delta[group_idx] = 1 - self.threshold - self.delta[group_idx]
+                            self.uf[group_idx] = True
+                    else:
+                        self.delta[group_idx] += 1 - self.threshold
     def new_window(self):
-        self.delta = [x * self.alpha for x in self.delta]
+        self.delta = [round(x * self.alpha, config.decimal) for x in self.delta]
+
 
 

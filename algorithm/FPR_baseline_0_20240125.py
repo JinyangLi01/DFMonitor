@@ -14,9 +14,14 @@ class FPR_baseline:
         return self.uf[idx]
 
     def print(self):
+        print("FPR_baseline, groups: ", self.groups)
         print("uf", self.uf)
         print("counters_TN", self.counters_TN)
         print("counters_FP", self.counters_FP)
+        print("FPR of groups: ", [self.counters_FP[i] / (self.counters_TN[i] + self.counters_FP[i])
+                                  for i in range(len(self.counters_FP))] )
+        print("\n")
+
 
     def belong_to_group(self, tuple_, group):
         for key in group.keys():
@@ -34,8 +39,10 @@ class FPR_baseline:
                     self.counters_TN[i] += 1
                 else:
                     self.counters_FP[i] += 1
-                if self.counters_FP[i] / (self.counters_TN[i] + self.counters_FP[i]) <= self.threshold:
+                if self.counters_FP[i] / (self.counters_TN[i] + self.counters_FP[i]) > self.threshold:
                     self.uf[i] = True
+                else:
+                    self.uf[i] = False
 
 
     def new_window(self):

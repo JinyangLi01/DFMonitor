@@ -54,8 +54,8 @@ def monitorCR_baseline(timed_data, date_column, time_window_str, monitored_group
     timed_data.apply(process_each_tuple, axis=1, args=(DFMonitor,))
 
 
-monitored_groups = [{"race": 'African-American'}, {"race": 'Caucasian'}]
-alpha = 0.5
-threshold = 0.1
-monitorCR_baseline(data, "compas_screening_date", "1 month", monitored_groups, threshold, alpha)
-
+# monitored_groups = [{"race": 'African-American'}, {"race": 'Caucasian'}]
+# alpha = 0.5
+# threshold = 0.1
+# monitorCR_baseline(data, "compas_screening_date", "1 month", monitored_groups, threshold, alpha)
+#

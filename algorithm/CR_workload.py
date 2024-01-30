@@ -57,7 +57,6 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_st
         if row['new_window']:
             DFMonitor_baseline.new_window()
             DFMonitor_baseline.insert(row)
-
             if not first_window_processed:
                 uf = [True if counters[i] / total_counter <= threshold else False for i in range(len(counters))]
                 delta = [abs(threshold * total_counter - counters[i]) * alpha for i in range(len(counters))]
