@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from algorithm import CR_0_20240118 as CR
 from algorithm import CR_baseline_0_20240118 as CR_baseline
+from algorithm import config
+
 
 data = pd.read_csv('../data/compas/preprocessed/cox-parsed_7214rows_with_labels_sorted_by_dates.csv')
 # get distribution of compas_screening_date
@@ -18,11 +20,11 @@ def compute_time_window_key(row, window_type):
     if window_type == 'year':
         return row.year
     elif window_type == 'month':
-        return f"{row.year}-{row.month}"
+        return "{}-{}".format(row.year, row.month)
     elif window_type == 'week':
-        return f"{row.year}-{row.week}"
+        return "{}-{}".format(row.year, row.strftime('%U'))
     elif window_type == 'day':
-        return f"{row.year}-{row.month}-{row.day}"
+        return "{}-{}-{}".format(row.year, row.month, row.day)
 
 
 def belong_to_group(row, group):

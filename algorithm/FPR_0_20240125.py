@@ -1,4 +1,4 @@
-import config
+from algorithm import config
 
 
 class DF_FPR:
