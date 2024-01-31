@@ -1,3 +1,10 @@
 .venv
-data
 algorithm/__pycache__/
+.idea/
+data/name_gender/data_R
+data/name_gender/SSA_data
+data/name_gender/names
+data/name_gender/namesbystate
+data/name_gender/namesbyterritory
+*.zip
+

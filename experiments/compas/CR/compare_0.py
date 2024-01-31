@@ -19,11 +19,11 @@ def compute_time_window_key(row, window_type):
     if window_type == 'year':
         return row.year
     elif window_type == 'month':
-        return f"{row.year}-{row.month}"
+        return "{}-{}".format(row.year, row.month)
     elif window_type == 'week':
-        return f"{row.year}-{row.week}"
+        return "{}-{}".format(row.year, row.strftime('%U'))
     elif window_type == 'day':
-        return f"{row.year}-{row.month}-{row.day}"
+        return "{}-{}-{}".format(row.year, row.month, row.day)
 
 
 def belong_to_group(row, group):
