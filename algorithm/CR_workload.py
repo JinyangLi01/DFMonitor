@@ -11,15 +11,25 @@ import copy
 # a time window is a month
 
 # Function to compute the time window key (e.g., year-month for 'month' windows)
-def compute_time_window_key(row, window_type):
+def compute_time_window_key(row, window_type, window_size):
     if window_type == 'year':
         return row.year
     elif window_type == 'month':
-        return "{}-{}".format(row.year, row.month)
+        if window_size == 1:
+            return "{}-{}".format(row.year, row.month)
+        else:
+            return "{}-{}".format(row.year, (row.month - 1) // window_size + 1)
     elif window_type == 'week':
-        return "{}-{}".format(row.year, row.strftime('%U'))
+        # Calculate the number of days since the start of the year to the current row date
+        days_since_start_of_year = (row - pd.Timestamp(year=row.year, month=1, day=1)).days
+        # For a 2-week window, divide by 14 (number of days in 2 weeks) to find the window index
+        window_index = days_since_start_of_year // (window_size * 7)  # 7 days in a week
+        # Calculate the start date of the window
+        window_start_date = pd.Timestamp(year=row.year, month=1, day=1) + pd.Timedelta(
+            days=window_index * window_size * 7)
+        return "{}-W{}".format(window_start_date.year, window_index + 1)
     elif window_type == 'day':
-        return "{}-{}-{}".format(row.year, row.month, row.day)
+        return "{}-{}-{}".format(row.year, row.month, row.day // window_size * window_size)
 
 
 def belong_to_group(row, group):
@@ -30,10 +40,11 @@ def belong_to_group(row, group):
 
 
 def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_str, monitored_groups, threshold, alpha):
-    number, unit = time_window_str.split()
+    window_size, window_type = time_window_str.split()
 
     # Apply the function to compute the window key for each row
-    timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key, args=(unit,))
+    timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
+                                                             args=(window_type, int(window_size)))
     # Initialize all rows as not the start of a new window
     timed_data['new_window'] = False
     # Determine the start of a new window for all rows except the first
@@ -85,9 +96,11 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_st
 
 
 def traverse_data_DFMonitor(timed_data, date_column, time_window_str, monitored_groups, threshold, alpha):
-    number, unit = time_window_str.split()
+    window_size, window_type = time_window_str.split()
+
     # Apply the function to compute the window key for each row
-    timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key, args=(unit,))
+    timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
+                                                             args=(window_type, int(window_size)))
     # Initialize all rows as not the start of a new window
     timed_data['new_window'] = False
     # Determine the start of a new window for all rows except the first
@@ -132,10 +145,11 @@ def traverse_data_DFMonitor(timed_data, date_column, time_window_str, monitored_
 
 
 def traverse_data_DFMonitor_baseline(timed_data, date_column, time_window_str, monitored_groups, threshold, alpha):
-    number, unit = time_window_str.split()
+    window_size, window_type = time_window_str.split()
 
     # Apply the function to compute the window key for each row
-    timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key, args=(unit,))
+    timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
+                                                             args=(window_type, int(window_size)))
     # Initialize all rows as not the start of a new window
     timed_data['new_window'] = False
     # Determine the start of a new window for all rows except the first
@@ -168,9 +182,11 @@ def traverse_data_DFMonitor_baseline(timed_data, date_column, time_window_str, m
 
 
 def CR_traditional(timed_data, date_column, time_window_str, monitored_groups, threshold):
-    number, unit = time_window_str.split()
+    window_size, window_type = time_window_str.split()
 
-    timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key, args=(unit,))
+    # Apply the function to compute the window key for each row
+    timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
+                                                             args=(window_type, int(window_size)))
     # Initialize all rows as not the start of a new window
     timed_data['new_window'] = False
     # Determine the start of a new window for all rows except the first

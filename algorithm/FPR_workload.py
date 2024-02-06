@@ -41,10 +41,11 @@ def belong_to_group(row, group):
 
 def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_str, monitored_groups, threshold, alpha,
                                          label_prediction="predicted", label_ground_truth="ground_truth"):
-    number, unit = time_window_str.split()
+    window_size, window_type = time_window_str.split()
 
     # Apply the function to compute the window key for each row
-    timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key, args=(unit,))
+    timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
+                                                             args=(window_type, int(window_size)))
     # Initialize all rows as not the start of a new window
     timed_data['new_window'] = False
     # Determine the start of a new window for all rows except the first
@@ -115,10 +116,11 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_st
 
 def traverse_data_DFMonitor(timed_data, date_column, time_window_str, monitored_groups, threshold, alpha,
                             label_prediction="predicted", label_ground_truth="ground_truth"):
-    number, unit = time_window_str.split()
+    window_size, window_type = time_window_str.split()
 
     # Apply the function to compute the window key for each row
-    timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key, args=(unit,))
+    timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
+                                                             args=(window_type, int(window_size)))
     # Initialize all rows as not the start of a new window
     timed_data['new_window'] = False
     # Determine the start of a new window for all rows except the first
@@ -263,9 +265,11 @@ def traverse_data_DF_baseline(timed_data, date_column, time_window_str, monitore
 
 def FPR_traditional(timed_data, date_column, time_window_str, monitored_groups, threshold,
                     label_prediction="predicted", label_ground_truth="ground_truth"):
-    number, unit = time_window_str.split()
+    window_size, window_type = time_window_str.split()
 
-    timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key, args=(unit,))
+    # Apply the function to compute the window key for each row
+    timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
+                                                             args=(window_type, int(window_size)))
     # Initialize all rows as not the start of a new window
     timed_data['new_window'] = False
     # Determine the start of a new window for all rows except the first
