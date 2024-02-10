@@ -1,3 +1,5 @@
+import csv
+
 import matplotlib
 import pandas as pd
 import numpy as np
@@ -67,51 +69,66 @@ hispanic_time_decay = [x[3] for x in fpr_list_DF]
 hispanic_traditional = [x[3] for x in fpr_list_trad]
 
 x_list = np.arange(0, len(fpr_list_DF))
-# pair_colors = ['blue', '#27bcf6', 'green', 'lightgreen', 'chocolate', 'gold']
-
-fig, ax = plt.subplots(figsize=(6, 3.5))
 
 
-# # Get the "Paired" color palette
-# paired_palette = sns.color_palette("Paired")
-# # Rearrange the colors within each pair
-# pair_colors = [paired_palette[i + 1] if i % 2 == 0 else paired_palette[i - 1] for i in range(len(paired_palette))]
-pair_colors = [scale_lightness(matplotlib.colors.ColorConverter.to_rgb("navy"), 2.2), 'cyan',
-               '#287c37', '#cccc00',
-               'indianred', '#fe01b1']
 
 
-# Plot the first curve (y1_values)
-ax.plot(x_list, black_time_decay, linewidth=3, markersize=6, label='Black time decay', linestyle='-', marker='o', color=pair_colors[0])
-
-# Plot the second curve (y2_values)
-ax.plot(x_list, black_traditional, linewidth=3, markersize=6, label='Black traditional', linestyle='--', marker='s', color=pair_colors[1])
-
-ax.plot(x_list, white_time_decay, linewidth=3, markersize=6, label='White time decay', linestyle='-', marker='o', color=pair_colors[2])
-ax.plot(x_list, white_traditional, linewidth=3, markersize=6, label='White traditional', linestyle='--', marker='s', color=pair_colors[3])
-
-ax.plot(x_list, hispanic_time_decay, linewidth=3, markersize=6, label='Hispanic time decay', linestyle='-', marker='o',
-        color=pair_colors[4])
-ax.plot(x_list, hispanic_traditional, linewidth=3, markersize=6, label='Hispanic traditional', linestyle='--', marker='s',
-        color=pair_colors[5])
-
-# ax.plot(x_list, asian_time_decay, linewidth=3, markersize=6, label='Hispanic time decay', linestyle='-', marker='o',
-#         color='red')
-# ax.plot(x_list, asian_traditional, linewidth=3, markersize=6, label='Hispanic traditional', linestyle='--', marker='s',
-#         color='orange')
-
-plt.xticks(np.arange(0, len(x_list)), [], rotation=0, fontsize=20)
-# plt.yticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0], fontsize=20)
-plt.xlabel('compas screening date starting\n from 01/01/2013, 1m interval',
-           fontsize=20, labelpad=-2).set_position((0.47, -0.1))
-plt.ylabel('false positive rate (FPR)', fontsize=20, labelpad=-1)
-# plt.yscale('symlog')
-plt.grid(True)
-plt.tight_layout()
-plt.legend(loc='lower left', bbox_to_anchor=(-0.145, 1), fontsize=15,
-               ncol=2, labelspacing=0.2, handletextpad=0.2, markerscale=1.5,
-               columnspacing=0.2, borderpad=0.2, frameon=True)
-plt.savefig("FPR_timedecay_traditional.png", bbox_inches='tight')
-plt.show()
+with open("case_study_FPR.csv", "w", newline='') as csvfile:
+    writer = csv.writer(csvfile, delimiter=',')
+    writer.writerow(["white_time_decay", "white_traditional", "black_time_decay",
+                     "black_traditional", "hispanic_time_decay", "hispanic_traditional"])
+    for i in range(len(white_time_decay)):
+        writer.writerow([white_time_decay[i], white_traditional[i], black_time_decay[i], black_traditional[i],
+                            hispanic_time_decay[i], hispanic_traditional[i]])
 
 
+
+
+#
+#
+# fig, ax = plt.subplots(figsize=(6, 3.5))
+#
+#
+# # # Get the "Paired" color palette
+# # paired_palette = sns.color_palette("Paired")
+# # # Rearrange the colors within each pair
+# # pair_colors = [paired_palette[i + 1] if i % 2 == 0 else paired_palette[i - 1] for i in range(len(paired_palette))]
+# pair_colors = [scale_lightness(matplotlib.colors.ColorConverter.to_rgb("navy"), 2.2), 'cyan',
+#                '#287c37', '#cccc00',
+#                'indianred', '#fe01b1']
+#
+#
+# # Plot the first curve (y1_values)
+# ax.plot(x_list, black_time_decay, linewidth=3, markersize=6, label='Black time decay', linestyle='-', marker='o', color=pair_colors[0])
+#
+# # Plot the second curve (y2_values)
+# ax.plot(x_list, black_traditional, linewidth=3, markersize=6, label='Black traditional', linestyle='--', marker='s', color=pair_colors[1])
+#
+# ax.plot(x_list, white_time_decay, linewidth=3, markersize=6, label='White time decay', linestyle='-', marker='o', color=pair_colors[2])
+# ax.plot(x_list, white_traditional, linewidth=3, markersize=6, label='White traditional', linestyle='--', marker='s', color=pair_colors[3])
+#
+# ax.plot(x_list, hispanic_time_decay, linewidth=3, markersize=6, label='Hispanic time decay', linestyle='-', marker='o',
+#         color=pair_colors[4])
+# ax.plot(x_list, hispanic_traditional, linewidth=3, markersize=6, label='Hispanic traditional', linestyle='--', marker='s',
+#         color=pair_colors[5])
+#
+# # ax.plot(x_list, asian_time_decay, linewidth=3, markersize=6, label='Hispanic time decay', linestyle='-', marker='o',
+# #         color='red')
+# # ax.plot(x_list, asian_traditional, linewidth=3, markersize=6, label='Hispanic traditional', linestyle='--', marker='s',
+# #         color='orange')
+#
+# plt.xticks(np.arange(0, len(x_list)), [], rotation=0, fontsize=20)
+# # plt.yticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0], fontsize=20)
+# plt.xlabel('compas screening date starting\n from 01/01/2013, 1m interval',
+#            fontsize=20, labelpad=-2).set_position((0.47, -0.1))
+# plt.ylabel('false positive rate (FPR)', fontsize=20, labelpad=-1)
+# # plt.yscale('symlog')
+# plt.grid(True)
+# plt.tight_layout()
+# plt.legend(loc='lower left', bbox_to_anchor=(-0.145, 1), fontsize=15,
+#                ncol=2, labelspacing=0.2, handletextpad=0.2, markerscale=1.5,
+#                columnspacing=0.2, borderpad=0.2, frameon=True)
+# plt.savefig("FPR_timedecay_traditional.png", bbox_inches='tight')
+# plt.show()
+#
+#
