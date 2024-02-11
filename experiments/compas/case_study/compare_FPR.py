@@ -8,15 +8,17 @@ from algorithm import FPR_workload as workload
 import seaborn as sns
 from matplotlib import rc
 import colorsys
+
 # sns.set_style("whitegrid")
 sns.set_palette("Paired")
 sns.set_context("paper", font_scale=2)
-
 
 # Set the font size for labels, legends, and titles
 
 plt.figure(figsize=(6, 3.5))
 plt.rcParams['font.size'] = 20
+
+
 # # activate latex text rendering
 # rc('text', usetex=True)
 # rc('axes', linewidth=2)
@@ -26,7 +28,7 @@ def scale_lightness(rgb, scale_l):
     # convert rgb to hls
     h, l, s = colorsys.rgb_to_hls(*rgb)
     # manipulate h, l, s values and return as rgb
-    return colorsys.hls_to_rgb(h, min(1, l * scale_l), s = s)
+    return colorsys.hls_to_rgb(h, min(1, l * scale_l), s=s)
 
 
 data = pd.read_csv('../../../data/compas/preprocessed/cox-parsed_7214rows_with_labels_sorted_by_dates.csv')
@@ -43,11 +45,13 @@ alpha = 0.5
 threshold = 0.3
 
 # use CR for compas dataset, a time window = 1 month, record the result of each uf in each month and draw a plot
-DFMonitor, uf_list_DF, fpr_list_DF, counter_list_TN_DF, counter_list_FP_DF = workload.traverse_data_DFMonitor(data,
-                                                                                                  date_column,
-                                                                                                  time_window_str,
-                                                                                                  monitored_groups,
-                                                                                                  threshold, alpha)
+DFMonitor, uf_list_DF, fpr_list_DF, counter_list_TN_DF, counter_list_FP_DF \
+    = workload.traverse_data_DFMonitor(data,
+                                       date_column,
+                                       time_window_str,
+                                       monitored_groups,
+                                       threshold,
+                                       alpha)
 
 uf_list_trad, fpr_list_trad, counter_list_TN_trad, counter_list_FP_trad = workload.FPR_traditional(data, date_column,
                                                                                                    time_window_str,
@@ -55,7 +59,6 @@ uf_list_trad, fpr_list_trad, counter_list_TN_trad, counter_list_FP_trad = worklo
                                                                                                    threshold)
 
 print(len(fpr_list_DF), len(fpr_list_trad))
-
 
 # draw chart of the first and second value in all lists in fpr_list and fpr_list1
 # 'Caucasian' 'African-American' 'Other' 'Hispanic' 'Asian' 'Native American'
@@ -70,19 +73,13 @@ hispanic_traditional = [x[3] for x in fpr_list_trad]
 
 x_list = np.arange(0, len(fpr_list_DF))
 
-
-
-
 with open("case_study_FPR.csv", "w", newline='') as csvfile:
     writer = csv.writer(csvfile, delimiter=',')
     writer.writerow(["white_time_decay", "white_traditional", "black_time_decay",
                      "black_traditional", "hispanic_time_decay", "hispanic_traditional"])
     for i in range(len(white_time_decay)):
         writer.writerow([white_time_decay[i], white_traditional[i], black_time_decay[i], black_traditional[i],
-                            hispanic_time_decay[i], hispanic_traditional[i]])
-
-
-
+                         hispanic_time_decay[i], hispanic_traditional[i]])
 
 #
 #
