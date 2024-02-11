@@ -11,14 +11,21 @@ from algorithm import config
 # a time window is a month
 
 # Function to compute the time window key (e.g., year-month for 'month' windows)
-def compute_time_window_key(row, window_type, window_size):
+def compute_time_window_key(row, window_type, window_size, first_row_time):
     if window_type == 'year':
         return row.year
     elif window_type == 'month':
         if window_size == 1:
             return "{}-{}".format(row.year, row.month)
         else:
-            return "{}-{}".format(row.year, (row.month - 1) // window_size + 1)
+            # if row.month == 2:
+            #     print("row = {}, first_row_time = {}".format(row, first_row_time))
+            num_year = row.year - first_row_time.year
+            num_month = num_year * 12 + row.month - 1
+            num_window = num_month // window_size
+            last_new_window_month = first_row_time.month + num_window * window_size
+            return "{}-{}".format(first_row_time.year + last_new_window_month // 12,
+                                  last_new_window_month % 12 + 1)
     elif window_type == 'week':
         # Calculate the number of days since the start of the year to the current row date
         days_since_start_of_year = (row - pd.Timestamp(year=row.year, month=1, day=1)).days
@@ -42,10 +49,10 @@ def belong_to_group(row, group):
 def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_str, monitored_groups, threshold, alpha,
                                          label_prediction="predicted", label_ground_truth="ground_truth"):
     window_size, window_type = time_window_str.split()
-
+    first_row_time = timed_data.loc[0, date_column]
     # Apply the function to compute the window key for each row
     timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
-                                                             args=(window_type, int(window_size)))
+                                                             args=(window_type, int(window_size), first_row_time))
     # Initialize all rows as not the start of a new window
     timed_data['new_window'] = False
     # Determine the start of a new window for all rows except the first
@@ -57,7 +64,6 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_st
     counter_first_window_TN = [0 for _ in monitored_groups]
     first_window_processed = False
     index = 0
-    row = timed_data.iloc[index]
 
     for index, row in timed_data.iterrows():
         if row['new_window']:
@@ -110,17 +116,16 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_st
                 DFMonitor_baseline.print()
                 DFMonitor.print()
                 return DFMonitor, DFMonitor_baseline
-    # last window:
     return DFMonitor, DFMonitor_baseline
 
 
 def traverse_data_DFMonitor(timed_data, date_column, time_window_str, monitored_groups, threshold, alpha,
                             label_prediction="predicted", label_ground_truth="ground_truth"):
     window_size, window_type = time_window_str.split()
-
+    first_row_time = timed_data.loc[0, date_column]
     # Apply the function to compute the window key for each row
     timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
-                                                             args=(window_type, int(window_size)))
+                                                             args=(window_type, int(window_size), first_row_time))
     # Initialize all rows as not the start of a new window
     timed_data['new_window'] = False
     # Determine the start of a new window for all rows except the first
@@ -188,14 +193,19 @@ def traverse_data_DFMonitor(timed_data, date_column, time_window_str, monitored_
 def traverse_data_DF_baseline(timed_data, date_column, time_window_str, monitored_groups, threshold, alpha,
                               label_prediction="predicted", label_ground_truth="ground_truth"):
     window_size, window_type = time_window_str.split()
-
+    # get the date_column value of the first row
+    first_row_time = timed_data.loc[0, date_column]
+    # starting_time = "{}-{}".format(row.year, (row.month - 1) // window_size + 1)
     # Apply the function to compute the window key for each row
-    timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key, args=(window_type, int(window_size)))
+    timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key, args=(window_type,
+                                                                                            int(window_size),
+                                                                                            first_row_time))
     # Initialize all rows as not the start of a new window
     timed_data['new_window'] = False
     # Determine the start of a new window for all rows except the first
     timed_data['new_window'] = timed_data['window_key'] != timed_data['window_key'].shift(1)
     timed_data.at[0, "new_window"] = False
+    print("num of new_window", len(timed_data[timed_data['new_window'] == True]))
     DFMonitor_baseline = FPR_baseline.FPR_baseline(monitored_groups, alpha, threshold)
     uf_list = []
     fpr_list = []
@@ -203,8 +213,8 @@ def traverse_data_DF_baseline(timed_data, date_column, time_window_str, monitore
     counter_values_TN = [0 for _ in monitored_groups]
     counter_list_FP = []  # record each time window's counter_values
     counter_list_TN = []
-    FP_each_window = [0, 0]
-    TN_each_window = [0, 0]
+    # FP_each_window = [0] * len(monitored_groups)
+    # TN_each_window = [0] * len(monitored_groups)
     for index, row in timed_data.iterrows():
         if row['new_window']:
             print("new window, index = {}, date = {}, before this point FP = {}, "
@@ -218,14 +228,8 @@ def traverse_data_DF_baseline(timed_data, date_column, time_window_str, monitore
                    if counter_values_TN[i] + counter_values_FP[i] != 0
                    else None for i in range(len(monitored_groups))]
             fpr_list.append(fpr)
-            # if index >= 5867 and index <= 6420:
-            #     print("index = {}, date = {}, last window FP = {}, "
-            #           "TN = {}, decay_FP = {}, decay_TN = {}, fpr= {}".format(index, row[date_column],
-            #                                                                   FP_each_window, TN_each_window,
-            #                                                                   counter_values_FP, counter_values_TN,
-            #                                                                   fpr))
-            FP_each_window = [0, 0]
-            TN_each_window = [0, 0]
+            # FP_each_window = [0] * len(monitored_groups)
+            # TN_each_window = [0] * len(monitored_groups)
 
             DFMonitor_baseline.new_window()
             counter_values_FP = [x * alpha for x in counter_values_FP]
@@ -234,16 +238,16 @@ def traverse_data_DF_baseline(timed_data, date_column, time_window_str, monitore
                 (row[label_prediction] == 0 and row[label_ground_truth] == 0)):
             if row[label_prediction] == 1 and row[label_ground_truth] == 0:
                 label = "FP"
-                if row['race'] == 'Caucasian':
-                    FP_each_window[0] += 1
-                elif row['race'] == "African-American":
-                    FP_each_window[1] += 1
+                # if row['race'] == 'Caucasian':
+                #     FP_each_window[0] += 1
+                # elif row['race'] == "African-American":
+                #     FP_each_window[1] += 1
             else:
                 label = "TN"
-                if row['race'] == 'Caucasian':
-                    TN_each_window[0] += 1
-                elif row['race'] == "African-American":
-                    TN_each_window[1] += 1
+                # if row['race'] == 'Caucasian':
+                #     TN_each_window[0] += 1
+                # elif row['race'] == "African-American":
+                #     TN_each_window[1] += 1
 
             DFMonitor_baseline.insert(row, label)
             for i, g in enumerate(monitored_groups):
@@ -266,10 +270,10 @@ def traverse_data_DF_baseline(timed_data, date_column, time_window_str, monitore
 def FPR_traditional(timed_data, date_column, time_window_str, monitored_groups, threshold,
                     label_prediction="predicted", label_ground_truth="ground_truth"):
     window_size, window_type = time_window_str.split()
-
+    first_row_time = timed_data.loc[0, date_column]
     # Apply the function to compute the window key for each row
     timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
-                                                             args=(window_type, int(window_size)))
+                                                             args=(window_type, int(window_size), first_row_time))
     # Initialize all rows as not the start of a new window
     timed_data['new_window'] = False
     # Determine the start of a new window for all rows except the first
@@ -333,40 +337,44 @@ if __name__ == "__main__":
     alpha = 0.3
     threshold = 0.3
     date_column = "compas_screening_date"
-    time_window_str = "1 month"
+    time_window_str = "8 month"
+
+
+    DFMonitor_baseline, uf_list1, fpr_list1, counter_list_TN1, counter_list_FP1 = (
+        traverse_data_DF_baseline(data, date_column, time_window_str, monitored_groups, threshold, alpha))
+
+
+    #
+    # DFMonitor, uf_list2, fpr_list2, counter_list_TN2, counter_list_FP2 = traverse_data_DFMonitor(data, date_column,
+    #                                                                                              time_window_str,
+    #                                                                                              monitored_groups,
+    #                                                                                              threshold, alpha)
 
     # uf_list, fpr_list, counter_list_TN, counter_list_FP = FPR_traditional(data, "compas_screening_date", "1 month",
     #                                                                       monitored_groups,
     #                                                                       threshold)
 
-    DFMonitor, DFMonitor_baseline = traverse_data_DFMonitor_and_baseline(data, date_column, time_window_str,
-                                                                         monitored_groups, threshold, alpha)
+    # DFMonitor, DFMonitor_baseline = traverse_data_DFMonitor_and_baseline(data, date_column, time_window_str,
+    #                                                                      monitored_groups, threshold, alpha)
 
-    DFMonitor_baseline, uf_list1, fpr_list1, counter_list_TN1, counter_list_FP1 = (
-        traverse_data_DF_baseline(data, date_column, time_window_str, monitored_groups, threshold, alpha))
-
-    DFMonitor, uf_list2, fpr_list2, counter_list_TN2, counter_list_FP2 = traverse_data_DFMonitor(data, date_column,
-                                                                                                 time_window_str,
-                                                                                                 monitored_groups,
-                                                                                                 threshold, alpha)
-
-
-    # compare fpr1 and fpr2
-    def compare_fpr(fpr_list1, fpr_list2):
-        for i in range(len(fpr_list1)):
-            for j in range(len(fpr_list1[i])):
-                if fpr_list1[i][j] != fpr_list2[i][j]:
-                    print(
-                        "fpr_list1[i][j] = {}, fpr_list2[i][j] = {}, i={}, j={}".format(fpr_list1[i][j],
-                                                                                        fpr_list2[i][j], i, j))
-                    return False
-        return True
-
-
-    print(compare_fpr(fpr_list1, fpr_list2))
-    print(compare_fpr(counter_list_FP1, counter_list_FP2))
-    print(compare_fpr(counter_list_TN1, counter_list_TN2))
-    print(uf_list1 == uf_list2)
-
-    print(fpr_list1[12:])
-    print(fpr_list2[12:])
+    #
+    #
+    # # compare fpr1 and fpr2
+    # def compare_fpr(fpr_list1, fpr_list2):
+    #     for i in range(len(fpr_list1)):
+    #         for j in range(len(fpr_list1[i])):
+    #             if fpr_list1[i][j] != fpr_list2[i][j]:
+    #                 print(
+    #                     "fpr_list1[i][j] = {}, fpr_list2[i][j] = {}, i={}, j={}".format(fpr_list1[i][j],
+    #                                                                                     fpr_list2[i][j], i, j))
+    #                 return False
+    #     return True
+    #
+    #
+    # print(compare_fpr(fpr_list1, fpr_list2))
+    # print(compare_fpr(counter_list_FP1, counter_list_FP2))
+    # print(compare_fpr(counter_list_TN1, counter_list_TN2))
+    # print(uf_list1 == uf_list2)
+    #
+    # print(fpr_list1[12:])
+    # print(fpr_list2[12:])

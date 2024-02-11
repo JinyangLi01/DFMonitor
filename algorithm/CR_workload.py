@@ -11,14 +11,19 @@ import copy
 # a time window is a month
 
 # Function to compute the time window key (e.g., year-month for 'month' windows)
-def compute_time_window_key(row, window_type, window_size):
+def compute_time_window_key(row, window_type, window_size, first_row_time):
     if window_type == 'year':
         return row.year
     elif window_type == 'month':
         if window_size == 1:
             return "{}-{}".format(row.year, row.month)
         else:
-            return "{}-{}".format(row.year, (row.month - 1) // window_size + 1)
+            num_year = row.year - first_row_time.year
+            num_month = num_year * 12 + row.month - 1
+            num_window = num_month // window_size
+            last_new_window_month = first_row_time.month + num_window * window_size
+            return "{}-{}".format(first_row_time.year + last_new_window_month // 12,
+                                  last_new_window_month % 12 + 1)
     elif window_type == 'week':
         # Calculate the number of days since the start of the year to the current row date
         days_since_start_of_year = (row - pd.Timestamp(year=row.year, month=1, day=1)).days
@@ -32,6 +37,7 @@ def compute_time_window_key(row, window_type, window_size):
         return "{}-{}-{}".format(row.year, row.month, row.day // window_size * window_size)
 
 
+
 def belong_to_group(row, group):
     for key in group.keys():
         if row[key] != group[key]:
@@ -39,12 +45,16 @@ def belong_to_group(row, group):
     return True
 
 
-def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_str, monitored_groups, threshold, alpha):
-    window_size, window_type = time_window_str.split()
-
-    # Apply the function to compute the window key for each row
-    timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
-                                                             args=(window_type, int(window_size)))
+def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_str, date_time_format, monitored_groups,
+                                         threshold, alpha):
+    if date_time_format:
+        window_size, window_type = time_window_str.split()
+        first_row_time = timed_data.loc[0, date_column]
+        # Apply the function to compute the window key for each row
+        timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
+                                                                 args=(window_type, int(window_size), first_row_time))
+    else:
+        timed_data['window_key'] = timed_data[date_column]
     # Initialize all rows as not the start of a new window
     timed_data['new_window'] = False
     # Determine the start of a new window for all rows except the first
@@ -60,7 +70,7 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_st
     for index, row in timed_data.iterrows():
         if first_window_processed:
             if DFMonitor.uf != DFMonitor_baseline.uf:
-                print("index = {}, row={}, {}".format(index, row['id'], row['compas_screening_date']))
+                # print("index = {}, row={}, {}".format(index, row['id'], row['compas_screening_date']))
                 DFMonitor.print()
                 DFMonitor_baseline.print()
                 return DFMonitor, DFMonitor_baseline
@@ -89,18 +99,22 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_st
                 DFMonitor.insert(row)
     # last window:
     if DFMonitor.uf != DFMonitor_baseline.uf:
-        print("index = {}, row={}, {}".format(index, row['id'], row['compas_screening_date']))
+        # print("index = {}, row={}, {}".format(index, row['id'], row['compas_screening_date']))
         DFMonitor.print()
         DFMonitor_baseline.print()
     return DFMonitor, DFMonitor_baseline
 
 
-def traverse_data_DFMonitor(timed_data, date_column, time_window_str, monitored_groups, threshold, alpha):
-    window_size, window_type = time_window_str.split()
-
-    # Apply the function to compute the window key for each row
-    timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
-                                                             args=(window_type, int(window_size)))
+def traverse_data_DFMonitor(timed_data, date_column, time_window_str, date_time_format, monitored_groups, threshold,
+                            alpha):
+    if date_time_format:
+        window_size, window_type = time_window_str.split()
+        # Apply the function to compute the window key for each row
+        first_row_time = timed_data.loc[0, date_column]
+        timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
+                                                                 args=(window_type, int(window_size), first_row_time))
+    else:
+        timed_data['window_key'] = timed_data[date_column]
     # Initialize all rows as not the start of a new window
     timed_data['new_window'] = False
     # Determine the start of a new window for all rows except the first
@@ -118,6 +132,7 @@ def traverse_data_DFMonitor(timed_data, date_column, time_window_str, monitored_
     cr_list = []
     for index, row in timed_data.iterrows():
         if row['new_window']:
+            # print("new window, index = {}".format(index))
             uf_list.append(copy.deepcopy(DFMonitor.uf))
             counter_list.append(copy.deepcopy(counters))
             cr_list.append([counters[i] / total_counter for i in range(len(counters))])
@@ -144,12 +159,16 @@ def traverse_data_DFMonitor(timed_data, date_column, time_window_str, monitored_
     return DFMonitor, uf_list, cr_list, counter_list
 
 
-def traverse_data_DFMonitor_baseline(timed_data, date_column, time_window_str, monitored_groups, threshold, alpha):
-    window_size, window_type = time_window_str.split()
-
-    # Apply the function to compute the window key for each row
-    timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
-                                                             args=(window_type, int(window_size)))
+def traverse_data_DFMonitor_baseline(timed_data, date_column, time_window_str, date_time_format, monitored_groups,
+                                     threshold, alpha):
+    if date_time_format:
+        window_size, window_type = time_window_str.split()
+        first_row_time = timed_data.loc[0, date_column]
+        # Apply the function to compute the window key for each row
+        timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
+                                                                 args=(window_type, int(window_size), first_row_time))
+    else:
+        timed_data['window_key'] = timed_data[date_column]
     # Initialize all rows as not the start of a new window
     timed_data['new_window'] = False
     # Determine the start of a new window for all rows except the first
@@ -162,6 +181,7 @@ def traverse_data_DFMonitor_baseline(timed_data, date_column, time_window_str, m
     cr_list = []
     for index, row in timed_data.iterrows():
         if row['new_window']:
+            # print("new window, index = {}".format(index))
             uf_list.append(copy.deepcopy(DFMonitor_baseline.uf))
             counter_list.append(copy.deepcopy(DFMonitor_baseline.counters))
             cr_list.append(
@@ -180,19 +200,20 @@ def traverse_data_DFMonitor_baseline(timed_data, date_column, time_window_str, m
     return DFMonitor_baseline, uf_list, counter_list, cr_list
 
 
-
-def CR_traditional(timed_data, date_column, time_window_str, monitored_groups, threshold):
-    window_size, window_type = time_window_str.split()
-
-    # Apply the function to compute the window key for each row
-    timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
-                                                             args=(window_type, int(window_size)))
+def CR_traditional(timed_data, date_column, time_window_str, date_time_format, monitored_groups, threshold):
+    if date_time_format:
+        window_size, window_type = time_window_str.split()
+        # Apply the function to compute the window key for each row
+        first_row_time = timed_data.loc[0, date_column]
+        timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
+                                                                 args=(window_type, int(window_size), first_row_time))
+    else:
+        timed_data['window_key'] = timed_data[date_column]
     # Initialize all rows as not the start of a new window
     timed_data['new_window'] = False
     # Determine the start of a new window for all rows except the first
     timed_data['new_window'] = timed_data['window_key'] != timed_data['window_key'].shift(1)
     timed_data.loc[0, "new_window"] = False
-    print(timed_data[timed_data['new_window'] == True].index)
     counter_values = [0 for g in monitored_groups]
     total_counter_of_window = 0
     counter_list = []  # record each time window's counter_values
@@ -225,7 +246,7 @@ if __name__ == "__main__":
     # get distribution of compas_screening_date
     data['compas_screening_date'] = pd.to_datetime(data['compas_screening_date'])
     # data['compas_screening_date'].hist()
-
+    date_time_format = True
     monitored_groups = [{"race": 'Caucasian'}, {"race": 'African-American'}]
     alpha = 0.5
     threshold = 0.3
@@ -234,34 +255,29 @@ if __name__ == "__main__":
 
     DFMonitor_baseline, uf_list_baseline, counter_list_baseline, cr_list_baseline \
         = traverse_data_DFMonitor_baseline(data, date_column,
-                                                    time_window_str,
-                                                    monitored_groups,
-                                                    threshold,
-                                                    alpha)
+                                           time_window_str,
+                                           date_time_format,
+                                           monitored_groups,
+                                           threshold,
+                                           alpha)
 
     # use CR for compas dataset, a time window = 1 month, record the result of each uf in each month and draw a plot
     DFMonitor, uf_list_DF, cr_list_DF, counter_list_DF = traverse_data_DFMonitor(data, date_column,
-                                                                                          time_window_str,
-                                                                                          monitored_groups,
-                                                                                          threshold,
-                                                                                          alpha)
+                                                                                 time_window_str,
+                                                                                 date_time_format,
+                                                                                 monitored_groups,
+                                                                                 threshold,
+                                                                                 alpha)
 
     counter_list_trad, cr_list_trad, uf_list_trad = CR_traditional(data, date_column,
-                                                                            time_window_str,
-                                                                            monitored_groups,
-                                                                            threshold)
+                                                                   time_window_str, date_time_format,
+                                                                   monitored_groups,
+                                                                   threshold)
 
     for i in range(0, len(cr_list_DF)):
         if cr_list_baseline[i] != cr_list_DF[i]:
             print("cr_list_baseline {} != cr_list_DF {}".format(cr_list_baseline[i], cr_list_DF[i]))
 
-
-
     for i in range(0, len(cr_list_DF)):
         print("cr_list_trad {}  cr_list_baseline {}  cr_list_DF {}  ".format(cr_list_trad[i],
                                                                              cr_list_baseline[i], cr_list_DF[i]))
-
-
-
-
-

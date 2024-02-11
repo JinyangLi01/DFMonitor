@@ -1,9 +1,9 @@
-from algorithm import config
 
 
-class DF_FPR:
+
+class DF_Accuracy:
     def __init__(self, monitored_groups, alpha, threshold):
-        self.name = "FPR"
+        self.name = "Accuracy"
         self.groups = monitored_groups
         # self.group2idx = {str(group): i for i, group in enumerate(monitored_groups)}
         self.uf = [False]*len(monitored_groups)
@@ -21,7 +21,6 @@ class DF_FPR:
         return self.uf[idx]
 
     def print(self):
-        print("FPR, groups: ", self.groups)
         print("uf", self.uf)
         print("delta", self.delta)
 
@@ -33,31 +32,33 @@ class DF_FPR:
         return True
 
     """
-    label = "FP" or "TN"
+    label = correct or incorrect
     """
     def insert(self, tuple_, label):
         for group_idx, group in enumerate(self.groups):
-            if self.belong_to_group(tuple_, group): # for group that the tuple satisfies
-                if label == "TN":
-                    if not self.uf[group_idx]:
-                        self.delta[group_idx] += self.threshold
+            if self.belong_to_group(tuple_, group): # only for group that the tuple satisfies
+                if not self.uf[group_idx]:
+                    if label == 'correct':
+                        self.delta[group_idx] += 1 - self.threshold
                     else:
                         if self.delta[group_idx] >= self.threshold:
                             self.delta[group_idx] -= self.threshold
                         else:
                             self.delta[group_idx] = self.threshold - self.delta[group_idx]
-                            self.uf[group_idx] = False
-                else:
-                    if not self.uf[group_idx]:
-                        if self.delta[group_idx] > 1 - self.threshold:
-                            self.delta[group_idx] -= 1 - self.threshold
-                        else:  # original unfair
-                            self.delta[group_idx] = 1 - self.threshold - self.delta[group_idx]
                             self.uf[group_idx] = True
+                else:
+                    if label == 'correct':
+                        if self.delta[group_idx] >= 1 - self.threshold:
+                            self.delta[group_idx] -= 1 - self.threshold
+                        else:
+                            self.delta[group_idx] = 1 - self.threshold - self.delta[group_idx]
+                            self.uf[group_idx] = False
                     else:
-                        self.delta[group_idx] += 1 - self.threshold
-    def new_window(self):
-        self.delta = [round(x * self.alpha, config.decimal) for x in self.delta]
+                        self.delta[group_idx] += self.threshold
 
+
+
+    def new_window(self):
+        self.delta = [x * self.alpha for x in self.delta]
 
 
