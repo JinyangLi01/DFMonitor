@@ -25,8 +25,6 @@ sns.set_palette("Paired")
 sns.set_context("paper", font_scale=1.6)
 
 
-# sns.set_theme(font='CMU Serif', style='darkgrid')
-
 
 def scale_lightness(rgb, scale_l):
     # convert rgb to hls
@@ -123,19 +121,16 @@ for col_name in df_CR.columns:
 
 x_list = np.arange(0, len(df_CR))
 
-print(len(x_list))
+# print(len(x_list))
 
 fig, axs = plt.subplots(1, 2, figsize=(6, 2.5))
 plt.rcParams['font.size'] = 10
 curve_colors = sns.color_palette(palette=['navy', 'blue', 'cornflowerblue', 'lightgreen', '#730a47', '#d810ef'])
-curve_colors.append('magenta')
-# print("x_list", x_list)
-# print(type(col_data_FPR['black_time_decay'][0]), col_data_FPR['black_time_decay'][0])
 
 
-pair_colors = [scale_lightness(matplotlib.colors.ColorConverter.to_rgb("navy"), 2.2), 'cyan',
+pair_colors = [scale_lightness(matplotlib.colors.ColorConverter.to_rgb("navy"), 2.2), '#8ef1e8',
                '#287c37', '#cccc00',
-               'indianred', '#fe01b1']
+               '#730a47', '#9966cc']
 
 # Plot the first curve (y1_values)
 axs[0].plot(x_list, col_data_FPR["black_time_decay"], linewidth=2.5, markersize=3.5, label='Black time decay',
@@ -174,17 +169,19 @@ axs[1].plot(x_list, col_data_CR["hispanic_traditional"], linewidth=2.5, markersi
 
 
 # add a common x-axis label
-fig.text(0.5, -0.05, 'compas screening date, from 01/01/2013 \nto 12/31/2014, window size = 1 month',
+fig.text(0.5, -0.03, 'compas screening date, from 01/01/2013 \nto 12/31/2014, time window = 1 month',
             ha='center', va='center', fontsize=16, fontweight='bold')
 
-axs[0].set_ylabel('false positive rate', fontsize=19, labelpad=-1)
-axs[1].set_ylabel('coverage rate', fontsize=19, labelpad=-1)
+axs[0].set_ylabel('false positive rate', fontsize=17, labelpad=-1, fontweight='bold')
+axs[1].set_ylabel('coverage rate', fontsize=17, labelpad=-1, fontweight='bold')
 axs[0].set_yticks([0.0, 0.5, 1.0])
 axs[1].set_yticks([0.0, 0.2, 0.4, 0.6])
 
 axs[0].set_title('(a) FPR', y=-0.19, pad=-0.5, fontweight='bold')
 axs[1].set_title('(b) CR', y=-0.19, pad=-0.5, fontweight='bold')
-
+axs[0].set_yscale('log')
+axs[0].set_yticks([0.1, 0.5, 1.0], [0.1, 0.5, 1.0])
+# axs[1].set_yscale('log')
 
 axs[0].grid(True)
 axs[1].grid(True)

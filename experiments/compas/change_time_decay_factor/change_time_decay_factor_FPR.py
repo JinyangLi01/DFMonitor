@@ -80,12 +80,6 @@ black_time_decay_dif_alpha.append([x[1] for x in fpr_list_DF1])
 white_time_decay_dif_alpha.append([x[0] for x in fpr_list_DF1])
 hispanic_time_decay_dif_alpha.append([x[3] for x in fpr_list_DF1])
 
-# draw chart of the first and second value in all lists in fpr_list and fpr_list1
-# 'Caucasian' 'African-American' 'Other' 'Hispanic' 'Asian' 'Native American'
-# black_time_decay_alpha1 = [x[1] for x in fpr_list_DF1]
-# white_time_decay_alpha1 = [x[0] for x in fpr_list_DF1]
-# asian_time_decay_alpha1 = [x[2] for x in fpr_list_DF1]
-# hispanic_time_decay_alpha1 = [x[3] for x in fpr_list_DF1]
 
 uf_list_trad, fpr_list_trad, counter_list_TN_trad, counter_list_FP_trad = workload.FPR_traditional(data, date_column,
                                                                                                    time_window_str,
@@ -96,7 +90,6 @@ uf_list_trad, fpr_list_trad, counter_list_TN_trad, counter_list_FP_trad = worklo
 # 'Caucasian' 'African-American' 'Other' 'Hispanic' 'Asian' 'Native American'
 black_traditional = [x[1] for x in fpr_list_trad]
 white_traditional = [x[0] for x in fpr_list_trad]
-# asian_traditional = [x[2] for x in fpr_list_trad]
 hispanic_traditional = [x[3] for x in fpr_list_trad]
 
 print(len(black_time_decay_dif_alpha), len(white_time_decay_dif_alpha), len(hispanic_time_decay_dif_alpha), len(black_traditional))
