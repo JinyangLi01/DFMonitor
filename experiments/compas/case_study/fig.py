@@ -123,7 +123,7 @@ x_list = np.arange(0, len(df_CR))
 
 # print(len(x_list))
 
-fig, axs = plt.subplots(1, 2, figsize=(6, 2.5))
+fig, axs = plt.subplots(1, 2, figsize=(6, 2.55))
 plt.rcParams['font.size'] = 10
 curve_colors = sns.color_palette(palette=['navy', 'blue', 'cornflowerblue', 'lightgreen', '#730a47', '#d810ef'])
 
@@ -132,6 +132,13 @@ pair_colors = [scale_lightness(matplotlib.colors.ColorConverter.to_rgb("navy"), 
                '#287c37', '#cccc00',
                '#730a47', '#9966cc']
 
+
+axs[0].plot(x_list, col_data_FPR["hispanic_time_decay"], linewidth=2.5, markersize=3.5, label='Hispanic time decay',
+            linestyle='-', marker='o',
+            color=pair_colors[4])
+axs[0].plot(x_list, col_data_FPR["hispanic_traditional"], linewidth=2.5, markersize=3.5, label='Hispanic traditional',
+            linestyle='--', marker='s',
+            color=pair_colors[5])
 # Plot the first curve (y1_values)
 axs[0].plot(x_list, col_data_FPR["black_time_decay"], linewidth=2.5, markersize=3.5, label='Black time decay',
             linestyle='-', marker='o', color=pair_colors[0])
@@ -145,12 +152,6 @@ axs[0].plot(x_list, col_data_FPR["white_time_decay"], linewidth=2.5, markersize=
 axs[0].plot(x_list, col_data_FPR["white_traditional"], linewidth=2.5, markersize=3.5, label='White traditional',
             linestyle='--', marker='s', color=pair_colors[3])
 
-axs[0].plot(x_list, col_data_FPR["hispanic_time_decay"], linewidth=2.5, markersize=3.5, label='Hispanic time decay',
-            linestyle='-', marker='o',
-            color=pair_colors[4])
-axs[0].plot(x_list, col_data_FPR["hispanic_traditional"], linewidth=2.5, markersize=3.5, label='Hispanic traditional',
-            linestyle='--', marker='s',
-            color=pair_colors[5])
 
 
 axs[1].plot(x_list, col_data_CR["black_time_decay"], linewidth=2.5, markersize=3.5, label='Black time decay',
@@ -169,24 +170,41 @@ axs[1].plot(x_list, col_data_CR["hispanic_traditional"], linewidth=2.5, markersi
 
 
 # add a common x-axis label
-fig.text(0.5, -0.03, 'compas screening date, from 01/01/2013 \nto 12/31/2014, time window = 1 month',
+fig.text(0.5, 0.01, 'compas screening date, from 01/01/2013 \nto 12/31/2014, time window = 1 month',
             ha='center', va='center', fontsize=16, fontweight='bold')
 
-axs[0].set_ylabel('false positive rate', fontsize=17, labelpad=-1, fontweight='bold')
-axs[1].set_ylabel('coverage rate', fontsize=17, labelpad=-1, fontweight='bold')
-axs[0].set_yticks([0.0, 0.5, 1.0])
-axs[1].set_yticks([0.0, 0.2, 0.4, 0.6])
-
-axs[0].set_title('(a) FPR', y=-0.19, pad=-0.5, fontweight='bold')
-axs[1].set_title('(b) CR', y=-0.19, pad=-0.5, fontweight='bold')
+axs[0].set_ylabel('false positive rate', fontsize=17, labelpad=-1, fontweight='bold', y=0.46)
+axs[0].set_title('(a) FPR', y=-0.3, pad=0, fontweight='bold')
 axs[0].set_yscale('log')
-axs[0].set_yticks([0.1, 0.5, 1.0], [0.1, 0.5, 1.0])
-# axs[1].set_yscale('log')
-
+axs[0].set_yticks([0.1, 0.3, 0.5, 1.0], [0.1, 0.3, 0.5, 1.0])
+x_ticks = np.arange(0, len(x_list))
+x_labels = [""] * len(x_list)
+x_labels[5] = "6"
+x_labels[11] = "12"
+x_labels[15] = "16"
+axs[0].set_xticks(x_ticks, x_labels, rotation=0, fontsize=14)
 axs[0].grid(True)
+
+gridlines = axs[0].xaxis.get_gridlines()
+gridlines[5].set_color("k")
+gridlines[5].set_linewidth(2)
+gridlines[11].set_color("k")
+gridlines[11].set_linewidth(2)
+gridlines[15].set_color("k")
+gridlines[15].set_linewidth(2)
+#
+# xt=np.append(x_ticks,5)
+# xtl = xt.tolist()
+# xtl[-1] = "6"
+# axs[0].set_xticklabels(xtl)
+
+
+
+axs[1].set_ylabel('coverage rate', fontsize=17, labelpad=-1, fontweight='bold')
+axs[1].set_yticks([0.0, 0.2, 0.3, 0.4, 0.6])
+axs[1].set_title('(b) CR', y=-0.27, pad=-0.5, fontweight='bold')
 axs[1].grid(True)
-axs[0].set_xticks(np.arange(0, len(x_list)), [], rotation=0, fontsize=20)
-axs[1].set_xticks(np.arange(0, len(x_list)), [], rotation=0, fontsize=20)
+axs[1].set_xticks(x_ticks, [], rotation=0, fontsize=20)
 
 
 # create a common legend
@@ -194,16 +212,138 @@ handles, labels = axs[-1].get_legend_handles_labels()
 
 
 fig.legend(handles=handles, labels=labels, loc='lower left', bbox_to_anchor=(0.01, 0.96), fontsize=12.8,
-           ncol=3, labelspacing=0.3, handletextpad=0.3, markerscale=1.6,
+           ncol=3, labelspacing=0.3, handletextpad=0.3, markerscale=2,
            columnspacing=0.4, borderpad=0.2, frameon=True)
 fig.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.1, wspace=0.3, hspace=0)
 
-#
-# plt.legend(loc='upper left', bbox_to_anchor=(-1, 1.1), fontsize=14,
-#            ncol=2, labelspacing=0.3, handletextpad=0.3, markerscale=1.6,
-#            columnspacing=0.4, borderpad=0.2, frameon=True, handles=handles, labels=labels)
-#
-# plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05, wspace=0.3, hspace=0)
+
 plt.tight_layout()
 plt.savefig("compas_compare.png", bbox_inches='tight')
+plt.show()
+
+
+####################### smoothness: standard deviation of the first derative of the curve ############################
+
+smooth_FPR = {}
+smooth_CR = {}
+
+
+
+# open a new file for FPR
+with open("roughness_compas_FPR.csv", "w", newline='') as csvfile:
+    writer = csv.writer(csvfile, delimiter=',')
+    writer.writerow(["smoothness"])
+    writer.writerow(["black_time_decay", np.std(np.diff(col_data_FPR["black_time_decay"]) / np.diff(x_list))])
+    smooth_FPR["black_time_decay"] = np.std(np.diff(col_data_FPR["black_time_decay"]) / np.diff(x_list))
+    # remove nan value in list
+    fpr = col_data_FPR["black_traditional"]
+    fpr = [x for x in fpr if str(x) != 'nan']
+    dydx = np.diff(fpr) / np.diff(np.arange(0, len(fpr)))
+    sm = np.std(dydx)
+    writer.writerow(["black_traditional", sm])
+    smooth_FPR["black_traditional"] = sm
+    writer.writerow(["white_time_decay", np.std(np.diff(col_data_FPR["white_time_decay"]) / np.diff(x_list))])
+    smooth_FPR["white_time_decay"] = np.std(np.diff(col_data_FPR["white_time_decay"]) / np.diff(x_list))
+    fpr = col_data_FPR["white_traditional"]
+    fpr = [x for x in fpr if str(x) != 'nan']
+    dydx = np.diff(fpr) / np.diff(np.arange(0, len(fpr)))
+    sm = np.std(dydx)
+    writer.writerow(["white_traditional", sm])
+    smooth_FPR["white_traditional"] = sm
+    writer.writerow(["hispanic_time_decay", np.std(np.diff(col_data_FPR["hispanic_time_decay"]) / np.diff(x_list))])
+    smooth_FPR["hispanic_time_decay"] = np.std(np.diff(col_data_FPR["hispanic_time_decay"]) / np.diff(x_list))
+    fpr = col_data_FPR["hispanic_traditional"]
+    fpr = [x for x in fpr if str(x) != 'nan']
+    dydx = np.diff(fpr) / np.diff(np.arange(0, len(fpr)))
+    sm = np.std(dydx)
+    writer.writerow(["hispanic_traditional", sm])
+    smooth_FPR["hispanic_traditional"] = sm
+
+smooth_CR["black_time_decay"] = np.std(np.diff(col_data_CR["black_time_decay"]) / np.diff(x_list))
+smooth_CR["black_traditional"] = np.std(np.diff(col_data_CR["black_traditional"]) / np.diff(x_list))
+smooth_CR["white_time_decay"] = np.std(np.diff(col_data_CR["white_time_decay"]) / np.diff(x_list))
+smooth_CR["white_traditional"] = np.std(np.diff(col_data_CR["white_traditional"]) / np.diff(x_list))
+smooth_CR["hispanic_time_decay"] = np.std(np.diff(col_data_CR["hispanic_time_decay"]) / np.diff(x_list))
+smooth_CR["hispanic_traditional"] = np.std(np.diff(col_data_CR["hispanic_traditional"]) / np.diff(x_list))
+
+# another file for CR
+with open("roughness_compas_CR.csv", "w", newline='') as csvfile:
+    writer = csv.writer(csvfile, delimiter=',')
+    writer.writerow(["smoothness"])
+    writer.writerow(["black_time_decay", np.std(np.diff(col_data_CR["black_time_decay"]) / np.diff(x_list))])
+    writer.writerow(["black_traditional", np.std(np.diff(col_data_CR["black_traditional"]) / np.diff(x_list))])
+    writer.writerow(["white_time_decay", np.std(np.diff(col_data_CR["white_time_decay"]) / np.diff(x_list))])
+    writer.writerow(["white_traditional", np.std(np.diff(col_data_CR["white_traditional"]) / np.diff(x_list))])
+    writer.writerow(["hispanic_time_decay", np.std(np.diff(col_data_CR["hispanic_time_decay"]) / np.diff(x_list))])
+    writer.writerow(["hispanic_traditional", np.std(np.diff(col_data_CR["hispanic_traditional"]) / np.diff(x_list))])
+
+
+
+from sklearn.preprocessing import MinMaxScaler
+
+
+roughness_scores_FPR = [1 / sd for sd in list(smooth_FPR.values())]
+roughness_scores_CR = [1 / sd for sd in list(smooth_CR.values())]
+
+# Assuming roughness_scores is a 2D array where each row is a feature to be normalized
+roughness_scores = np.array(roughness_scores_FPR).reshape(-1, 1)  # Reshape for scaler if it's a single feature
+
+scaler = MinMaxScaler(feature_range=(0, 1))
+smoothness_scores_normalized_FPR = scaler.fit_transform(roughness_scores).flatten()
+
+
+smoothness_scores = [1/sd for sd in list(smooth_FPR.values())]  # Example data
+# Normalize based on the maximum value observed
+max_smoothness = max(smoothness_scores)
+smoothness_scores_normalized_FPR = [score / max_smoothness for score in smoothness_scores]
+print("Normalized Smoothness Scores with Scikit-learn:", smoothness_scores_normalized_FPR)
+
+
+
+roughness_scores = np.array(roughness_scores_CR).reshape(-1, 1)  # Reshape for scaler if it's a single feature
+smoothness_scores_normalized_CR = scaler.fit_transform(roughness_scores).flatten()
+
+
+smoothness_scores = [1/sd for sd in list(smooth_CR.values())]  # Example data
+# Normalize based on the maximum value observed
+max_smoothness = max(smoothness_scores)
+smoothness_scores_normalized_CR = [score / max_smoothness for score in smoothness_scores]
+print("Normalized Smoothness Scores with Scikit-learn:", smoothness_scores_normalized_CR)
+
+
+
+# draw two bar charts using FPR and CR smoothness
+fig, axs = plt.subplots(1, 2, figsize=(5.8, 2))
+
+legend_labels = ["Black time decay", "Black traditional", "White time decay", "White traditional", "Hispanic time decay", "Hispanic traditional"]
+
+axs[0].bar(smooth_FPR.keys(), smoothness_scores_normalized_FPR, color=pair_colors, label=legend_labels)
+axs[0].set_ylabel('smoothness', fontsize=17, labelpad=-1, fontweight='bold')
+axs[0].set_title('(a) FPR', y=-0.13, pad=0, fontweight='bold')
+axs[0].set_yticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0], [0.0, 0.2, 0.4, 0.6, 0.8, 1.0], fontsize=16)
+axs[0].grid(True)
+# remove x ticks
+axs[0].set_xticks([], [], rotation=0, fontsize=20)
+axs[0].bar_label(axs[0].containers[0], labels=["{:0.2f}".format(score) for score in smoothness_scores_normalized_FPR],
+                 fontsize=14, padding=-1.2)
+
+
+axs[1].bar(smooth_CR.keys(), smoothness_scores_normalized_CR, color=pair_colors, label=legend_labels)
+axs[1].set_ylabel('smoothness', fontsize=17, labelpad=-1, fontweight='bold')
+axs[1].set_title('(b) CR', y=-0.13, pad=0, fontweight='bold')
+axs[1].set_yticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0], [0.0, 0.2, 0.4, 0.6, 0.8, 1.0], fontsize=16)
+axs[1].grid(True)
+axs[1].set_xticks([], [], rotation=0, fontsize=20)
+axs[1].bar_label(axs[1].containers[0], labels=["{:0.2f}".format(score) for score in smoothness_scores_normalized_CR],
+                 fontsize=14, padding=-1.2)
+
+
+handles, labels = axs[0].get_legend_handles_labels()
+fig.legend(handles=handles, labels=labels, loc='lower left', bbox_to_anchor=(-0.07, 0.95), fontsize=13,
+              ncol=3, labelspacing=0.3, handletextpad=0.3, markerscale=2, handlelength=1.9,
+              columnspacing=0.5, borderpad=0.2, frameon=True)
+# fig.legend()
+plt.tight_layout()
+fig.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.1, wspace=0.3, hspace=0)
+fig.savefig("compas_smoothness_normalized.png", bbox_inches='tight')
 plt.show()

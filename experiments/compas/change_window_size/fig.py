@@ -119,6 +119,8 @@ curve_colors = sns.color_palette(palette=['black', '#09339e', '#5788ee', '#00b9b
                                           '#41ab5d', '#006837'])
 curve_colors = sns.color_palette(palette=['firebrick', 'darkorange', '#004b00', 'blueviolet', '#0000ff', '#57d357',
                                           'magenta', 'cyan'])
+curve_colors = sns.color_palette(palette=[ '#0000ff', 'cyan', '#57d357', '#004b00', 'darkorange', 'firebrick',
+                                           'blueviolet', 'magenta'])
 # curve_colors = curve_colors[::-1]
 # curve_colors = sns.color_palette(palette=["#1984c5", "#22a7f0", "#63bff0", "#a7d5ed", "#e2e2e2", "#e1a692", "#de6e56",
 #                                           "#e14b31", "#c23728", "#8c2d1c"])
@@ -201,9 +203,9 @@ fig.text(0.44, -0.03, 'normalized measuring time',
 # create a common legend
 handles, labels = axs[-1, -1].get_legend_handles_labels()
 
-plt.legend(title='time window', title_fontsize=14, loc='upper left', bbox_to_anchor=(-1.3, 4.15), fontsize=14,
-           ncol=4, labelspacing=0.2, handletextpad=0.3, markerscale=1.6,
-           columnspacing=0.4, borderpad=0.2, frameon=True, handles=handles, labels=labels)
+plt.legend(title='time window', title_fontsize=14, loc='upper left', bbox_to_anchor=(-1.4, 4.15), fontsize=14,
+           ncol=4, labelspacing=0.2, handletextpad=0.4, markerscale=2,
+           columnspacing=0.6, borderpad=0.2, frameon=True, handles=handles, labels=labels)
 
 plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05, wspace=0.35, hspace=0.3)
 plt.tight_layout()
