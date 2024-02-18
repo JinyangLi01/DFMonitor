@@ -1,5 +1,3 @@
-import config
-
 
 class Accuracy_baseline:
     def __init__(self, monitored_groups, alpha, threshold):
