@@ -48,7 +48,7 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_st
         timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
                                                                  args=(window_type, int(window_size)))
     else:
-        timed_data['window_key'] = timed_data[date_column]
+        timed_data['window_key'] = (timed_data[date_column] // int(time_window_str)) * int(time_window_str)
     # Initialize all rows as not the start of a new window
     timed_data['new_window'] = False
     # Determine the start of a new window for all rows except the first
@@ -121,7 +121,7 @@ def traverse_data_DFMonitor(timed_data, date_column, time_window_str, date_time_
         timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
                                                                  args=(window_type, int(window_size)))
     else:
-        timed_data['window_key'] = timed_data[date_column]
+        timed_data['window_key'] = (timed_data[date_column] // int(time_window_str)) * int(time_window_str)
     # Initialize all rows as not the start of a new window
     timed_data['new_window'] = False
     # Determine the start of a new window for all rows except the first
@@ -190,7 +190,7 @@ def traverse_data_DFMonitor_baseline(timed_data, date_column, time_window_str, d
         timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
                                                                  args=(window_type, int(window_size)))
     else:
-        timed_data['window_key'] = timed_data[date_column]
+        timed_data['window_key'] = (timed_data[date_column] // int(time_window_str)) * int(time_window_str)
     # Initialize all rows as not the start of a new window
     timed_data['new_window'] = False
     # Determine the start of a new window for all rows except the first
@@ -244,7 +244,7 @@ def CR_traditional(timed_data, date_column, time_window_str, date_time_format, m
         timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
                                                                  args=(window_type, int(window_size)))
     else:
-        timed_data['window_key'] = timed_data[date_column]
+        timed_data['window_key'] = (timed_data[date_column] // int(time_window_str)) * int(time_window_str)
     # Initialize all rows as not the start of a new window
     timed_data['new_window'] = False
     # Determine the start of a new window for all rows except the first
