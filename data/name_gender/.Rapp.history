@@ -1,0 +1,7 @@
+load("/Users/jinyangli/OngoingProjects/Project4/DFMonitor/data/name_gender/babynames.rda")
+load("/Users/jinyangli/OngoingProjects/Project4/DFMonitor/data/name_gender/babynames.rda")
+load("babynames.rda")
+load("name_gender/babynames.rda")
+load("./name_gender/babynames.rda")
+getwd()
+load("/Users/jinyangli/OngoingProjects/Project4/DFMonitor/data/name_gender/babynames.rda")
