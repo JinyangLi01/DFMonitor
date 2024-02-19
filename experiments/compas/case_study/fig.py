@@ -233,6 +233,7 @@ smooth_CR = {}
 with open("roughness_compas_FPR.csv", "w", newline='') as csvfile:
     writer = csv.writer(csvfile, delimiter=',')
     writer.writerow(["smoothness"])
+    print("$$$$$$$$$$", col_data_FPR["black_time_decay"])
     writer.writerow(["black_time_decay", np.std(np.diff(col_data_FPR["black_time_decay"]) / np.diff(x_list))])
     smooth_FPR["black_time_decay"] = np.std(np.diff(col_data_FPR["black_time_decay"]) / np.diff(x_list))
     # remove nan value in list
@@ -282,44 +283,44 @@ with open("roughness_compas_CR.csv", "w", newline='') as csvfile:
 from sklearn.preprocessing import MinMaxScaler
 
 
-roughness_scores_FPR = [1 / sd for sd in list(smooth_FPR.values())]
-roughness_scores_CR = [1 / sd for sd in list(smooth_CR.values())]
+# roughness_scores_FPR = [1 / sd for sd in list(smooth_FPR.values())]
+# roughness_scores_CR = [1 / sd for sd in list(smooth_CR.values())]
+#
+# # Assuming roughness_scores is a 2D array where each row is a feature to be normalized
+# roughness_scores = np.array(roughness_scores_FPR).reshape(-1, 1)  # Reshape for scaler if it's a single feature
 
-# Assuming roughness_scores is a 2D array where each row is a feature to be normalized
-roughness_scores = np.array(roughness_scores_FPR).reshape(-1, 1)  # Reshape for scaler if it's a single feature
-
-scaler = MinMaxScaler(feature_range=(0, 1))
-smoothness_scores_normalized_FPR = scaler.fit_transform(roughness_scores).flatten()
+# scaler = MinMaxScaler(feature_range=(0, 1))
+# smoothness_scores_normalized_FPR = scaler.fit_transform(roughness_scores).flatten()
 
 
 smoothness_scores = [1/sd for sd in list(smooth_FPR.values())]  # Example data
 # Normalize based on the maximum value observed
 max_smoothness = max(smoothness_scores)
 smoothness_scores_normalized_FPR = [score / max_smoothness for score in smoothness_scores]
-print("Normalized Smoothness Scores with Scikit-learn:", smoothness_scores_normalized_FPR)
+print("Normalized Smoothness Scores :", smoothness_scores_normalized_FPR)
 
 
 
-roughness_scores = np.array(roughness_scores_CR).reshape(-1, 1)  # Reshape for scaler if it's a single feature
-smoothness_scores_normalized_CR = scaler.fit_transform(roughness_scores).flatten()
-
+# roughness_scores = np.array(roughness_scores_CR).reshape(-1, 1)  # Reshape for scaler if it's a single feature
+# smoothness_scores_normalized_CR = scaler.fit_transform(roughness_scores).flatten()
+#
 
 smoothness_scores = [1/sd for sd in list(smooth_CR.values())]  # Example data
 # Normalize based on the maximum value observed
 max_smoothness = max(smoothness_scores)
 smoothness_scores_normalized_CR = [score / max_smoothness for score in smoothness_scores]
-print("Normalized Smoothness Scores with Scikit-learn:", smoothness_scores_normalized_CR)
+print("Normalized Smoothness Scores with :", smoothness_scores_normalized_CR)
 
 
 
 # draw two bar charts using FPR and CR smoothness
-fig, axs = plt.subplots(1, 2, figsize=(5.8, 2))
+fig, axs = plt.subplots(1, 2, figsize=(5.8, 1.7))
 
 legend_labels = ["Black time decay", "Black traditional", "White time decay", "White traditional", "Hispanic time decay", "Hispanic traditional"]
 
 axs[0].bar(smooth_FPR.keys(), smoothness_scores_normalized_FPR, color=pair_colors, label=legend_labels)
 axs[0].set_ylabel('smoothness', fontsize=17, labelpad=-1, fontweight='bold')
-axs[0].set_title('(a) FPR', y=-0.13, pad=0, fontweight='bold')
+axs[0].set_title('(a) FPR', y=-0.15, pad=0, fontweight='bold')
 axs[0].set_yticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0], [0.0, 0.2, 0.4, 0.6, 0.8, 1.0], fontsize=16)
 axs[0].grid(True)
 # remove x ticks
@@ -330,7 +331,7 @@ axs[0].bar_label(axs[0].containers[0], labels=["{:0.2f}".format(score) for score
 
 axs[1].bar(smooth_CR.keys(), smoothness_scores_normalized_CR, color=pair_colors, label=legend_labels)
 axs[1].set_ylabel('smoothness', fontsize=17, labelpad=-1, fontweight='bold')
-axs[1].set_title('(b) CR', y=-0.13, pad=0, fontweight='bold')
+axs[1].set_title('(b) CR', y=-0.15, pad=0, fontweight='bold')
 axs[1].set_yticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0], [0.0, 0.2, 0.4, 0.6, 0.8, 1.0], fontsize=16)
 axs[1].grid(True)
 axs[1].set_xticks([], [], rotation=0, fontsize=20)

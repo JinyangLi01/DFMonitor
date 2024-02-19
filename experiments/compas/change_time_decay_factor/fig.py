@@ -13,7 +13,6 @@ import csv
 from matplotlib.scale import ScaleBase
 from matplotlib.transforms import Transform
 
-
 # Enable LaTeX rendering
 # plt.rcParams['text.usetex'] = True
 # plt.rcParams['font.family'] = 'CMU.Serif'
@@ -24,6 +23,7 @@ plt.rcParams['font.family'] = 'arial'
 
 sns.set_palette("Paired")
 sns.set_context("paper", font_scale=1.6)
+
 
 # sns.set_theme(font='CMU Serif', style='darkgrid')
 
@@ -111,7 +111,6 @@ col_data_CR = {}
 for col_name in df_CR.columns:
     col_data_CR[col_name] = df_CR[col_name].tolist()
 
-
 # draw the plot
 
 x_list = np.arange(0, len(ast.literal_eval(col_data_FPR['black_time_decay'][0])))
@@ -124,20 +123,13 @@ curve_colors.append('magenta')
 # print(type(col_data_FPR['black_time_decay'][0]), col_data_FPR['black_time_decay'][0])
 
 
-for i in range(len(alpha_list) - 1):
+for i in range(1, len(alpha_list)):
     axs[0, 0].plot(x_list, ast.literal_eval(col_data_FPR['black_time_decay'][i]), linewidth=2, markersize=4,
                    label='{}'.format(alpha_list[i]), linestyle='-', marker='o', color=curve_colors[i])
-    # axs[0, 0].plot(x_list, (col_data_FPR['black_traditional']), linewidth=2, markersize=4,
-    #             label='{}'.format(alpha_list[i]), linestyle='-', marker='o', color=curve_colors[i])
+
     axs[0, 1].plot(x_list, ast.literal_eval(col_data_CR['black_time_decay'][i]), linewidth=2, markersize=4,
                    label='{}'.format(alpha_list[i]), linestyle='-', marker='o', color=curve_colors[i])
-    # axs[0, 1].plot(x_list, (col_data_FPR['white_traditional']), linewidth=2, markersize=4,
-    #             label='{}'.format(alpha_list[i]), linestyle='-', marker='o', color=curve_colors[i])
 
-    # linear_threshold = 0.2
-    # log_linear_transition = 0.25
-    # y_transformered = get_y_transformed(ast.literal_eval(col_data_FPR['white_time_decay'][i]),
-    #                                     linear_threshold, log_linear_transition)
     y = ast.literal_eval(col_data_FPR['white_time_decay'][i])
     axs[1, 0].plot(x_list, y, linewidth=2, markersize=4,
                    label='{}'.format(alpha_list[i]), linestyle='-', marker='o', color=curve_colors[i])
@@ -157,7 +149,7 @@ for i in range(len(alpha_list) - 1):
     # axs[2, 1].plot(x_list, (col_data_FPR['hispanic_traditional']), linewidth=2, markersize=4,
     #             label='{}'.format(alpha_list[i]), linestyle='-', marker='o', color=curve_colors[i])
 
-i = len(alpha_list) - 1
+i = 0
 axs[0, 0].plot(x_list, ast.literal_eval(col_data_FPR['black_time_decay'][i]), linewidth=2, markersize=3,
                label='{}'.format(alpha_list[i]), linestyle=':', marker='s', color=curve_colors[i])
 axs[0, 1].plot(x_list, ast.literal_eval(col_data_CR['black_time_decay'][i]), linewidth=2, markersize=3,
@@ -181,8 +173,6 @@ axs[2, 1].set_title('(f) CR, Hispanic', y=-0.19, pad=-0.5, fontweight='bold')
 for ax in axs.flat:
     ax.grid(True)
     ax.set_xticks(np.arange(0, len(x_list)), [], rotation=0, fontsize=20)
-
-
 
 axs[0, 0].set_yscale('symlog', linthresh=0.29, linscale=0.15, base=2)
 axs.flat[0].set_yticks([0, 0.3, 0.4, 0.5], ['0', '0.3', '0.4', '0.5'])
@@ -213,9 +203,9 @@ fig.text(0.44, -0.05, 'compas screening date, from 01/01/2013 \nto 12/31/2014, t
 
 # create a common legend
 handles, labels = axs[-1, -1].get_legend_handles_labels()
-# put the last legend as the first
-handles = [handles[-1]] + handles[:-1]
-labels = [labels[-1]] + labels[:-1]
+# # put the last legend as the first
+# handles = [handles[-1]] + handles[:-1]
+# labels = [labels[-1]] + labels[:-1]
 
 plt.legend(title='Alpha Values', title_fontsize=14, loc='upper left', bbox_to_anchor=(-1.7, 4.1), fontsize=14,
            ncol=7, labelspacing=0.3, handletextpad=0.3, markerscale=1.6,
@@ -225,3 +215,7 @@ plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05, wspace=0.4, hs
 plt.tight_layout()
 plt.savefig("compas_time_decay_factor.png", bbox_inches='tight')
 plt.show()
+
+
+
+##########################################################################################################
