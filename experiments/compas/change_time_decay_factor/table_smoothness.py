@@ -140,7 +140,6 @@ row_names = row_names[:-1]
 rows = zip(*formatted_data.values())
 rows = list(rows)
 print(rows)
-rows = rows[::-1]
 
 print(headers, row_names)
 
