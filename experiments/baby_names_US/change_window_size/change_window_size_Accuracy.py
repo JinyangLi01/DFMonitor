@@ -60,7 +60,7 @@ def generate_scaled_colors(base_color, num_colors, scale_range=(0.5, 1.5)):
     return [scale_lightness(rgb_base, scale) for scale in scales]
 
 
-data = pd.read_csv('../../../data/name_gender/baby_names_1880_2020_predicted.csv')
+data = pd.read_csv('../../../data/name_gender/baby_names_1880_2020_US_predicted.csv')
 print(data["sex"].unique())
 date_column = "year"
 date_time_format = False

@@ -31,7 +31,7 @@ def scale_lightness(rgb, scale_l):
     return colorsys.hls_to_rgb(h, min(1, l * scale_l), s=s)
 
 
-data = pd.read_csv('../../../data/name_gender/baby_names_1880_2020_predicted.csv')
+data = pd.read_csv('../../../data/name_gender/baby_names_1880_2020_US_predicted.csv')
 print(data["sex"].unique())
 date_column = "year"
 date_time_format = False
