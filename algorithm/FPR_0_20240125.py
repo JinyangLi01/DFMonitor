@@ -1,11 +1,17 @@
 from algorithm import config
+import sys
+
+
+def sizeof(obj):
+    size = sys.getsizeof(obj)
+    if isinstance(obj, dict): return size + sum(map(sizeof, obj.keys())) + sum(map(sizeof, obj.values()))
+    if isinstance(obj, (list, tuple, set, frozenset)): return size + sum(map(sizeof, obj))
+    return size
 
 
 class DF_FPR:
     def __init__(self, monitored_groups, alpha, threshold):
-        self.name = "FPR"
         self.groups = monitored_groups
-        # self.group2idx = {str(group): i for i, group in enumerate(monitored_groups)}
         self.uf = [False]*len(monitored_groups)
         self.delta = [0]*len(monitored_groups)
         self.alpha = alpha
@@ -19,6 +25,24 @@ class DF_FPR:
         # idx = self.group2idx[str(group)]
         idx = self.groups.index(group)
         return self.uf[idx]
+
+    def get_size(self):
+        size = 0
+        size += sys.getsizeof(self.groups) + sys.getsizeof(self.groups[0]) * len(self.groups)
+        size += sys.getsizeof(self.uf) + sys.getsizeof(self.uf[0]) * len(self.uf)
+        size += sys.getsizeof(self.delta) + sys.getsizeof(self.delta[0]) * len(self.delta)
+        size += sys.getsizeof(self.alpha)
+        size += sys.getsizeof(self.threshold)
+        return size
+
+    def get_size_recursive(self):
+        size = 0
+        size += sizeof(self.groups)
+        size += sizeof(self.uf)
+        size += sizeof(self.delta)
+        size += sizeof(self.alpha)
+        size += sizeof(self.threshold)
+        return size
 
     def print(self):
         print("FPR, groups: ", self.groups)
@@ -57,7 +81,8 @@ class DF_FPR:
                     else:
                         self.delta[group_idx] += 1 - self.threshold
     def new_window(self):
-        self.delta = [round(x * self.alpha, config.decimal) for x in self.delta]
+        # self.delta = [round(x * self.alpha, config.decimal) for x in self.delta]
+        self.delta = [x * self.alpha for x in self.delta]
 
 
 
