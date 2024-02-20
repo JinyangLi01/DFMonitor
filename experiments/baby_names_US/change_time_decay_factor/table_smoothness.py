@@ -103,18 +103,18 @@ print(headers, row_names)
 # Create a figure and a single subplot
 fig, ax = plt.subplots(figsize=(8, 6))
 
-plt.axis('off')
+
 
 # Create table with row labels
 table = plt.table(cellText=list(rows), colLabels=['male', 'female'],
-                  rowColours=[curve_colors[-1]]+curve_colors[:-1], colWidths=[0.2] * (len(headers) + 1),
+                  rowColours=[curve_colors[-1]]+curve_colors[:-1], colWidths=[0.1] * (len(headers) + 1),
                   cellLoc='center', rowLoc='center',
                   rowLabels=['   '] * len(row_names), loc='center')
 # plt.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1)
 
-table.auto_set_column_width(col=list(range(len(headers) + 1)))
+# table.auto_set_column_width(col=list(range(len(headers) + 1)))
 table.PAD = 0.2
-table.scale(1, 1.1)
+table.scale(1, 1.2)
 
 
 fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=0, hspace=0)
@@ -124,7 +124,7 @@ plt.show()
 
 img = plt.imread("baby_names_time_decay_factor_smoothness_2f.png")
 print(img.shape)
-img_cropped = img[530:img.shape[0] - 530, 770:img.shape[1] - 830]
+img_cropped = img[520:img.shape[0] - 580, 830:img.shape[1] - 840]
 plt.axis('off')
 plt.imshow(img_cropped)
 plt.savefig("baby_names_time_decay_factor_smoothness_2f.png", bbox_inches='tight', dpi=250)
