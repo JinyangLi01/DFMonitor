@@ -150,14 +150,14 @@ plt.axis('off')
 
 # Create table with row labels
 table = plt.table(cellText=list(rows), colLabels=['B, F', 'W, F', 'H, F', 'B, C', 'W, C', 'H, C'],
-                  rowColours=[curve_colors[-1]]+curve_colors[:-1], colWidths=[0.2] * (len(headers) + 1),
-                  cellLoc='left', rowLoc='center',
+                  rowColours=[curve_colors[-1]]+curve_colors[:-1], colWidths=[0.09] * (len(headers) + 1),
+                  cellLoc='center', rowLoc='center',
                   rowLabels=['   '] * len(row_names), loc='center')
 # plt.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1)
 
-table.auto_set_column_width(col=list(range(len(headers) + 1)))
+# table.auto_set_column_width(col=list(range(len(headers) + 1)))
 table.PAD = 0.2
-table.scale(1, 1.1)
+table.scale(1, 1.2)
 # table.auto_set_font_size(True)
 
 fig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=0, hspace=0)
@@ -167,7 +167,7 @@ plt.show()
 
 img = plt.imread("compas_time_decay_factor_smoothness_2f.png")
 print(img.shape)
-img_cropped = img[530:img.shape[0] - 530, 530:img.shape[1] - 590]
+img_cropped = img[500:img.shape[0] - 500, 410:img.shape[1] - 470]
 plt.axis('off')
 plt.imshow(img_cropped)
 plt.savefig("compas_time_decay_factor_smoothness_2f.png", bbox_inches='tight', dpi=250)

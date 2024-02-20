@@ -1,0 +1,42 @@
+monitored_group,size_base,size_opt,(size_base - size_opt) / size_base
+[{'race': 'Caucasian'}],1328,1128,0.15060240963855423
+[{'race': 'African-American'}],1344,1144,0.1488095238095238
+[{'race': 'Hispanic'}],1328,1128,0.15060240963855423
+[{'sex': 'Male'}],1320,1120,0.15151515151515152
+[{'sex': 'Female'}],1320,1120,0.15151515151515152
+"[{'race': 'Caucasian', 'sex': 'Male'}, {'race': 'African-American'}]",1840,1608,0.12608695652173912
+"[{'race': 'African-American'}, {'race': 'Hispanic'}]",1728,1496,0.13425925925925927
+"[{'race': 'Caucasian'}, {'race': 'Caucasian', 'sex': 'Male'}]",1736,1504,0.1336405529953917
+"[{'race': 'Hispanic'}, {'race': 'Caucasian', 'sex': 'Female'}]",1800,1568,0.1288888888888889
+"[{'race': 'African-American'}, {'sex': 'Male'}]",1776,1544,0.13063063063063063
+"[{'race': 'African-American', 'sex': 'Male'}, {'race': 'Caucasian', 'sex': 'Male'}, {'race': 'Hispanic'}]",2200,1936,0.12
+"[{'race': 'Caucasian'}, {'race': 'African-American'}, {'race': 'Hispanic'}]",2088,1824,0.12643678160919541
+"[{'race': 'Caucasian', 'sex': 'Male'}, {'race': 'African-American'}, {'sex': 'Female'}]",2192,1928,0.12043795620437957
+"[{'race': 'African-American', 'sex': 'Male'}, {'race': 'Caucasian', 'sex': 'Female'}, {'race': 'Caucasian', 'sex': 'Female'}]",2192,1928,0.12043795620437957
+"[{'race': 'Caucasian'}, {'race': 'African-American'}, {'race': 'African-American', 'sex': 'Female'}]",2136,1872,0.12359550561797752
+"[{'race': 'Caucasian', 'sex': 'Male'}, {'race': 'Caucasian', 'sex': 'Female'}, {'race': 'African-American'}, {'race': 'Hispanic'}]",2552,2256,0.11598746081504702
+"[{'race': 'African-American', 'sex': 'Male'}, {'race': 'Caucasian', 'sex': 'Male'}, {'race': 'Hispanic'}, {'sex': 'Female'}]",2552,2256,0.11598746081504702
+"[{'race': 'Caucasian'}, {'race': 'African-American'}, {'race': 'Hispanic'}, {'sex': 'Male'}]",2496,2200,0.11858974358974358
+"[{'race': 'Caucasian', 'sex': 'Male'}, {'race': 'African-American'}, {'sex': 'Female'}, {'race': 'African-American', 'sex': 'Male'}]",2488,2192,0.1189710610932476
+"[{'race': 'African-American', 'sex': 'Male'}, {'race': 'Caucasian', 'sex': 'Female'}, {'race': 'Caucasian', 'sex': 'Female'}, {'race': 'African-American', 'sex': 'Female'}]",2488,2192,0.1189710610932476
+"[{'race': 'Caucasian'}, {'race': 'African-American'}, {'race': 'Caucasian', 'sex': 'Female'}, {'race': 'African-American', 'sex': 'Female'}]",2432,2136,0.12171052631578948
+"[{'race': 'Caucasian', 'sex': 'Male'}, {'race': 'Caucasian', 'sex': 'Female'}, {'race': 'African-American', 'sex': 'Male'}, {'race': 'African-American', 'sex': 'Female'}, {'race': 'Hispanic'}]",2912,2584,0.11263736263736264
+"[{'race': 'African-American', 'sex': 'Male'}, {'race': 'Caucasian', 'sex': 'Male'}, {'race': 'Hispanic'}, {'race': 'African-American', 'sex': 'Female'}, {'sex': 'Female'}]",2912,2584,0.11263736263736264
+"[{'race': 'Caucasian'}, {'race': 'African-American'}, {'race': 'Hispanic'}, {'sex': 'Male'}, {'sex': 'Female'}]",2912,2584,0.11263736263736264
+"[{'race': 'Caucasian', 'sex': 'Male'}, {'race': 'African-American'}, {'sex': 'Female'}, {'race': 'African-American', 'sex': 'Male'}, {'race': 'African-American', 'sex': 'Female'}]",2848,2520,0.1151685393258427
+"[{'race': 'African-American', 'sex': 'Male'}, {'race': 'Caucasian', 'sex': 'Female'}, {'race': 'Caucasian', 'sex': 'Female'}, {'race': 'African-American', 'sex': 'Female'}, {'race': 'Hispanic', 'sex': 'Male'}]",2912,2584,0.11263736263736264
+"[{'race': 'Caucasian'}, {'race': 'African-American'}, {'race': 'Caucasian', 'sex': 'Female'}, {'race': 'African-American', 'sex': 'Female'}, {'race': 'Caucasian', 'sex': 'Male'}, {'race': 'Hispanic'}]",3208,2848,0.11221945137157108
+"[{'race': 'Caucasian', 'sex': 'Male'}, {'race': 'Caucasian', 'sex': 'Female'}, {'race': 'African-American', 'sex': 'Male'}, {'race': 'African-American', 'sex': 'Female'}, {'race': 'Hispanic', 'sex': 'Male'}, {'race': 'Hispanic', 'sex': 'Female'}]",3208,2848,0.11221945137157108
+"[{'race': 'Caucasian'}, {'race': 'African-American'}, {'race': 'Hispanic'}, {'sex': 'Male'}, {'sex': 'Female'}, {'race': 'Caucasian', 'sex': 'Male'}]",3208,2848,0.11221945137157108
+"[{'race': 'Caucasian', 'sex': 'Male'}, {'race': 'African-American'}, {'sex': 'Female'}, {'race': 'African-American', 'sex': 'Male'}, {'race': 'African-American', 'sex': 'Female'}, {'race': 'Hispanic'}]",3208,2848,0.11221945137157108
+"[{'race': 'African-American', 'sex': 'Male'}, {'race': 'Caucasian', 'sex': 'Female'}, {'race': 'Caucasian', 'sex': 'Female'}, {'race': 'African-American', 'sex': 'Female'}, {'race': 'Hispanic', 'sex': 'Male'}, {'race': 'African-American'}]",3208,2848,0.11221945137157108
+"[{'race': 'Caucasian'}, {'race': 'African-American'}, {'race': 'Caucasian', 'sex': 'Female'}, {'race': 'African-American', 'sex': 'Female'}, {'race': 'Caucasian', 'sex': 'Male'}, {'race': 'Hispanic'}, {'race': 'African-American', 'sex': 'Male'}]",3504,3112,0.11187214611872145
+"[{'race': 'Caucasian', 'sex': 'Male'}, {'race': 'Caucasian', 'sex': 'Female'}, {'race': 'African-American', 'sex': 'Male'}, {'race': 'African-American', 'sex': 'Female'}, {'race': 'Hispanic', 'sex': 'Male'}, {'race': 'Hispanic', 'sex': 'Female'}, {'race': 'African-American'}]",3504,3112,0.11187214611872145
+"[{'race': 'Caucasian'}, {'race': 'African-American'}, {'race': 'Hispanic'}, {'sex': 'Male'}, {'sex': 'Female'}, {'race': 'Caucasian', 'sex': 'Male'}, {'race': 'African-American', 'sex': 'Male'}]",3504,3112,0.11187214611872145
+"[{'race': 'Caucasian', 'sex': 'Male'}, {'race': 'African-American'}, {'sex': 'Female'}, {'race': 'African-American', 'sex': 'Male'}, {'race': 'African-American', 'sex': 'Female'}, {'race': 'Hispanic'}, {'race': 'Caucasian', 'sex': 'Male'}]",3504,3112,0.11187214611872145
+"[{'race': 'African-American', 'sex': 'Male'}, {'race': 'Caucasian', 'sex': 'Female'}, {'race': 'Caucasian', 'sex': 'Female'}, {'race': 'African-American', 'sex': 'Female'}, {'race': 'Hispanic', 'sex': 'Male'}, {'race': 'African-American'}, {'sex': 'Female'}]",3504,3112,0.11187214611872145
+"[{'race': 'Caucasian'}, {'race': 'African-American'}, {'race': 'Caucasian', 'sex': 'Female'}, {'race': 'African-American', 'sex': 'Female'}, {'race': 'Caucasian', 'sex': 'Male'}, {'race': 'Hispanic'}, {'race': 'African-American', 'sex': 'Male'}, {'sex': 'Female'}]",3800,3376,0.11157894736842106
+"[{'race': 'Caucasian', 'sex': 'Male'}, {'race': 'Caucasian', 'sex': 'Female'}, {'race': 'African-American', 'sex': 'Male'}, {'race': 'African-American', 'sex': 'Female'}, {'race': 'Hispanic', 'sex': 'Male'}, {'race': 'Hispanic', 'sex': 'Female'}, {'race': 'African-American'}, {'sex': 'Female'}]",3800,3376,0.11157894736842106
+"[{'race': 'Caucasian'}, {'race': 'African-American'}, {'race': 'Hispanic'}, {'sex': 'Male'}, {'sex': 'Female'}, {'race': 'Caucasian', 'sex': 'Male'}, {'race': 'African-American', 'sex': 'Female'}, {'race': 'African-American', 'sex': 'Male'}]",3800,3376,0.11157894736842106
+"[{'race': 'Caucasian', 'sex': 'Male'}, {'race': 'African-American'}, {'sex': 'Female'}, {'race': 'African-American', 'sex': 'Male'}, {'race': 'African-American', 'sex': 'Female'}, {'race': 'Hispanic'}, {'race': 'Caucasian', 'sex': 'Male'}, {'sex': 'Male'}]",3800,3376,0.11157894736842106
+"[{'race': 'African-American', 'sex': 'Male'}, {'race': 'Caucasian', 'sex': 'Female'}, {'race': 'Caucasian', 'sex': 'Female'}, {'race': 'African-American', 'sex': 'Female'}, {'race': 'Hispanic', 'sex': 'Male'}, {'race': 'African-American'}, {'sex': 'Female'}, {'sex': 'Male'}]",3800,3376,0.11157894736842106
