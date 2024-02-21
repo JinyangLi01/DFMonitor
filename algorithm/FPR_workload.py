@@ -47,81 +47,6 @@ def belong_to_group(row, group):
     return True
 
 
-def traverse_data_DFMonitor_and_baseline_time(timed_data, date_column, time_window_str, monitored_groups, threshold,
-                                              alpha, label_prediction="predicted", label_ground_truth="ground_truth"):
-    window_size, window_type = time_window_str.split()
-    first_row_time = timed_data.loc[0, date_column]
-    # Apply the function to compute the window key for each row
-    timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
-                                                             args=(window_type, int(window_size), first_row_time))
-    # Initialize all rows as not the start of a new window
-    timed_data['new_window'] = False
-    # Determine the start of a new window for all rows except the first
-    timed_data['new_window'] = timed_data['window_key'] != timed_data['window_key'].shift(1)
-    timed_data.at[0, "new_window"] = False
-    DFMonitor = FPR.DF_FPR(monitored_groups, alpha, threshold)
-    DFMonitor_baseline = FPR_baseline.FPR_baseline(monitored_groups, alpha, threshold)
-    counter_first_window_FP = [0 for _ in monitored_groups]
-    counter_first_window_TN = [0 for _ in monitored_groups]
-    first_window_processed = False
-
-    insertion_time_DF_opt = 0
-    insertion_time_DF_baseline = 0
-    total_time_DF_opt = 0
-    total_time_DF_baseline = 0
-
-    for index, row in timed_data.iterrows():
-        if row['new_window']:
-            DFMonitor_baseline.new_window()
-            if not first_window_processed:
-                uf = []
-                for i in range(len(monitored_groups)):
-                    if counter_first_window_FP[i] + counter_first_window_TN[i] == 0:
-                        uf.append(None)
-                    else:
-                        if (counter_first_window_FP[i] / (counter_first_window_TN[i] + counter_first_window_FP[i])
-                                > threshold):
-                            uf.append(True)
-                        else:
-                            uf.append(False)
-                delta = [0] * len(monitored_groups)
-
-                for i in range(len(monitored_groups)):
-                    delta[i] = threshold * counter_first_window_TN[i] - (1 - threshold) * counter_first_window_FP[i]
-                # print(delta)
-                delta = [
-                    round(abs(threshold * counter_first_window_TN[i] - (1 - threshold) * counter_first_window_FP[i])
-                          * alpha, config.decimal) for i in range(len(monitored_groups))]
-                DFMonitor.initialization(uf, delta)
-                first_window_processed = True
-            else:
-                DFMonitor.new_window()
-        if ((row[label_prediction] == 1 and row[label_ground_truth] == 0)
-                or (row[label_prediction] == 0 and row[label_ground_truth] == 0)):
-            if row[label_prediction] == 1 and row[label_ground_truth] == 0:
-                label = "FP"
-            else:
-                label = "TN"
-            DFMonitor_baseline.insert(row, label)
-            if not first_window_processed:
-                for group_idx, group in enumerate(monitored_groups):
-                    if belong_to_group(row, group):
-                        if label == "FP":
-                            counter_first_window_FP[group_idx] += 1
-                        else:
-                            counter_first_window_TN[group_idx] += 1
-            else:
-                DFMonitor.insert(row, label)
-        # print("index = {}, delta = {}".format(index, DFMonitor.delta))
-        if first_window_processed:
-            # if index == 1161:
-            if DFMonitor.uf != DFMonitor_baseline.uf:
-                print("+++++++ after loop not equal **********")
-                print("index === {}, row={}, {}".format(index, row['id'], row['compas_screening_date']))
-                DFMonitor_baseline.print()
-                DFMonitor.print()
-                return DFMonitor, DFMonitor_baseline
-    return DFMonitor, DFMonitor_baseline
 
 
 def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_str, monitored_groups, threshold, alpha,
@@ -252,10 +177,6 @@ def traverse_data_DFMonitor_only(timed_data, date_column, time_window_str, monit
                             counter_values_TN[i] += 1
     time2 = time.time()
     elapsed_time = time2 - time1
-    # fpr = [counter_values_FP[i] / (counter_values_TN[i] + counter_values_FP[i])
-    #        if counter_values_TN[i] + counter_values_FP[i] != 0
-    #        else None for i in range(len(monitored_groups))]
-    # fpr_list.append(fpr)
     return DFMonitor, elapsed_time, total_time_new_window, num_items_after_first_window, num_new_windows
 
 
@@ -448,6 +369,7 @@ def traverse_data_DF_baseline(timed_data, date_column, time_window_str, monitore
            else None for i in range(len(monitored_groups))]
     fpr_list.append(fpr)
     return DFMonitor_baseline, uf_list, fpr_list, counter_list_TN, counter_list_FP
+
 
 
 def FPR_traditional(timed_data, date_column, time_window_str, monitored_groups, threshold,

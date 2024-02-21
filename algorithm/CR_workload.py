@@ -1,3 +1,5 @@
+import time
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -105,6 +107,73 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_st
     return DFMonitor, DFMonitor_baseline
 
 
+
+
+def traverse_data_DFMonitor_only(timed_data, date_column, time_window_str, date_time_format, monitored_groups, threshold,
+                            alpha):
+    global time1
+    if date_time_format:
+        window_size, window_type = time_window_str.split()
+        # Apply the function to compute the window key for each row
+        first_row_time = timed_data.loc[0, date_column]
+        timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
+                                                                 args=(window_type, int(window_size), first_row_time))
+    else:
+        timed_data['window_key'] = timed_data[date_column]
+    # Initialize all rows as not the start of a new window
+    timed_data['new_window'] = False
+    # Determine the start of a new window for all rows except the first
+    timed_data['new_window'] = timed_data['window_key'] != timed_data['window_key'].shift(1)
+    # timed_data.loc["new_window", 0] = False
+    timed_data.loc[0, "new_window"] = False
+    # print(timed_data[:1])
+    # print(len(timed_data[timed_data['new_window'] == True]))
+    DFMonitor = CR.DF_CR(monitored_groups, alpha, threshold)
+    counters = [0] * len(monitored_groups)
+    total_counter = 0
+    first_window_processed = False
+    first_row_id = timed_data[timed_data['new_window'] == True].index[0]
+    num_items_after_first_window = len(timed_data) - first_row_id
+    total_time_new_window = 0
+    num_new_windows = len(timed_data[timed_data['new_window'] == True])
+    counter_list = []
+    uf_list = []
+    cr_list = []
+    for index, row in timed_data.iterrows():
+        if row['new_window']:
+            if not first_window_processed:
+                uf = [True if counters[i] / total_counter <= threshold else False for i in range(len(counters))]
+                delta = [abs(threshold * total_counter - counters[i]) * alpha for i in range(len(counters))]
+                DFMonitor.initialization(uf, delta)
+                first_window_processed = True
+                time1 = time.time()
+            else:
+                timea = time.time()
+                DFMonitor.new_window()
+                timeb = time.time()
+                total_time_new_window += timeb - timea
+            DFMonitor.insert(row)
+            counters = [x * alpha for x in counters]
+            total_counter *= alpha
+        else:
+            if first_window_processed:
+                DFMonitor.insert(row)
+            else:
+                for i, g in enumerate(monitored_groups):
+                    if belong_to_group(row, g):
+                        counters[i] += 1
+        total_counter += 1
+    # # last window:
+    # uf_list.append(copy.deepcopy(DFMonitor.uf))
+    # cr_list.append([counters[i] / total_counter for i in range(len(counters))])
+    # counter_list.append(copy.deepcopy(counters))
+    time2 = time.time()
+    elapsed_time = time2 - time1
+    return DFMonitor, elapsed_time, total_time_new_window, num_items_after_first_window, num_new_windows
+
+
+
+
 def traverse_data_DFMonitor(timed_data, date_column, time_window_str, date_time_format, monitored_groups, threshold,
                             alpha):
     if date_time_format:
@@ -157,6 +226,48 @@ def traverse_data_DFMonitor(timed_data, date_column, time_window_str, date_time_
     cr_list.append([counters[i] / total_counter for i in range(len(counters))])
     counter_list.append(copy.deepcopy(counters))
     return DFMonitor, uf_list, cr_list, counter_list
+
+
+
+def traverse_data_DFMonitor_baseline_only(timed_data, date_column, time_window_str, date_time_format, monitored_groups,
+                                     threshold, alpha):
+    global time1
+    if date_time_format:
+        window_size, window_type = time_window_str.split()
+        first_row_time = timed_data.loc[0, date_column]
+        # Apply the function to compute the window key for each row
+        timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
+                                                                 args=(window_type, int(window_size), first_row_time))
+    else:
+        timed_data['window_key'] = timed_data[date_column]
+    # Initialize all rows as not the start of a new window
+    timed_data['new_window'] = False
+    # Determine the start of a new window for all rows except the first
+    timed_data['new_window'] = timed_data['window_key'] != timed_data['window_key'].shift(1)
+    timed_data.loc[0, "new_window"] = False
+    DFMonitor_baseline = CR_baseline.CR_baseline(monitored_groups, alpha, threshold)
+    first_row_id = timed_data[timed_data['new_window'] == True].index[0]
+    num_items_after_first_window = len(timed_data) - first_row_id
+    total_time_new_window = 0
+    first_window_processed = False
+    num_new_windows = len(timed_data[timed_data['new_window'] == True])
+    for index, row in timed_data.iterrows():
+        if row['new_window']:
+            timea = time.time()
+            DFMonitor_baseline.new_window()
+            timeb = time.time()
+            total_time_new_window += timeb - timea
+            if not first_window_processed:
+                first_window_processed = True
+                time1 = time.time()
+            DFMonitor_baseline.insert(row)
+        else:
+            DFMonitor_baseline.insert(row)
+    time2 = time.time()
+    elapsed_time = time2 - time1
+    return DFMonitor_baseline, elapsed_time, total_time_new_window, num_items_after_first_window, num_new_windows
+
+
 
 
 def traverse_data_DFMonitor_baseline(timed_data, date_column, time_window_str, date_time_format, monitored_groups,
