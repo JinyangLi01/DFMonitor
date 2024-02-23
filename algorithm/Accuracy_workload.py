@@ -1,3 +1,5 @@
+import time
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -113,6 +115,73 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_st
     return DFMonitor, DFMonitor_baseline
 
 
+def traverse_data_DFMonitor_only(timed_data, date_column, time_window_str, date_time_format, monitored_groups,
+                                 threshold,
+                                 alpha, label_prediction="predicted", label_ground_truth="ground_truth"):
+    global time1
+    if date_time_format:
+        window_size, window_type = time_window_str.split()
+        # Apply the function to compute the window key for each row
+        timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
+                                                                 args=(window_type, int(window_size)))
+    else:
+        timed_data['window_key'] = (timed_data[date_column] // int(time_window_str)) * int(time_window_str)
+    # Initialize all rows as not the start of a new window
+    timed_data['new_window'] = False
+    # Determine the start of a new window for all rows except the first
+    timed_data['new_window'] = timed_data['window_key'] != timed_data['window_key'].shift(1)
+    # timed_data.loc["new_window", 0] = False
+    timed_data.loc[0, "new_window"] = False
+    # print(timed_data[:1])
+    # print(len(timed_data[timed_data['new_window'] == True]))
+    DFMonitor = CR.DF_Accuracy(monitored_groups, alpha, threshold)
+    counter_values_correct = [0] * len(monitored_groups)
+    counter_values_incorrect = [0] * len(monitored_groups)
+    counter_list_correct = []
+    counter_list_incorrect = []
+    uf_list = []
+    accuracy_list = []
+    first_window_processed = False
+    first_row_id = timed_data[timed_data['new_window'] == True].index[0]
+    num_items_after_first_window = len(timed_data) - first_row_id
+    total_time_new_window = 0
+    num_new_windows = len(timed_data[timed_data['new_window'] == True])
+
+    for index, row in timed_data.iterrows():
+        if row['new_window']:
+            if not first_window_processed:
+                uf = [True if counter_values_correct[j] /
+                              (counter_values_correct[j] + counter_values_incorrect[j]) <= threshold
+                      else False for j in range(len(counter_values_correct))]
+                delta = [round(abs(threshold * (counter_values_correct[j] + counter_values_incorrect[j]) -
+                                   counter_values_correct[j]) * alpha, config.decimal)
+                         for j in range(len(counter_values_incorrect))]
+                DFMonitor.initialization(uf, delta)
+                first_window_processed = True
+                time1 = time.time()
+            else:
+                timea = time.time()
+                DFMonitor.new_window()
+                timeb = time.time()
+                total_time_new_window += timeb - timea
+        if row[label_prediction] == row[label_ground_truth]:
+            label = 'correct'
+        else:
+            label = 'incorrect'
+        if first_window_processed:
+            DFMonitor.insert(row, label)
+        else:
+            for i, g in enumerate(monitored_groups):
+                if belong_to_group(row, g):
+                    if label == 'correct':
+                        counter_values_correct[i] += 1
+                    else:
+                        counter_values_incorrect[i] += 1
+    time2 = time.time()
+    elapsed_time = time2 - time1
+    return DFMonitor, elapsed_time, total_time_new_window, num_items_after_first_window, num_new_windows
+
+
 def traverse_data_DFMonitor(timed_data, date_column, time_window_str, date_time_format, monitored_groups, threshold,
                             alpha, label_prediction="predicted", label_ground_truth="ground_truth"):
     if date_time_format:
@@ -164,7 +233,8 @@ def traverse_data_DFMonitor(timed_data, date_column, time_window_str, date_time_
             label = 'correct'
         else:
             label = 'incorrect'
-        DFMonitor.insert(row, label)
+        if first_window_processed:
+            DFMonitor.insert(row, label)
         for i, g in enumerate(monitored_groups):
             if belong_to_group(row, g):
                 if label == 'correct':
@@ -180,6 +250,49 @@ def traverse_data_DFMonitor(timed_data, date_column, time_window_str, date_time_
                 else None for j in range(len(counter_values_correct))]
     accuracy_list.append(accuracy)
     return DFMonitor, uf_list, accuracy_list, counter_list_correct, counter_list_incorrect
+
+
+def traverse_data_DF_baseline_only(timed_data, date_column, time_window_str, date_time_format, monitored_groups,
+                                     threshold, alpha, label_prediction="predicted", label_ground_truth="ground_truth"):
+    global time1
+    if date_time_format:
+        window_size, window_type = time_window_str.split()
+        # Apply the function to compute the window key for each row
+        timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
+                                                                 args=(window_type, int(window_size)))
+    else:
+        timed_data['window_key'] = (timed_data[date_column] // int(time_window_str)) * int(time_window_str)
+    # Initialize all rows as not the start of a new window
+    timed_data['new_window'] = False
+    # Determine the start of a new window for all rows except the first
+    timed_data['new_window'] = timed_data['window_key'] != timed_data['window_key'].shift(1)
+    timed_data.loc[0, "new_window"] = False
+    DFMonitor_baseline = Accuracy_baseline.Accuracy_baseline(monitored_groups, alpha, threshold)
+    first_window_processed = False
+    first_row_id = timed_data[timed_data['new_window'] == True].index[0]
+    num_items_after_first_window = len(timed_data) - first_row_id
+    total_time_new_window = 0
+    # number of new windows
+    num_new_windows = len(timed_data[timed_data['new_window'] == True])
+    for index, row in timed_data.iterrows():
+        if row['new_window']:
+            timea = time.time()
+            DFMonitor_baseline.new_window()
+            timeb = time.time()
+            total_time_new_window += timeb - timea
+            if not first_window_processed:
+                first_window_processed = True
+                time1 = time.time()
+        if row[label_prediction] == row[label_ground_truth]:
+            label = 'correct'
+        else:
+            label = 'incorrect'
+        DFMonitor_baseline.insert(row, label)
+    time2 = time.time()
+    elapsed_time = time2 - time1
+    return DFMonitor_baseline, elapsed_time, total_time_new_window, num_items_after_first_window, num_new_windows
+
+
 
 
 def traverse_data_DFMonitor_baseline(timed_data, date_column, time_window_str, date_time_format, monitored_groups,
@@ -236,7 +349,7 @@ def traverse_data_DFMonitor_baseline(timed_data, date_column, time_window_str, d
     return DFMonitor_baseline, uf_list, accuracy_list, counter_list_correct, counter_list_incorrect
 
 
-def CR_traditional(timed_data, date_column, time_window_str, date_time_format, monitored_groups, threshold,
+def Accuracy_traditional(timed_data, date_column, time_window_str, date_time_format, monitored_groups, threshold,
                    label_prediction="predicted", label_ground_truth="ground_truth"):
     if date_time_format:
         window_size, window_type = time_window_str.split()
@@ -302,7 +415,7 @@ if __name__ == "__main__":
     print(data[:5])
     alpha = 0.5
     threshold = 0.8
-    label_prediction= "sex"
+    label_prediction = "sex"
     label_ground_truth = "predicted_gender"
 
     (DFMonitor_baseline, uf_list_baseline, accuracy_list_baseline, counter_list_correct_baseline,

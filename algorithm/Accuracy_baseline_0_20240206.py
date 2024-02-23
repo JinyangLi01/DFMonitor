@@ -1,11 +1,20 @@
+import sys
 
+from algorithm import config
+import numpy as np
+import pandas as pd
 class Accuracy_baseline:
     def __init__(self, monitored_groups, alpha, threshold):
-        self.name = "Accuracy_baseline"
-        self.groups = monitored_groups
-        self.uf = [False] * len(monitored_groups)
-        self.counters_correct = [0] * len(monitored_groups)
-        self.counters_incorrect = [0] * len(monitored_groups)
+        df = pd.DataFrame(monitored_groups)
+        unique_keys = set()
+        for item in monitored_groups:
+            unique_keys.update(item.keys())
+        for key in unique_keys:
+            df[key] = df[key].astype("category")
+        self.groups = df
+        self.uf = np.array([False]*len(monitored_groups), dtype=bool)
+        self.counters_correct = np.array([0]*len(monitored_groups), dtype=np.float64)
+        self.counters_incorrect = np.array([0]*len(monitored_groups), dtype=np.float64)
         self.alpha = alpha
         self.threshold = threshold
 
@@ -13,6 +22,18 @@ class Accuracy_baseline:
         # idx = self.group2idx[str(group)]
         idx = self.groups.index(group)
         return self.uf[idx]
+
+
+    def get_size(self):
+        size = 0
+        size += sys.getsizeof(self.groups) + self.groups.memory_usage(deep=True).sum() - self.groups.memory_usage().sum()
+        size += sys.getsizeof(self.uf) + self.uf.nbytes
+        size += sys.getsizeof(self.counters_correct) + self.counters_correct.nbytes
+        size += sys.getsizeof(self.counters_incorrect) + self.counters_incorrect.nbytes
+        size += sys.getsizeof(self.threshold)
+        size += sys.getsizeof(self.alpha)
+        return size
+
 
     def print(self):
         print("uf", self.uf)
@@ -30,19 +51,20 @@ class Accuracy_baseline:
     """
 
     def insert(self, tuple_, label):
-        for group_idx, group in enumerate(self.groups):
-            if self.belong_to_group(tuple_, group):  # only for group that the tuple satisfies
+        for index in self.groups.index:
+            row = self.groups.loc[index]
+            if all(row.get(key, None) == value for key, value in tuple_.items()):
                 if label == 'correct':
-                    self.counters_correct[group_idx] += 1
+                    self.counters_correct[index] += 1
                 else:
-                    self.counters_incorrect[group_idx] += 1
-                if (self.counters_correct[group_idx] /
-                        (self.counters_correct[group_idx] + self.counters_incorrect[group_idx])
-                        <= self.threshold):
-                    self.uf[group_idx] = True
-                else:
-                    self.uf[group_idx] = False
+                    self.counters_incorrect[index] += 1
+                self.uf[index] = (self.counters_correct[index] /
+                                  (self.counters_correct[index] + self.counters_incorrect[index])
+                                  <= self.threshold)
+
+
+
 
     def new_window(self):
-        self.counters_correct = [round(x * self.alpha, config.decimal) for x in self.counters_correct]
-        self.counters_incorrect = [round(x * self.alpha, config.decimal) for x in self.counters_incorrect]
+        self.counters_correct = self.alpha * self.counters_correct
+        self.counters_incorrect = self.alpha * self.counters_incorrect

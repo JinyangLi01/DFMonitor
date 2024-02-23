@@ -23,7 +23,7 @@ class DF_FPR:
 
     def initialization(self, uf, delta):
         self.uf = np.array(uf, dtype=bool)
-        self.delta = np.array(delta, dtype=np.float16)
+        self.delta = np.array(delta, dtype=np.float64)
 
     def find(self, group):
         # idx = self.group2idx[str(group)]

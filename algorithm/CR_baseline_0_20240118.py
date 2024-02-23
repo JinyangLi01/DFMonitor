@@ -1,17 +1,24 @@
+import sys
+
+import pandas as pd
+import numpy as np
+
 
 class CR_baseline:
     def __init__(self, monitored_groups, alpha, threshold):
-        self.name = "CR_baseline"
-        self.groups = monitored_groups
-        self.uf = [False]*len(monitored_groups)
-        self.counters = [0]*len(monitored_groups)
+        df = pd.DataFrame(monitored_groups)
+        unique_keys = set()
+        for item in monitored_groups:
+            unique_keys.update(item.keys())
+        for key in unique_keys:
+            df[key] = df[key].astype("category")
+        self.groups = df
+        self.uf = np.array([False]*len(monitored_groups), dtype=bool)
+        self.counters = np.array([0]*len(monitored_groups), dtype=np.float64)
         self.counter_total = 0
         self.threshold = threshold
         self.alpha = alpha
 
-    # def initialization(self, n):
-    #     self.uf = [i for i in range(n)]
-    #     self.counters = [0 for i in range(n)]
 
     def find(self, group):
         idx = self.groups.index(group)
@@ -22,6 +29,18 @@ class CR_baseline:
         print("counters", self.counters)
         print("counter_total", self.counter_total)
 
+
+    def get_size(self):
+        size = 0
+        size += sys.getsizeof(self.groups) + self.groups.memory_usage(deep=True).sum() - self.groups.memory_usage().sum()
+        size += sys.getsizeof(self.uf) + self.uf.nbytes
+        size += sys.getsizeof(self.counters) + self.counters.nbytes
+        size += sys.getsizeof(self.counter_total)
+        size += sys.getsizeof(self.threshold)
+        size += sys.getsizeof(self.alpha)
+        return size
+
+
     def belong_to_group(self, tuple_, group):
         for key in group.keys():
             if tuple_[key] != group[key]:
@@ -30,15 +49,17 @@ class CR_baseline:
 
     def insert(self, tuple_):
         self.counter_total += 1
-        for i, group in enumerate(self.groups):
-            if self.belong_to_group(tuple_, group):  # for group that the tuple satisfies
-                self.counters[i] += 1
-            if self.counters[i] / self.counter_total <= self.threshold:
-                self.uf[i] = True
+        for group_idx in self.groups.index:
+            row = self.groups.loc[group_idx]
+            if all(row.get(key, None) == value for key, value in tuple_.items()):
+                self.counters[group_idx] += 1
+            if self.counters[group_idx] / self.counter_total <= self.threshold:
+                self.uf[group_idx] = True
             else:
-                self.uf[i] = False
+                self.uf[group_idx] = False
+
 
     def new_window(self):
         self.counter_total *= self.alpha
-        self.counters = [x * self.alpha for x in self.counters]
+        self.counters = self.counters * self.alpha
 

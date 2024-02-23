@@ -1,24 +1,42 @@
+import sys
 
+import pandas as pd
+import numpy as np
 
 
 class DF_Accuracy:
     def __init__(self, monitored_groups, alpha, threshold):
-        self.name = "Accuracy"
-        self.groups = monitored_groups
-        # self.group2idx = {str(group): i for i, group in enumerate(monitored_groups)}
-        self.uf = [False]*len(monitored_groups)
-        self.delta = [0]*len(monitored_groups)
+        df = pd.DataFrame(monitored_groups)
+        unique_keys = set()
+        for item in monitored_groups:
+            unique_keys.update(item.keys())
+        for key in unique_keys:
+            df[key] = df[key].astype("category")
+        self.groups = df
+        self.uf = np.array([False] * len(monitored_groups), dtype=bool)
+        self.delta = np.array([0] * len(monitored_groups), dtype=np.float64)
         self.alpha = alpha
         self.threshold = threshold
 
     def initialization(self, uf, delta):
-        self.uf = uf
-        self.delta = delta
+        self.uf = np.array(uf, dtype=bool)
+        self.delta = np.array(delta, dtype=np.float64)
 
     def find(self, group):
         # idx = self.group2idx[str(group)]
         idx = self.groups.index(group)
         return self.uf[idx]
+
+
+    def get_size(self):
+        size = 0
+        size += sys.getsizeof(self.groups) + self.groups.memory_usage(deep=True).sum() - self.groups.memory_usage().sum()
+        size += sys.getsizeof(self.uf) + self.uf.nbytes
+        size += sys.getsizeof(self.delta) + self.delta.nbytes
+        size += sys.getsizeof(self.threshold)
+        size += sys.getsizeof(self.alpha)
+        return size
+
 
     def print(self):
         print("uf", self.uf)
@@ -35,30 +53,32 @@ class DF_Accuracy:
     label = correct or incorrect
     """
     def insert(self, tuple_, label):
-        for group_idx, group in enumerate(self.groups):
-            if self.belong_to_group(tuple_, group): # only for group that the tuple satisfies
-                if not self.uf[group_idx]:
-                    if label == 'correct':
-                        self.delta[group_idx] += 1 - self.threshold
+        for index in self.groups.index:
+            row = self.groups.loc[index]
+            correct = (label == 'correct')
+            if all(row.get(key, None) == value for key, value in tuple_.items()):
+                if not self.uf[index]:
+                    if correct:
+                        self.delta[index] += 1 - self.threshold
                     else:
-                        if self.delta[group_idx] >= self.threshold:
-                            self.delta[group_idx] -= self.threshold
+                        if self.delta[index] >= self.threshold:
+                            self.delta[index] -= self.threshold
                         else:
-                            self.delta[group_idx] = self.threshold - self.delta[group_idx]
-                            self.uf[group_idx] = True
+                            self.delta[index] = self.threshold - self.delta[index]
+                            self.uf[index] = True
                 else:
-                    if label == 'correct':
-                        if self.delta[group_idx] >= 1 - self.threshold:
-                            self.delta[group_idx] -= 1 - self.threshold
+                    if correct:
+                        if self.delta[index] >= 1 - self.threshold:
+                            self.delta[index] -= 1 - self.threshold
                         else:
-                            self.delta[group_idx] = 1 - self.threshold - self.delta[group_idx]
-                            self.uf[group_idx] = False
+                            self.delta[index] = 1 - self.threshold - self.delta[index]
+                            self.uf[index] = False
                     else:
-                        self.delta[group_idx] += self.threshold
+                        self.delta[index] += self.threshold
 
 
 
     def new_window(self):
-        self.delta = [x * self.alpha for x in self.delta]
+        self.delta = self.delta * self.alpha
 
 
