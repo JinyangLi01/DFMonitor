@@ -17,6 +17,8 @@ sns.set_context("paper", font_scale=2)
 
 plt.figure(figsize=(6, 3.5))
 plt.rcParams['font.size'] = 20
+
+
 # # activate latex text rendering
 # rc('text', usetex=True)
 # rc('axes', linewidth=2)
@@ -27,8 +29,7 @@ def scale_lightness(rgb, scale_l):
     # convert rgb to hls
     h, l, s = colorsys.rgb_to_hls(*rgb)
     # manipulate h, l, s values and return as rgb
-    return colorsys.hls_to_rgb(h, min(1, l * scale_l), s = s)
-
+    return colorsys.hls_to_rgb(h, min(1, l * scale_l), s=s)
 
 
 data = pd.read_csv('../../../data/name_gender/baby_names_1880_2020_US_predicted.csv')
@@ -51,19 +52,21 @@ label_ground_truth = "sex"
 #                                                 alpha)
 
 # use CR for compas dataset, a time window = 1 month, record the result of each uf in each month and draw a plot
-DFMonitor, uf_list_DF, accuracy_list_DF, counter_list_correct_DF, counter_list_incorrect_DF = workload.traverse_data_DFMonitor(data, date_column,
-                                                                                      time_window_str, date_time_format,
-                                                                                      monitored_groups,
-                                                                                      threshold,
-                                                                                      alpha, label_prediction,
-                                                                                      label_ground_truth)
+DFMonitor, uf_list_DF, accuracy_list_DF, counter_list_correct_DF, counter_list_incorrect_DF = workload.traverse_data_DFMonitor(
+    data, date_column,
+    time_window_str, date_time_format,
+    monitored_groups,
+    threshold,
+    alpha, label_prediction,
+    label_ground_truth)
 
-uf_list_trad, accuracy_list_trad, counter_list_correct_trad, counter_list_incorrect_trad = workload.CR_traditional(data, date_column,
-                                                                        time_window_str, date_time_format,
-                                                                        monitored_groups,
-                                                                        threshold,
-                                                                        label_prediction,
-                                                                        label_ground_truth)
+uf_list_trad, accuracy_list_trad, counter_list_correct_trad, counter_list_incorrect_trad \
+    = workload.Accuracy_traditional(data, date_column,
+                                    time_window_str, date_time_format,
+                                    monitored_groups,
+                                    threshold,
+                                    label_prediction,
+                                    label_ground_truth)
 
 print(len(uf_list_trad), len(uf_list_trad))
 
@@ -76,8 +79,6 @@ with open("baby_names_compare_Accuracy.csv", "w", newline='') as csvfile:
     for i in range(len(years)):
         writer.writerow([years[i], accuracy_list_DF[i][0], accuracy_list_DF[i][1],
                          accuracy_list_trad[i][0], accuracy_list_trad[i][1]])
-
-
 
 # if len(uf_list_baseline) != len(uf_list_DF):
 #     print("uf_list_baseline and uf_list_DF have different length")

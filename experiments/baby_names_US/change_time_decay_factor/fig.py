@@ -108,12 +108,13 @@ alpha_list = col_data_Accuracy['alpha']
 fig, axs = plt.subplots(1, 2, figsize=(6, 2.4))
 plt.rcParams['font.size'] = 10
 curve_colors = sns.color_palette(palette=['navy', 'blue', 'cornflowerblue', 'lightgreen', '#41ab5d', '#006837'])
-curve_colors.append('magenta')
+curve_colors.insert(0, 'magenta')
 # print("x_list", x_list)
 # print(type(col_data_FPR['black_time_decay'][0]), col_data_FPR['black_time_decay'][0])
 
 
-for i in range(len(alpha_list) - 1):
+
+for i in range(1, len(alpha_list)):
     axs[0].plot(x_list, ast.literal_eval(col_data_Accuracy['male_time_decay'][i]), linewidth=2, markersize=4,
                    label='{}'.format(alpha_list[i]), linestyle='-', marker='o', color=curve_colors[i])
     # axs[0, 0].plot(x_list, (col_data_FPR['black_traditional']), linewidth=2, markersize=4,
@@ -124,7 +125,7 @@ for i in range(len(alpha_list) - 1):
     #             label='{}'.format(alpha_list[i]), linestyle='-', marker='o', color=curve_colors[i])
 
 
-i = len(alpha_list) - 1
+i = 0
 axs[0].plot(x_list, ast.literal_eval(df_Accuracy['male_time_decay'][i]), linewidth=2, markersize=3,
                label='{}'.format(alpha_list[i]), linestyle=':', marker='s', color=curve_colors[i])
 axs[1].plot(x_list, ast.literal_eval(df_Accuracy['female_time_decay'][i]), linewidth=2, markersize=3,
@@ -159,6 +160,8 @@ handles, labels = axs[0].get_legend_handles_labels()
 # put the last legend as the first
 handles = [handles[-1]] + handles[:-1]
 labels = [labels[-1]] + labels[:-1]
+labels[0] = "traditional"
+
 
 fig.legend(title='Alpha Values', title_fontsize=14, loc='upper left', bbox_to_anchor=(0.02, 1.19), fontsize=14,
            ncol=7, labelspacing=0.3, handletextpad=0.24, markerscale=1.6, handlelength=1.9,

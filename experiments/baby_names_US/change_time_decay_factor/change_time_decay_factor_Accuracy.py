@@ -79,7 +79,7 @@ female_time_decay_dif_alpha.append([x[1] for x in accuracy_list_DF1])
 
 
 uf_list_trad, accuracy_list_trad, counter_list_correct_trad, counter_list_incorrect_trad \
-    = workload.CR_traditional(data, date_column,
+    = workload.Accuracy_traditional(data, date_column,
                               time_window_str, date_time_format,
                               monitored_groups,
                               threshold,
@@ -105,10 +105,11 @@ print("male_time_decay_dif_alpha", len(male_time_decay_dif_alpha))
 with open("Accuracy_time_decay_factor.csv", "w", newline='') as csvfile:
     writer = csv.writer(csvfile, delimiter=',')
     writer.writerow(["alpha", "male_time_decay", "female_time_decay"])
+    writer.writerow(['t', male_traditional, female_traditional])
     for i in range(len(alpha_list)):
         writer.writerow([alpha_list[i], male_time_decay_dif_alpha[i],
                          female_time_decay_dif_alpha[i]])
-    writer.writerow(['traditional', male_traditional, female_traditional])
+
 
 # save results to a file
 # with open("FPR_time_decay_factor.txt", "w") as f:

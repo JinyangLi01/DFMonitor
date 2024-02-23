@@ -1,0 +1,4 @@
+monitored_group,size_base,size_opt,(size_base - size_opt) / size_base
+[{'sex': 'male'}],785,657,0.16305732484076432
+[{'sex': 'female'}],789,661,0.16223067173637515
+"[{'sex': 'female'}, {'sex': 'male'}]",938,794,0.1535181236673774

@@ -81,19 +81,17 @@ for time_window_str in window_size_str_list_brev:
     # print("\nwindow_str = {}".format(time_window_str))
     # use CR for compas dataset, a time window = 1 month, record the result of each uf in each month and draw a plot
     (DFMonitor, uf_list_DF, accuracy_list_DF, counter_list_correct_DF,
-    counter_list_incorrect_DF) = workload.traverse_data_DFMonitor(data, date_column, time_window_str,
-                                                                                      date_time_format,
-                                                                                      monitored_groups,
-                                                                                      threshold,
-                                                                                      alpha, label_prediction,
-                                                                                      label_ground_truth)
+     counter_list_incorrect_DF) = workload.traverse_data_DFMonitor(data, date_column, time_window_str,
+                                                                   date_time_format,
+                                                                   monitored_groups,
+                                                                   threshold,
+                                                                   alpha, label_prediction,
+                                                                   label_ground_truth)
     male_time_decay = [x[0] for x in accuracy_list_DF]
     female_time_decay = [x[1] for x in accuracy_list_DF]
 
     male_time_decay_dif_alpha.append(male_time_decay)
     female_time_decay_dif_alpha.append(female_time_decay)
-
-
 
 with open("Accuracy_window_size.csv", "w", newline='') as csvfile:
     writer = csv.writer(csvfile, delimiter=',')
@@ -101,7 +99,6 @@ with open("Accuracy_window_size.csv", "w", newline='') as csvfile:
     for i in range(len(window_size_str_list_brev)):
         writer.writerow([window_size_str_list[i], male_time_decay_dif_alpha[i],
                          female_time_decay_dif_alpha[i]])
-
 
 # x_list = np.arange(0, len(window_size_str_list))
 # # pair_colors = ['blue', '#27bcf6', 'green', 'lightgreen', 'chocolate', 'gold']
