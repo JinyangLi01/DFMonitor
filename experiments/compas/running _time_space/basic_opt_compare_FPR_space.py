@@ -41,88 +41,121 @@ monitored_groups_set = [[{"race": 'Caucasian'}], [{"race": 'African-American'}],
                         [{"sex": "Male"}], [{"sex": "Female"}],
 
                         [{"race": 'Caucasian', "sex": "Male"}, {"race": 'African-American'}],
-                        [{"race": 'African-American'}, {"race": "Hispanic"}],
-                        [{"race": 'Caucasian'}, {"race": 'Caucasian', "sex": "Male"}],
-                        [{"race": 'Hispanic'}, {"race": 'Caucasian', "sex": "Female"}],
-                        [{"race": 'African-American'}, {"sex": "Male"}],
+                        # [{"race": 'African-American'}, {"race": "Hispanic"}],
+                        # [{"race": 'Caucasian'}, {"race": 'Caucasian', "sex": "Male"}],
+                        # [{"race": 'Hispanic'}, {"race": 'Caucasian', "sex": "Female"}],
+                        # [{"race": 'African-American'}, {"sex": "Male"}],
 
                         [{"race": 'African-American', "sex": "Male"}, {"race": 'Caucasian', "sex": "Male"}, {"race": "Hispanic"}],
-                        [{"race": 'Caucasian'}, {"race": 'African-American'}, {"race": "Hispanic"}],
-                        [{"race": 'Caucasian', "sex": "Male"}, {"race": 'African-American'}, {"sex": "Female"}],
-                        [{"race": 'African-American', "sex": "Male"}, {"race": 'Caucasian', "sex": "Female"}, {"race": 'Caucasian', "sex": "Female"}],
-                        [{"race": 'Caucasian'}, {"race": 'African-American'}, {"race": 'African-American', "sex": "Female"}],
+                        # [{"race": 'Caucasian'}, {"race": 'African-American'}, {"race": "Hispanic"}],
+                        # [{"race": 'Caucasian', "sex": "Male"}, {"race": 'African-American'}, {"sex": "Female"}],
+                        # [{"race": 'African-American', "sex": "Male"}, {"race": 'Caucasian', "sex": "Female"}, {"race": 'Caucasian', "sex": "Female"}],
+                        # [{"race": 'Caucasian'}, {"race": 'African-American'}, {"race": 'African-American', "sex": "Female"}],
 
                         [{"race": 'Caucasian', "sex": "Male"}, {"race": 'Caucasian', "sex": "Female"},
                          {"race": 'African-American'}, {"race": "Hispanic"}],
                         [{"race": 'African-American', "sex": "Male"}, {"race": 'Caucasian', "sex": "Male"},
                          {"race": "Hispanic"}, {"sex": "Female"}],
-                        [{"race": 'Caucasian'}, {"race": 'African-American'}, {"race": "Hispanic"}, {"sex": "Male"}],
-                        [{"race": 'Caucasian', "sex": "Male"}, {"race": 'African-American'}, {"sex": "Female"}, {"race": 'African-American', "sex": "Male"}],
-                        [{"race": 'African-American', "sex": "Male"}, {"race": 'Caucasian', "sex": "Female"},
-                         {"race": 'Caucasian', "sex": "Female"}, {"race": 'African-American', "sex": "Female"}],
-                        [{"race": 'Caucasian'}, {"race": 'African-American'}, {"race": 'Caucasian', "sex": "Female"},
-                         {"race": 'African-American', "sex": "Female"}],
+                        # [{"race": 'Caucasian'}, {"race": 'African-American'}, {"race": "Hispanic"}, {"sex": "Male"}],
+                        # [{"race": 'Caucasian', "sex": "Male"}, {"race": 'African-American'}, {"sex": "Female"}, {"race": 'African-American', "sex": "Male"}],
+                        # [{"race": 'African-American', "sex": "Male"}, {"race": 'Caucasian', "sex": "Female"},
+                        #  {"race": 'Caucasian', "sex": "Female"}, {"race": 'African-American', "sex": "Female"}],
+                        # [{"race": 'Caucasian'}, {"race": 'African-American'}, {"race": 'Caucasian', "sex": "Female"},
+                        #  {"race": 'African-American', "sex": "Female"}],
 
 
                         [{"race": 'Caucasian', "sex": "Male"}, {"race": 'Caucasian', "sex": "Female"},
                          {"race": 'African-American', "sex": "Male"}, {"race": 'African-American', "sex": "Female"},
                          {"race": "Hispanic"}],
-                        [{"race": 'African-American', "sex": "Male"}, {"race": 'Caucasian', "sex": "Male"},
-                         {"race": "Hispanic"}, {"race": 'African-American', "sex": "Female"}, {"sex": "Female"}],
-                        [{"race": 'Caucasian'}, {"race": 'African-American'}, {"race": "Hispanic"}, {"sex": "Male"}, {"sex": "Female"}],
-                        [{"race": 'Caucasian', "sex": "Male"}, {"race": 'African-American'}, {"sex": "Female"},
-                         {"race": 'African-American', "sex": "Male"}, {"race": 'African-American', "sex": "Female"}],
-                        [{"race": 'African-American', "sex": "Male"}, {"race": 'Caucasian', "sex": "Female"},
-                         {"race": 'Caucasian', "sex": "Female"}, {"race": 'African-American', "sex": "Female"}, {"race": 'Hispanic', "sex": "Male"}],
+                        # [{"race": 'African-American', "sex": "Male"}, {"race": 'Caucasian', "sex": "Male"},
+                        #  {"race": "Hispanic"}, {"race": 'African-American', "sex": "Female"}, {"sex": "Female"}],
+                        # [{"race": 'Caucasian'}, {"race": 'African-American'}, {"race": "Hispanic"}, {"sex": "Male"}, {"sex": "Female"}],
+                        # [{"race": 'Caucasian', "sex": "Male"}, {"race": 'African-American'}, {"sex": "Female"},
+                        #  {"race": 'African-American', "sex": "Male"}, {"race": 'African-American', "sex": "Female"}],
+                        # [{"race": 'African-American', "sex": "Male"}, {"race": 'Caucasian', "sex": "Female"},
+                        #  {"race": 'Caucasian', "sex": "Female"}, {"race": 'African-American', "sex": "Female"}, {"race": 'Hispanic', "sex": "Male"}],
 
 
                         [{"race": 'Caucasian'}, {"race": 'African-American'}, {"race": 'Caucasian', "sex": "Female"},
                          {"race": 'African-American', "sex": "Female"}, {"race": 'Caucasian', "sex": "Male"}, {"race": "Hispanic"}],
-                        [{"race": 'Caucasian', "sex": "Male"}, {"race": 'Caucasian', "sex": "Female"},
-                         {"race": 'African-American', "sex": "Male"}, {"race": 'African-American', "sex": "Female"},
-                         {"race": "Hispanic", "sex": "Male"}, {"race": "Hispanic", "sex": "Female"}],
-                        [{"race": 'Caucasian'}, {"race": 'African-American'}, {"race": "Hispanic"}, {"sex": "Male"},
-                         {"sex": "Female"}, {"race": 'Caucasian', "sex": "Male"}],
-                        [{"race": 'Caucasian', "sex": "Male"}, {"race": 'African-American'}, {"sex": "Female"},
-                         {"race": 'African-American', "sex": "Male"}, {"race": 'African-American', "sex": "Female"}, {"race": "Hispanic"}],
-                        [{"race": 'African-American', "sex": "Male"}, {"race": 'Caucasian', "sex": "Female"},
-                         {"race": 'Caucasian', "sex": "Female"}, {"race": 'African-American', "sex": "Female"},
-                         {"race": 'Hispanic', "sex": "Male"}, {"race": "African-American"}],
+                        # [{"race": 'Caucasian', "sex": "Male"}, {"race": 'Caucasian', "sex": "Female"},
+                        #  {"race": 'African-American', "sex": "Male"}, {"race": 'African-American', "sex": "Female"},
+                        #  {"race": "Hispanic", "sex": "Male"}, {"race": "Hispanic", "sex": "Female"}],
+                        # [{"race": 'Caucasian'}, {"race": 'African-American'}, {"race": "Hispanic"}, {"sex": "Male"},
+                        #  {"sex": "Female"}, {"race": 'Caucasian', "sex": "Male"}],
+                        # [{"race": 'Caucasian', "sex": "Male"}, {"race": 'African-American'}, {"sex": "Female"},
+                        #  {"race": 'African-American', "sex": "Male"}, {"race": 'African-American', "sex": "Female"}, {"race": "Hispanic"}],
+                        # [{"race": 'African-American', "sex": "Male"}, {"race": 'Caucasian', "sex": "Female"},
+                        #  {"race": 'Caucasian', "sex": "Female"}, {"race": 'African-American', "sex": "Female"},
+                        #  {"race": 'Hispanic', "sex": "Male"}, {"race": "African-American"}],
 
                         [{"race": 'Caucasian'}, {"race": 'African-American'}, {"race": 'Caucasian', "sex": "Female"},
                          {"race": 'African-American', "sex": "Female"}, {"race": 'Caucasian', "sex": "Male"},
                          {"race": "Hispanic"}, {"race": 'African-American', "sex": "Male"}],
-                        [{"race": 'Caucasian', "sex": "Male"}, {"race": 'Caucasian', "sex": "Female"},
-                         {"race": 'African-American', "sex": "Male"}, {"race": 'African-American', "sex": "Female"},
-                         {"race": "Hispanic", "sex": "Male"}, {"race": "Hispanic", "sex": "Female"}, {"race": "African-American"}],
-                        [{"race": 'Caucasian'}, {"race": 'African-American'}, {"race": "Hispanic"}, {"sex": "Male"},
-                         {"sex": "Female"}, {"race": 'Caucasian', "sex": "Male"}, {"race": 'African-American', "sex": "Male"}],
-                        [{"race": 'Caucasian', "sex": "Male"}, {"race": 'African-American'}, {"sex": "Female"},
-                         {"race": 'African-American', "sex": "Male"}, {"race": 'African-American', "sex": "Female"},
-                         {"race": "Hispanic"}, {"race": 'Caucasian', "sex": "Male"}],
-                        [{"race": 'African-American', "sex": "Male"}, {"race": 'Caucasian', "sex": "Female"},
-                         {"race": 'Caucasian', "sex": "Female"}, {"race": 'African-American', "sex": "Female"},
-                         {"race": 'Hispanic', "sex": "Male"}, {"race": "African-American"}, {"sex": "Female"}],
+                        # [{"race": 'Caucasian', "sex": "Male"}, {"race": 'Caucasian', "sex": "Female"},
+                        #  {"race": 'African-American', "sex": "Male"}, {"race": 'African-American', "sex": "Female"},
+                        #  {"race": "Hispanic", "sex": "Male"}, {"race": "Hispanic", "sex": "Female"}, {"race": "African-American"}],
+                        # [{"race": 'Caucasian'}, {"race": 'African-American'}, {"race": "Hispanic"}, {"sex": "Male"},
+                        #  {"sex": "Female"}, {"race": 'Caucasian', "sex": "Male"}, {"race": 'African-American', "sex": "Male"}],
+                        # [{"race": 'Caucasian', "sex": "Male"}, {"race": 'African-American'}, {"sex": "Female"},
+                        #  {"race": 'African-American', "sex": "Male"}, {"race": 'African-American', "sex": "Female"},
+                        #  {"race": "Hispanic"}, {"race": 'Caucasian', "sex": "Male"}],
+                        # [{"race": 'African-American', "sex": "Male"}, {"race": 'Caucasian', "sex": "Female"},
+                        #  {"race": 'Caucasian', "sex": "Female"}, {"race": 'African-American', "sex": "Female"},
+                        #  {"race": 'Hispanic', "sex": "Male"}, {"race": "African-American"}, {"sex": "Female"}],
 
                         [{"race": 'Caucasian'}, {"race": 'African-American'}, {"race": 'Caucasian', "sex": "Female"},
                          {"race": 'African-American', "sex": "Female"}, {"race": 'Caucasian', "sex": "Male"},
                          {"race": "Hispanic"}, {"race": 'African-American', "sex": "Male"}, {"sex": "Female"}],
-                        [{"race": 'Caucasian', "sex": "Male"}, {"race": 'Caucasian', "sex": "Female"},
-                         {"race": 'African-American', "sex": "Male"}, {"race": 'African-American', "sex": "Female"},
-                         {"race": "Hispanic", "sex": "Male"}, {"race": "Hispanic", "sex": "Female"},
-                         {"race": "African-American"}, {"sex": "Female"}],
-                        [{"race": 'Caucasian'}, {"race": 'African-American'}, {"race": "Hispanic"}, {"sex": "Male"},
-                         {"sex": "Female"}, {"race": 'Caucasian', "sex": "Male"}, {"race": 'African-American', "sex": "Female"},
-                         {"race": 'African-American', "sex": "Male"}],
-                        [{"race": 'Caucasian', "sex": "Male"}, {"race": 'African-American'}, {"sex": "Female"},
-                         {"race": 'African-American', "sex": "Male"}, {"race": 'African-American', "sex": "Female"},
-                         {"race": "Hispanic"}, {"race": 'Caucasian', "sex": "Male"}, {"sex": "Male"}],
+                        # [{"race": 'Caucasian', "sex": "Male"}, {"race": 'Caucasian', "sex": "Female"},
+                        #  {"race": 'African-American', "sex": "Male"}, {"race": 'African-American', "sex": "Female"},
+                        #  {"race": "Hispanic", "sex": "Male"}, {"race": "Hispanic", "sex": "Female"},
+                        #  {"race": "African-American"}, {"sex": "Female"}],
+                        # [{"race": 'Caucasian'}, {"race": 'African-American'}, {"race": "Hispanic"}, {"sex": "Male"},
+                        #  {"sex": "Female"}, {"race": 'Caucasian', "sex": "Male"}, {"race": 'African-American', "sex": "Female"},
+                        #  {"race": 'African-American', "sex": "Male"}],
+                        # [{"race": 'Caucasian', "sex": "Male"}, {"race": 'African-American'}, {"sex": "Female"},
+                        #  {"race": 'African-American', "sex": "Male"}, {"race": 'African-American', "sex": "Female"},
+                        #  {"race": "Hispanic"}, {"race": 'Caucasian', "sex": "Male"}, {"sex": "Male"}],
+                        # [{"race": 'African-American', "sex": "Male"}, {"race": 'Caucasian', "sex": "Female"},
+                        #  {"race": 'Caucasian', "sex": "Female"}, {"race": 'African-American', "sex": "Female"},
+                        #  {"race": 'Hispanic', "sex": "Male"}, {"race": "African-American"}, {"sex": "Female"}, {"sex": "Male"}],
+
                         [{"race": 'African-American', "sex": "Male"}, {"race": 'Caucasian', "sex": "Female"},
                          {"race": 'Caucasian', "sex": "Female"}, {"race": 'African-American', "sex": "Female"},
-                         {"race": 'Hispanic', "sex": "Male"}, {"race": "African-American"}, {"sex": "Female"}, {"sex": "Male"}],
+                         {"race": 'Hispanic', "sex": "Male"}, {"race": "African-American"}, {"sex": "Female"},
+                         {"sex": "Male"}, {"race": "Hispanic"}],
+
+
+
+                        [{"race": 'African-American', "sex": "Male"}, {"race": 'Caucasian', "sex": "Female"},
+                         {"race": 'Caucasian', "sex": "Female"}, {"race": 'African-American', "sex": "Female"},
+                         {"race": 'Hispanic', "sex": "Male"}, {"race": "African-American"}, {"sex": "Female"},
+                         {"sex": "Male"}, {"race": "Hispanic"}, {"race": 'Caucasian'}],
+
+
+                        [{"race": 'African-American', "sex": "Male"}, {"race": 'Caucasian', "sex": "Female"},
+                         {"race": 'Caucasian', "sex": "Female"}, {"race": 'African-American', "sex": "Female"},
+                         {"race": 'Hispanic', "sex": "Male"}, {"race": "African-American"}, {"sex": "Female"},
+                         {"sex": "Male"}, {"race": "Hispanic"}, {"race": 'Caucasian'}, {"race": 'African-American'}],
+
+
+                        [{"race": 'African-American', "sex": "Male"}, {"race": 'Caucasian', "sex": "Female"},
+                         {"race": 'Caucasian', "sex": "Female"}, {"race": 'African-American', "sex": "Female"},
+                         {"race": 'Hispanic', "sex": "Male"}, {"race": "African-American"}, {"sex": "Female"},
+                         {"sex": "Male"}, {"race": "Hispanic"}, {"race": 'Caucasian'}, {"race": 'African-American'},
+                         {"race": "Hispanic", "sex": "Male"}],
+
+                        [{"race": 'African-American', "sex": "Male"}, {"race": 'Caucasian', "sex": "Female"},
+                         {"race": 'Caucasian', "sex": "Female"}, {"race": 'African-American', "sex": "Female"},
+                         {"race": 'Hispanic', "sex": "Male"}, {"race": "African-American"}, {"sex": "Female"},
+                         {"sex": "Male"}, {"race": "Hispanic"}, {"race": 'Caucasian'}, {"race": 'African-American'},
+                         {"race": "Hispanic", "sex": "Male"}, {"race": "Hispanic", "sex": "Female"}]
                         ]
 
-file = open('space_comparison.csv', mode='w', newline='')
+
+
+file = open('space_comparison_FPR_nparray.csv', mode='w', newline='')
 writer = csv.writer(file)
 writer.writerow(["monitored_group", "size_base", "size_opt", "(size_base - size_opt) / size_base"])
 
@@ -154,34 +187,17 @@ for monitored_group in monitored_groups_set:
     total_elapsed_time_opt += elapsed_time_opt
     total_elapsed_time_base += elapsed_time_base
 
-    size_base = asizeof.asizeof(DFMonitor_baseline)
-    size_opt = asizeof.asizeof(DFMonitor)
+    # size_base = asizeof.asizeof(DFMonitor_baseline)
+    # size_opt = asizeof.asizeof(DFMonitor)
+
+    size_base = DFMonitor_baseline.get_size()
+    size_opt = DFMonitor.get_size()
+
     print("\nmonitored_group: ", monitored_group)
     print("size of base: ", size_base)
     print("size of opt: ", size_opt)
     print("(size of base - size of opt) / size of base: ", (size_base - size_opt) / size_base)
     writer.writerow([monitored_group, size_base, size_opt, (size_base - size_opt) / size_base])
 
-    # print("\n============================ use sys.getsizeof()============================")
-    # print("size of base: ", DFMonitor_baseline.get_size())
-    # print("size of opt: ", DFMonitor.get_size())
-    # print("(size of base - size of opt) / size of base: ",
-    #       (DFMonitor_baseline.get_size() - DFMonitor.get_size()) / DFMonitor_baseline.get_size())
-
-
-
-    # print("\n===========================use recursive function============================")
-    # print("size of base: ", DFMonitor_baseline.get_size_recursive())
-    # print("size of opt: ", DFMonitor.get_size_recursive())
-    # print("(size of base - size of opt) / size of base: ",
-    #       (DFMonitor_baseline.get_size_recursive() - DFMonitor.get_size_recursive()) / DFMonitor_baseline.get_size_recursive())
-
-
-    # with open('space_comparison.csv', mode='a') as file:
-    #     writer = csv.writer(file)
-    #     writer.writerow([monitored_group, size_base, size_opt, (size_base - size_opt) / size_base])
-
-# print("avg elapsed_time_base out of {} executions: {}".format(num_repeat, total_elapsed_time_base / num_repeat))
-# print("avg elapsed_time_opt out of {} executions: {}".format(num_repeat, total_elapsed_time_opt / num_repeat))
-
-########################################## end space comparison ##########################################
+    # ================================================
+    print(DFMonitor.get_size())

@@ -4,7 +4,7 @@ import matplotlib
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from algorithm import FPR_workload as workload
+from algorithm import CR_workload as workload
 import seaborn as sns
 from matplotlib import rc
 import colorsys
@@ -53,20 +53,14 @@ def one_run(monitored_groups, num_repeat=10):
     for i in range(num_repeat):
         (DFMonitor_baseline, elapsed_time_base, total_time_new_window_base,
          num_items_after_first_window_base, num_new_windows_base) \
-            = workload.traverse_data_DF_baseline_only(data,
-                                                      date_column,
-                                                      time_window_str,
-                                                      monitored_groups,
-                                                      threshold,
-                                                      alpha)
+            = workload.traverse_data_DFMonitor_baseline_only(data, date_column,
+                                                             time_window_str, date_time_format,
+                                                             monitored_groups, threshold, alpha)
 
         DFMonitor, elapsed_time_opt, total_time_new_window_opt, num_items_after_first_window_opt, num_new_windows_opt \
-            = workload.traverse_data_DFMonitor_only(data,
-                                                    date_column,
-                                                    time_window_str,
-                                                    monitored_groups,
-                                                    threshold,
-                                                    alpha)
+            = workload.traverse_data_DFMonitor_only(data, date_column,
+                                                    time_window_str, date_time_format,
+                                                    monitored_groups, threshold, alpha)
 
         total_elapsed_time_opt += elapsed_time_opt
         total_elapsed_time_base += elapsed_time_base
@@ -83,31 +77,6 @@ def one_run(monitored_groups, num_repeat=10):
                             (num_items_after_first_window_base * num_repeat - (num_repeat * num_new_windows_base))
     avg_insertion_opt = (total_elapsed_time_opt - total_time_new_window_opt) / \
                             (num_items_after_first_window_opt * num_repeat - (num_new_windows_opt * num_repeat))
-
-    # print("avg time for new window base: ", total_time_new_window_base / (num_repeat * num_new_windows_base))
-    # print("avg time for new window opt: ", total_time_new_window_opt / (num_new_windows_opt * num_repeat))
-    # print("avg time for insertion base: ", (total_elapsed_time_base - total_time_new_window_base) /
-    #       (num_items_after_first_window_base * num_repeat - (num_repeat * num_new_windows_base)))
-    # print("avg time for insertion opt: ", (total_elapsed_time_opt - total_time_new_window_opt) /
-    #       (num_items_after_first_window_opt * num_repeat - (num_new_windows_opt * num_repeat)))
-
-    # with open("running_time.csv", "a", newline='') as csvfile:
-    #     writer = csv.writer(csvfile, delimiter=',')
-    #     # writer.writerow(["monitored groups", "avg elapsed_time_base", "avg elapsed_time_opt",
-    #     #                  "num_items_after_first_window_base",
-    #     #                  "avg time of an operation base", "avg time of an operation opt",
-    #     #                  "avg time for new window base", "avg time for new window opt",
-    #     #                  "avg time for insertion base", "avg time for insertion opt"])
-    #     writer.writerow([monitored_groups, total_elapsed_time_base / num_repeat, total_elapsed_time_opt / num_repeat,
-    #                      num_items_after_first_window_base,
-    #                      total_elapsed_time_base / (num_items_after_first_window_base * num_repeat),
-    #                      total_elapsed_time_opt / (num_items_after_first_window_base * num_repeat),
-    #                      total_time_new_window_base / (num_repeat * num_new_windows_base),
-    #                      total_time_new_window_opt / (num_new_windows_opt * num_repeat),
-    #                      (total_elapsed_time_base - total_time_new_window_base) /
-    #                      (num_items_after_first_window_base * num_repeat - (num_repeat * num_new_windows_base)),
-    #                      (total_elapsed_time_opt - total_time_new_window_opt) /
-    #                      (num_items_after_first_window_opt * num_repeat - (num_new_windows_opt * num_repeat))])
 
     return avg_insertion_base, avg_insertion_opt, avg_newwindow_base, avg_newwindow_opt
 
@@ -322,7 +291,7 @@ result_insertion_base = []
 result_insertion_opt = []
 result_newwindow_base = []
 result_newwindow_opt = []
-repeat = 1
+repeat = 10
 for i, group in enumerate(monitored_groups_set):
     print("group: ", group, "i: ", i)
     a, b, c, d = one_run(group, repeat)
@@ -336,7 +305,7 @@ for i, group in enumerate(monitored_groups_set):
         result_newwindow_base.append(avg_newwindow_base / 5)
         result_newwindow_opt.append(avg_newwindow_opt / 5)
         avg_insertion_base, avg_insertion_opt, avg_newwindow_base, avg_newwindow_opt = 0, 0, 0, 0
-with open("running_time_FPR.csv", "a", newline='') as csvfile:
+with open("running_time_CR.csv", "a", newline='') as csvfile:
     writer = csv.writer(csvfile, delimiter=',')
     writer.writerow(["avg_insertion_base", "avg_insertion_opt", "avg_newwindow_base", "avg_newwindow_opt"])
     writer.writerow([result_insertion_base, result_insertion_opt, result_newwindow_base, result_newwindow_opt])
