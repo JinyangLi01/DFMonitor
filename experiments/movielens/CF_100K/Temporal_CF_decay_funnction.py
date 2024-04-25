@@ -14,7 +14,7 @@ print(os.getcwd())
 
 ##import data
 # read from u.data into a dataframe, seperator is any number of black spaces
-data_set=pd.read_csv("../../../data/movielens/ml-100k/u.data", header=None, sep='\s+').values
+data_set=pd.read_csv("../../../data/movielens/CF_100K/shuffle_assume_timestamp/u0.data", header=None, sep='\s+').values
 
 
 ##clean data
@@ -22,8 +22,13 @@ data_set=pd.read_csv("../../../data/movielens/ml-100k/u.data", header=None, sep=
 ########################################################################
 ########################################################################
 #compute user rating matrix and timestamp matrix
-num_user=943 #user id 1 to 943
-num_movie=1682 #movie id 1 to 1682
+# num_user=943 #user id 1 to 943
+# num_movie=1682 #movie id 1 to 1682
+# columns user_id	movie_id	rating	timestamp
+# number of user and movie
+num_user = len(np.unique(data_set[:,0]))
+num_movie = len(np.unique(data_set[:, 1]))
+print("num_user: {}, num_movie: {}".format(num_user, num_movie))
 
 user_rating_dict={}
 #key is user id : value are rating of all movie 
@@ -64,18 +69,19 @@ for i in range(0,num_user):
     user_like_matrix.append(np.array(row_list))
 user_like_matrix=np.array(user_like_matrix)
 
-#convert user-like matrix to user-user network
-user_user_network=[]
-for i in range(0,num_user):
-    # if i%10==0:
-    #     print(i)
-    row_list=[]
-    for j in range(0,num_user):
-        common_prefered_item=user_like_matrix[i,:]*user_like_matrix[j,:]
-        row_list.append(common_prefered_item)
-    row_list=np.array(row_list).sum(axis=1)
-    user_user_network.append(row_list)
-user_user_network=np.array(user_user_network)
+# #convert user-like matrix to user-user network
+# user_user_network=[]
+# for i in range(0,num_user):
+#     # if i%10==0:
+#     #     print(i)
+#     row_list=[]
+#     for j in range(0,num_user):
+#         common_prefered_item=user_like_matrix[i,:]*user_like_matrix[j,:]
+#         row_list.append(common_prefered_item)
+#     row_list=np.array(row_list).sum(axis=1)
+#     user_user_network.append(row_list)
+# user_user_network=np.array(user_user_network)
+
 #normalization
 row_mean=np.mean(user_rating_array,axis=1)
 row_mean=row_mean[:,np.newaxis]
@@ -221,7 +227,7 @@ def weighted_time(target_user_index,similar_user_index_list,alpha,user_timestamp
 
 ########################################################################
 ########################################################################
-######################################################################## 
+########################################################################
 #find best value of alpha (1.7)
 k=3
 MAE_list=[]
@@ -246,7 +252,7 @@ print("best_alpha=",best_alpha)
 
 ########################################################################
 ########################################################################
-######################################################################## 
+########################################################################
 #compare performance of no time and time
 alpha=best_alpha
 MAE_time_list=[]
@@ -256,10 +262,10 @@ for k in range(1,100,10):
     print("k : ",k)
     time=faster_rating_prediction(k,user_similarity_matrix,True,alpha,user_timestamp_array)
     no_time=faster_rating_prediction(k,user_similarity_matrix,False,alpha,user_timestamp_array)
-    
+
     MAE_time=MAE_calculator(time,user_rating_array)
     MAE_no_time=MAE_calculator(no_time,user_rating_array)
-    
+
     MAE_time_list.append(MAE_time)
     MAE_no_time_list.append(MAE_no_time)
     k_list.append(k)
