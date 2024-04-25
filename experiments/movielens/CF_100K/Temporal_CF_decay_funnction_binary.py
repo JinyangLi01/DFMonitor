@@ -23,10 +23,9 @@ def faster_rating_prediction(k, user_similarity_matrix, time, alpha, user_timest
     avg_rating_user_matrix = np.mean(user_rating_array, axis=1)
     avg_rating_user_matrix = avg_rating_user_matrix[:, np.newaxis]
     avg_rating_user_matrix = np.repeat(avg_rating_user_matrix, num_movie, axis=1)
-
+    print("len of avg_rating_user_matrix", len(avg_rating_user_matrix))
     predicted_rating_array = []
     for target_user_index in range(0, num_user):
-
         # avg rating of target user
         avg_rating_of_target_user = avg_rating_user_matrix[target_user_index, :]
         # print("target_user_index: {}".format(target_user_index))
@@ -35,12 +34,15 @@ def faster_rating_prediction(k, user_similarity_matrix, time, alpha, user_timest
 
         # find k similar user
         lst = pd.Series(list(user_similarity_matrix[target_user_index, :]))
+        # print(("lst: ", lst))
 
         i = lst.nlargest(k + 1)
         similar_user_index_list = i.index.values.tolist()
         similar_user_index_list = similar_user_index_list[1:]  # exclude yourself
-
+        # print("similar_user_index_list: ", similar_user_index_list)
         # avg rating of similar user
+        # print("len of avg_rating_user_matrix: ", len(avg_rating_user_matrix))
+        # print("similar_user_index_list: ", similar_user_index_list)
         avg_rating_of_similar_user = avg_rating_user_matrix[similar_user_index_list, :]
         rating_of_similar_user = user_rating_array[similar_user_index_list, :]
         diff_of_similar_user = rating_of_similar_user - avg_rating_of_similar_user
@@ -124,8 +126,10 @@ def weighted_time(target_user_index, similar_user_index_list, alpha, user_timest
 
 
 # wrap all the above into one function
-def temporal_CF_decay_function_binary(data_set, num_user, num_movie, time_window, alpha=1.7, k=11):
+def temporal_CF_decay_function_binary(data_set, time_window, alpha=1.7, k=11):
     print("Here is the temporal_CF_decay_function_binary")
+    num_user = data_set['user_id'].nunique()
+    num_movie = data_set['movie_id'].nunique()
     ##clean data
     ########################################################################
     ########################################################################
@@ -133,6 +137,7 @@ def temporal_CF_decay_function_binary(data_set, num_user, num_movie, time_window
     #compute user rating matrix and timestamp matrix
     print("num_user: ", num_user)
     print("num_movie: ", num_movie)
+
 
     user_rating_dict={} # size is num_user
     #key is user id : value are rating of all movie
@@ -182,18 +187,18 @@ def temporal_CF_decay_function_binary(data_set, num_user, num_movie, time_window
         user_like_matrix.append(np.array(row_list))
     user_like_matrix=np.array(user_like_matrix)
 
-    #convert user-like matrix to user-user network
-    user_user_network=[]
-    for i in range(0,num_user):
-        # if i%10==0:
-        #     print(i)
-        row_list=[]
-        for j in range(0,num_user):
-            common_prefered_item=user_like_matrix[i,:]*user_like_matrix[j,:]
-            row_list.append(common_prefered_item)
-        row_list=np.array(row_list).sum(axis=1)
-        user_user_network.append(row_list)
-    user_user_network=np.array(user_user_network)
+    # #convert user-like matrix to user-user network
+    # user_user_network=[]
+    # for i in range(0,num_user):
+    #     # if i%10==0:
+    #     #     print(i)
+    #     row_list=[]
+    #     for j in range(0,num_user):
+    #         common_prefered_item=user_like_matrix[i,:]*user_like_matrix[j,:]
+    #         row_list.append(common_prefered_item)
+    #     row_list=np.array(row_list).sum(axis=1)
+    #     user_user_network.append(row_list)
+    # user_user_network=np.array(user_user_network)
 
     #normalization
     row_mean=np.mean(user_rating_array,axis=1)
@@ -225,6 +230,7 @@ def temporal_CF_decay_function_binary(data_set, num_user, num_movie, time_window
         print("load user similarity matrix")
         user_similarity_matrix=np.load("user_similarity_matrix_"+str(time_window)+".npy")
     else:
+        print("computing user similarity matrix")
         # from sklearn.metrics.pairwise import cosine_similarity
         # from scipy.stats import pearsonr
         user_similarity_matrix=[]
@@ -240,6 +246,7 @@ def temporal_CF_decay_function_binary(data_set, num_user, num_movie, time_window
                 row.append(similarity)
             user_similarity_matrix.append(np.array(row))
         user_similarity_matrix=np.array(user_similarity_matrix)
+        print("len of user_similarity_matrix: ", len(user_similarity_matrix))
         print("save user similarity matrix")
         np.save("user_similarity_matrix_"+str(time_window)+".npy",user_similarity_matrix)
 
@@ -289,22 +296,49 @@ if __name__ == '__main__':
     sys.path.append("experiments/movielens/CF_100K")
     # 10 time windows
     num_time_windows = 10
+    alpha = 1.7
+    bestk = 11
 
-    for i in range(0, num_time_windows):
+    for i in range(0, 1):
         # Load the data
         # test data is the current time window
         data_set = pd.read_csv('../../../data/movielens/CF_100K/shuffle_assume_timestamp/u' + str(i)
-                               + '.data', sep='\s+')
+                               + '.data', sep='\s+').values
 
-        num_all_user = 943
-        num_all_movie = 1682
-        alpha = 1.7
-        k = 11
-        # calculate the temporal CF decay function
+        # num_all_user = 943
+        # num_all_movie = 1682
 
-        (MAE_time, MAE_no_time, predicted_user_rating_array_binary_time, predicted_user_rating_array_binary_no_time,
-         accuracy_time, accuracy_no_time) = temporal_CF_decay_function_binary(
-            data_set, num_all_user, num_all_movie, i, alpha, k)
+        # We will create a one-to-one mapping, to map the user_id and movie_id to the index starting from 1
+        # then after finishing the computation using temporal_CF_decay_function_binary, we will map it back to the original user_id and movie_id
+
+        num_user = data_set['user_id'].nunique()
+        num_movie = data_set['movie_id'].nunique()
+        user_id_list = data_set['user_id'].unique()
+        movie_id_list = data_set['movie_id'].unique()
+
+        # user id to index
+        user_id_map = {user_id: index+1 for index, user_id in enumerate(user_id_list)}
+        movie_id_map = {movie_id: index+1 for index, movie_id in enumerate(movie_id_list)}
+
+
+        data_set['user_id'] = data_set['user_id'].map(user_id_map)
+        data_set['movie_id'] = data_set['movie_id'].map(movie_id_map)
+
+        # print the max value of user_id and movie_id
+        print("max user_id: ", max(data_set['user_id']))
+        print("max movie_id: ", max(data_set['movie_id']))
+
+
+        print(data_set[:6])
+
+        MAE_time, MAE_no_time, predicted_user_rating_array_binary_time, predicted_user_rating_array_binary_no_time,\
+         accuracy_time, accuracy_no_time = temporal_CF_decay_function_binary(data_set, i, alpha, bestk)
+
+        # map the user_id and movie_id back to the original user_id and movie_id# Example to reverse map the results to original IDs if needed (for final output or further processing)
+        # # This would be more relevant if you need to output or use the results mapped to the original IDs
+        # original_user_ids = [user_id for user_id, index in sorted(user_index_map.items(), key=lambda x: x[1])]
+        # original_movie_ids = [movie_id for movie_id, index in sorted(movie_index_map.items(), key=lambda x: x[1])]
+
 
 #
 #     print("Here is to execute the Temporal_CF_decay_function_binary file")
