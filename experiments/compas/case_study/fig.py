@@ -1,13 +1,8 @@
-import ast
-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
-from algorithm import FPR_workload as workload
 import seaborn as sns
-from matplotlib import rc
-from algorithm import config
 import colorsys
 import csv
 from matplotlib.scale import ScaleBase
@@ -277,11 +272,6 @@ with open("roughness_compas_CR.csv", "w", newline='') as csvfile:
     writer.writerow(["white_traditional", np.std(np.diff(col_data_CR["white_traditional"]) / np.diff(x_list))])
     writer.writerow(["hispanic_time_decay", np.std(np.diff(col_data_CR["hispanic_time_decay"]) / np.diff(x_list))])
     writer.writerow(["hispanic_traditional", np.std(np.diff(col_data_CR["hispanic_traditional"]) / np.diff(x_list))])
-
-
-
-from sklearn.preprocessing import MinMaxScaler
-
 
 # roughness_scores_FPR = [1 / sd for sd in list(smooth_FPR.values())]
 # roughness_scores_CR = [1 / sd for sd in list(smooth_CR.values())]

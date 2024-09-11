@@ -1,9 +1,6 @@
 
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from algorithm import CR_0_20240118 as CR
-from algorithm import CR_baseline_0_20240118 as CR_baseline
+from algorithm.fixed_window import CR_0_20240118 as CR, CR_baseline_0_20240118 as CR_baseline
 
 data = pd.read_csv('../../../data/compas/preprocessed/cox-parsed_7214rows_with_labels_sorted_by_dates.csv')
 # get distribution of compas_screening_date

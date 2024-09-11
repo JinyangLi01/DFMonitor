@@ -5,15 +5,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 import matplotlib.colors as mcolors
-import plotly
-from traitlets import Integer
-from algorithm import Accuracy_workload as workload
+from algorithm.fixed_window import Accuracy_workload as workload
 import seaborn as sns
-from matplotlib import rc
-import plotly.express as px
-from algorithm import config
 import colorsys
-from scipy.interpolate import interp1d
 
 # sns.set_style("whitegrid")
 sns.set_palette("Paired")

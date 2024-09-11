@@ -1,0 +1,2 @@
+time_window, MAE_time, MAE_no_time, accuracy_time, accuracy_no_time
+4, 0.16846364019250698, 0.18564580988498433, 0.0, 0.0

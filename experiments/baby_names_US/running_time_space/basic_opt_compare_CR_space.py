@@ -1,13 +1,9 @@
 import csv
 
-import matplotlib
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-from algorithm import CR_workload as workload
+from algorithm.fixed_window import CR_workload as workload
 import seaborn as sns
-from matplotlib import rc
-import colorsys
 from pympler import asizeof
 
 # sns.set_style("whitegrid")

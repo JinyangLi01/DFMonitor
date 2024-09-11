@@ -18,31 +18,78 @@ import sys
 
 # prediction function
 
-def faster_rating_prediction(k, user_similarity_matrix, time, alpha, user_timestamp_array, user_rating_array, num_user, num_movie):
+
+########################################################################
+########################################################################
+########################################################################
+# MAE function
+def MAE_calculator(predicted_user_rating_array, user_rating_array, data_set):
+    # change predict matrix to have only known value
+    filter_matrix = np.copy(user_rating_array)
+    filter_matrix[filter_matrix > 0] = 1
+    predicted_user_rating_array = predicted_user_rating_array * filter_matrix
+
+    num_predict = np.count_nonzero(predicted_user_rating_array)
+    MAE = (abs(predicted_user_rating_array - user_rating_array).sum()) / num_predict
+
+    # get binary classification result: 1 if MAE < 0.5, 0 otherwise, since when k = 11, MAE of dynamic user interest is about 1.0
+    predicted_user_rating_array_binary = np.zeros(predicted_user_rating_array.shape)
+    predicted_user_rating_array_binary[MAE < 1.0] = 1
+    predicted_user_rating_array_binary[MAE >= 1.0] = 0
+
+    # for the case without consider dynamic user interest, MAE is about 1.6, so the threshold is 0.8
+    filter_matrix_binary = np.zeros(filter_matrix.shape)
+    filter_matrix_binary[filter_matrix >= 1.6] = 1
+    filter_matrix_binary[filter_matrix < 1.6] = 0
+
+    # print the accuracy by counting the 1
+    accuracy = np.count_nonzero(predicted_user_rating_array_binary == filter_matrix_binary) / num_predict
+    print("accuracy: ", accuracy)
+    # print the binary result for each user
+    print("predicted_user_rating_array_binary: ", predicted_user_rating_array_binary)
+    # add a column to the original dataset
+    # save the dataset
+    np.savetxt("predicted_user_rating_array_binary.csv", predicted_user_rating_array_binary, delimiter=",")
+    return MAE, predicted_user_rating_array_binary, accuracy
+
+
+########################################################################
+########################################################################
+########################################################################
+
+# generate abs time diff matrix
+def weighted_time(target_user_index, similar_user_index_list, alpha, user_timestamp_array):
+    a = user_timestamp_array[target_user_index, :]
+    b = user_timestamp_array[similar_user_index_list, :]
+    time_diff_matrix = abs(a - b)
+
+    # standardization
+    # from sklearn.preprocessing import StandardScaler
+    scaler = StandardScaler()
+    time_diff_matrix = scaler.fit_transform(time_diff_matrix)
+    lam_matrix = np.exp(-1 * time_diff_matrix * alpha)
+    return lam_matrix
+
+
+def faster_rating_prediction(k, user_similarity_matrix, time, alpha, user_timestamp_array, user_rating_array):
     # avg rating of all user matrix
     avg_rating_user_matrix = np.mean(user_rating_array, axis=1)
     avg_rating_user_matrix = avg_rating_user_matrix[:, np.newaxis]
     avg_rating_user_matrix = np.repeat(avg_rating_user_matrix, num_movie, axis=1)
-    print("len of avg_rating_user_matrix", len(avg_rating_user_matrix))
+
     predicted_rating_array = []
     for target_user_index in range(0, num_user):
+
         # avg rating of target user
         avg_rating_of_target_user = avg_rating_user_matrix[target_user_index, :]
-        # print("target_user_index: {}".format(target_user_index))
-        # print(type(user_similarity_matrix))
-        # print(user_similarity_matrix)
 
         # find k similar user
         lst = pd.Series(list(user_similarity_matrix[target_user_index, :]))
-        # print(("lst: ", lst))
-
         i = lst.nlargest(k + 1)
         similar_user_index_list = i.index.values.tolist()
         similar_user_index_list = similar_user_index_list[1:]  # exclude yourself
-        # print("similar_user_index_list: ", similar_user_index_list)
+
         # avg rating of similar user
-        # print("len of avg_rating_user_matrix: ", len(avg_rating_user_matrix))
-        # print("similar_user_index_list: ", similar_user_index_list)
         avg_rating_of_similar_user = avg_rating_user_matrix[similar_user_index_list, :]
         rating_of_similar_user = user_rating_array[similar_user_index_list, :]
         diff_of_similar_user = rating_of_similar_user - avg_rating_of_similar_user
@@ -73,63 +120,11 @@ def faster_rating_prediction(k, user_similarity_matrix, time, alpha, user_timest
     return predicted_rating_array
 
 
-########################################################################
-########################################################################
-########################################################################
-# MAE function
-def MAE_calculator(predicted_user_rating_array, user_rating_array, data_set):
-    # change predict matrix to have only known value
-    filter_matrix = np.copy(user_rating_array)
-    filter_matrix[filter_matrix > 0] = 1
-    predicted_user_rating_array = predicted_user_rating_array * filter_matrix
-
-    num_predict = np.count_nonzero(predicted_user_rating_array)
-    MAE = (abs(predicted_user_rating_array - user_rating_array).sum()) / num_predict
-
-    # get binary classification result: 1 if MAE < 0.5, 0 otherwise, since when k = 11, MAE of dynamic user interest is about 1.0
-    predicted_user_rating_array_binary = np.zeros(predicted_user_rating_array.shape)
-    predicted_user_rating_array_binary[MAE < 1.0] = 1
-    predicted_user_rating_array_binary[MAE >= 1.0] = 0
-
-    # for the case without consider dynamic user interest, MAE is about 1.6, so the threshold is 0.8
-    filter_matrix_binary = np.zeros(filter_matrix.shape)
-    filter_matrix_binary[filter_matrix >= 1.6] = 1
-    filter_matrix_binary[filter_matrix < 1.6] = 0
-
-    # print the accuracy
-    accuracy = np.count_nonzero(predicted_user_rating_array_binary == filter_matrix) / num_predict
-    print("accuracy: ", accuracy)
-    # print the binary result for each user
-    print("predicted_user_rating_array_binary: ", predicted_user_rating_array_binary)
-    # add a column to the original dataset
-    # save the dataset
-    np.savetxt("predicted_user_rating_array_binary.csv", predicted_user_rating_array_binary, delimiter=",")
-    return MAE, predicted_user_rating_array_binary, accuracy
-
-
-########################################################################
-########################################################################
-########################################################################
-
-# generate abs time diff matrix
-def weighted_time(target_user_index, similar_user_index_list, alpha, user_timestamp_array):
-    a = user_timestamp_array[target_user_index, :]
-    b = user_timestamp_array[similar_user_index_list, :]
-    time_diff_matrix = abs(a - b)
-
-    # standardization
-    # from sklearn.preprocessing import StandardScaler
-    scaler = StandardScaler()
-    time_diff_matrix = scaler.fit_transform(time_diff_matrix)
-    lam_matrix = np.exp(-1 * time_diff_matrix * alpha)
-    return lam_matrix
-
-
 # wrap all the above into one function
 def temporal_CF_decay_function_binary(data_set, time_window, alpha=1.7, k=11):
     print("Here is the temporal_CF_decay_function_binary")
-    num_user = data_set['user_id'].nunique()
-    num_movie = data_set['movie_id'].nunique()
+    num_user = np.unique(data_set[:, 0]).size
+    num_movie = np.unique(data_set[:, 1]).size
     ##clean data
     ########################################################################
     ########################################################################
@@ -149,11 +144,11 @@ def temporal_CF_decay_function_binary(data_set, time_window, alpha=1.7, k=11):
     for user_id in range(1,num_user+1):
         user_timestamp_dict[user_id]=np.array([0]*num_movie)
 
-    user_id_list=data_set['user_id'].unique()
-    movie_id_list=data_set['movie_id'].unique()
+    user_id_list=np.unique(data_set[:, 0])
+    movie_id_list=np.unique(data_set[:, 1])
 
     #append rating data set to user rating dict
-    data_set_list=data_set.values.tolist()
+    data_set_list = data_set.tolist()
     for each_row in data_set_list:
         # print("each_row: ", each_row)
         user_id=each_row[0]
@@ -271,8 +266,8 @@ def temporal_CF_decay_function_binary(data_set, time_window, alpha=1.7, k=11):
     # use k = 11, which has the lowest MAE
     # k = 11
     # print("k : ", k)
-    time = faster_rating_prediction(k, user_similarity_matrix, True, alpha, user_timestamp_array, user_rating_array, num_user, num_movie)
-    no_time = faster_rating_prediction(k, user_similarity_matrix, False, alpha, user_timestamp_array, user_rating_array, num_user, num_movie)
+    time = faster_rating_prediction(k, user_similarity_matrix, True, alpha, user_timestamp_array, user_rating_array)
+    no_time = faster_rating_prediction(k, user_similarity_matrix, False, alpha, user_timestamp_array, user_rating_array)
 
     # print("time: ", time)
     # print("no_time: ", no_time)
@@ -299,11 +294,12 @@ if __name__ == '__main__':
     alpha = 1.7
     bestk = 11
 
-    for i in range(0, 1):
+    for i in range(4, 5):
         # Load the data
         # test data is the current time window
         data_set = pd.read_csv('../../../data/movielens/CF_100K/shuffle_assume_timestamp/u' + str(i)
-                               + '.data', sep='\s+').values
+                               + '.data', header=0, sep='\s+')
+        data_set = data_set.to_numpy()
 
         # num_all_user = 943
         # num_all_movie = 1682
@@ -311,28 +307,46 @@ if __name__ == '__main__':
         # We will create a one-to-one mapping, to map the user_id and movie_id to the index starting from 1
         # then after finishing the computation using temporal_CF_decay_function_binary, we will map it back to the original user_id and movie_id
 
-        num_user = data_set['user_id'].nunique()
-        num_movie = data_set['movie_id'].nunique()
-        user_id_list = data_set['user_id'].unique()
-        movie_id_list = data_set['movie_id'].unique()
+        num_user = len(np.unique(data_set[:, 0]))
+        num_movie = len(np.unique(data_set[:, 1]))
+        print("num_user: {}, num_movie: {}".format(num_user, num_movie))
+        # user_id_list = np.unique(data_set[:, 0])
+        # movie_id_list = np.unique(data_set[:, 1])
+        seen = set()
+        user_id_list = [x for x in data_set[:, 0] if not (x in seen or seen.add(x))]
+        seen = set()
+        movie_id_list = [x for x in data_set[:, 1] if not (x in seen or seen.add(x))]
 
         # user id to index
         user_id_map = {user_id: index+1 for index, user_id in enumerate(user_id_list)}
         movie_id_map = {movie_id: index+1 for index, movie_id in enumerate(movie_id_list)}
 
+        print("user_id_map: ", user_id_map)
+        print(type(list(user_id_map.keys())[0]))
 
-        data_set['user_id'] = data_set['user_id'].map(user_id_map)
-        data_set['movie_id'] = data_set['movie_id'].map(movie_id_map)
+        # enumerate dataset['user_id'] and dataset['movie_id'] and replace the values with the index
+        for index, user_id in enumerate(data_set[:, 0]):
+            data_set[index, 0] = user_id_map[user_id]
+        for index, movie_id in enumerate(data_set[:, 1]):
+            data_set[index, 1] = movie_id_map[movie_id]
+
+
 
         # print the max value of user_id and movie_id
-        print("max user_id: ", max(data_set['user_id']))
-        print("max movie_id: ", max(data_set['movie_id']))
+        print("max user_id: ", max(user_id_map.keys()   ))
+        print("max movie_id: ", max(movie_id_map.keys()))
 
 
         print(data_set[:6])
 
         MAE_time, MAE_no_time, predicted_user_rating_array_binary_time, predicted_user_rating_array_binary_no_time,\
          accuracy_time, accuracy_no_time = temporal_CF_decay_function_binary(data_set, i, alpha, bestk)
+
+        # print teh results to file
+        with open("temporal_CF_decay_function_binary_results.csv", "a") as f:
+            f.write("time_window, MAE_time, MAE_no_time, accuracy_time, accuracy_no_time\n")
+            f.write("{}, {}, {}, {}, {}\n".format(i, MAE_time, MAE_no_time, accuracy_time, accuracy_no_time))
+
 
         # map the user_id and movie_id back to the original user_id and movie_id# Example to reverse map the results to original IDs if needed (for final output or further processing)
         # # This would be more relevant if you need to output or use the results mapped to the original IDs
