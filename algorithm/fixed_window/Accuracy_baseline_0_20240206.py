@@ -2,7 +2,9 @@ import sys
 
 import numpy as np
 import pandas as pd
-class Accuracy_baseline:
+# 2024-02-06
+
+class DF_Accuracy_Fixed_Window_Counter:
     def __init__(self, monitored_groups, alpha, threshold):
         df = pd.DataFrame(monitored_groups)
         unique_keys = set()

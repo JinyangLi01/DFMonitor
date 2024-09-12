@@ -20,7 +20,7 @@ In this file we implement the following fairness metrics:
 
 For each fairness metric, there are three python files (eg, accuracy):
 - Accuracy.....py: the implementation of optimized DFMonitor for accuracy
-- Accuracy_baseline....py: the implementation of baseline DFMonitor for accuracy
+- DF_Accuracy_Fixed_Window_Counter....py: the implementation of baseline DFMonitor for accuracy
 - Accuracy_workload.py: the implementation of functions feed a data stream to different versions of DFMonitor and measure the performance and compare with the ground truth.
 
 

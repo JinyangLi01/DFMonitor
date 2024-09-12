@@ -3,8 +3,9 @@ import sys
 import pandas as pd
 import numpy as np
 
+# 2024-02-06
 
-class DF_Accuracy:
+class DF_Accuracy_Fixed_Window_Bit:
     def __init__(self, monitored_groups, alpha, threshold):
         df = pd.DataFrame(monitored_groups)
         unique_keys = set()

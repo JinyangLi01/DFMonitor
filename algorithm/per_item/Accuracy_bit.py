@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 
-class DF_Accuracy_Per_Item:
+class DF_Accuracy_Per_Item_Bit:
     def __init__(self, monitored_groups, alpha, threshold):
         df = pd.DataFrame(monitored_groups)
         unique_keys = set()
@@ -12,10 +12,12 @@ class DF_Accuracy_Per_Item:
         for key in unique_keys:
             df[key] = df[key].astype("category")
         self.groups = df
-        self.uf = np.array([False] * len(monitored_groups), dtype=bool)
+
+        # Initialize delta values (representing relative distance from flipping fairness bit)
         self.delta = np.array([0] * len(monitored_groups), dtype=np.float64)
-        self.alpha = alpha
-        self.threshold = threshold
+        self.uf = np.array([False] * len(monitored_groups), dtype=bool)  # Fair/unfair flag
+        self.alpha = alpha  # Time decay factor
+        self.threshold = threshold  # Fairness threshold
 
     def initialization(self, uf, delta):
         self.uf = np.array(uf, dtype=bool)
@@ -27,7 +29,8 @@ class DF_Accuracy_Per_Item:
 
     def get_size(self):
         size = 0
-        size += sys.getsizeof(self.groups) + self.groups.memory_usage(deep=True).sum() - self.groups.memory_usage().sum()
+        size += sys.getsizeof(self.groups) + self.groups.memory_usage(
+            deep=True).sum() - self.groups.memory_usage().sum()
         size += sys.getsizeof(self.uf) + self.uf.nbytes
         size += sys.getsizeof(self.delta) + self.delta.nbytes
         size += sys.getsizeof(self.threshold)
@@ -44,13 +47,22 @@ class DF_Accuracy_Per_Item:
                 return False
         return True
 
+    """
+    label = one of 'correct', 'incorrect'
+    """
+
     def insert(self, tuple_, label):
-        # This version updates delta and uf after every item, without any window mechanism
+        # Apply time decay to all delta values before processing the new item
+        self.apply_time_decay()
+
+        # Update delta and fairness flag based on the new item
         for index in self.groups.index:
             row = self.groups.loc[index]
-            correct = (label == 'correct')
             if all(row.get(key, None) == value for key, value in tuple_.items()):
-                if not self.uf[index]:
+                correct = (label == 'correct')
+
+                # Update delta based on the correctness of the new item
+                if not self.uf[index]:  # Currently fair
                     if correct:
                         self.delta[index] += 1 - self.threshold
                     else:
@@ -58,18 +70,17 @@ class DF_Accuracy_Per_Item:
                             self.delta[index] -= self.threshold
                         else:
                             self.delta[index] = self.threshold - self.delta[index]
-                            self.uf[index] = True
-                else:
+                            self.uf[index] = True  # Flip to unfair
+                else:  # Currently unfair
                     if correct:
                         if self.delta[index] >= 1 - self.threshold:
                             self.delta[index] -= 1 - self.threshold
                         else:
                             self.delta[index] = 1 - self.threshold - self.delta[index]
-                            self.uf[index] = False
+                            self.uf[index] = False  # Flip to fair
                     else:
                         self.delta[index] += self.threshold
 
-
-    def new_window(self):
-        # No window mechanism, so this method is not used in per-item accuracy
-        pass
+    def apply_time_decay(self):
+        # Apply the time decay factor alpha to all delta values
+        self.delta *= self.alpha

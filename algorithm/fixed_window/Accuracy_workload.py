@@ -60,8 +60,8 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_st
     # Determine the start of a new window for all rows except the first
     timed_data['new_window'] = timed_data['window_key'] != timed_data['window_key'].shift(1)
     timed_data["new_window"].loc[0] = False
-    DFMonitor = CR.DF_Accuracy(monitored_groups, alpha, threshold)
-    DFMonitor_baseline = Accuracy_baseline.Accuracy_baseline(monitored_groups, alpha, threshold)
+    DFMonitor = CR.DF_Accuracy_Fixed_Window_Bit(monitored_groups, alpha, threshold)
+    DFMonitor_baseline = Accuracy_baseline.DF_Accuracy_Fixed_Window_Counter(monitored_groups, alpha, threshold)
     counter_first_window_correct = [0] * len(monitored_groups)
     counter_first_window_incorrect = [0] * len(monitored_groups)
     first_window_processed = False
@@ -139,7 +139,7 @@ def traverse_data_DFMonitor_only(timed_data, date_column, time_window_str, date_
     timed_data.loc[0, "new_window"] = False
     # print(timed_data[:1])
     # print(len(timed_data[timed_data['new_window'] == True]))
-    DFMonitor = CR.DF_Accuracy(monitored_groups, alpha, threshold)
+    DFMonitor = CR.DF_Accuracy_Fixed_Window_Bit(monitored_groups, alpha, threshold)
     counter_values_correct = [0] * len(monitored_groups)
     counter_values_incorrect = [0] * len(monitored_groups)
     counter_list_correct = []
@@ -206,7 +206,7 @@ def traverse_data_DFMonitor(timed_data, date_column, time_window_str, date_time_
     timed_data.loc[0, "new_window"] = False
     # print(timed_data[:1])
     # print(len(timed_data[timed_data['new_window'] == True]))
-    DFMonitor = CR.DF_Accuracy(monitored_groups, alpha, threshold)
+    DFMonitor = CR.DF_Accuracy_Fixed_Window_Bit(monitored_groups, alpha, threshold)
     counter_values_correct = [0] * len(monitored_groups)
     counter_values_incorrect = [0] * len(monitored_groups)
     counter_list_correct = []
@@ -275,7 +275,7 @@ def traverse_data_DF_baseline_only(timed_data, date_column, time_window_str, dat
     # Determine the start of a new window for all rows except the first
     timed_data['new_window'] = timed_data['window_key'] != timed_data['window_key'].shift(1)
     timed_data.loc[0, "new_window"] = False
-    DFMonitor_baseline = Accuracy_baseline.Accuracy_baseline(monitored_groups, alpha, threshold)
+    DFMonitor_baseline = Accuracy_baseline.DF_Accuracy_Fixed_Window_Counter(monitored_groups, alpha, threshold)
     first_window_processed = False
     first_row_id = timed_data[timed_data['new_window'] == True].index[0]
     num_items_after_first_window = len(timed_data) - first_row_id
@@ -318,7 +318,7 @@ def traverse_data_DFMonitor_baseline(timed_data, date_column, time_window_str, d
     # Determine the start of a new window for all rows except the first
     timed_data['new_window'] = timed_data['window_key'] != timed_data['window_key'].shift(1)
     timed_data.loc[0, "new_window"] = False
-    DFMonitor_baseline = Accuracy_baseline.Accuracy_baseline(monitored_groups, alpha, threshold)
+    DFMonitor_baseline = Accuracy_baseline.DF_Accuracy_Fixed_Window_Counter(monitored_groups, alpha, threshold)
     counter_values_correct = [0] * len(monitored_groups)
     counter_values_incorrect = [0] * len(monitored_groups)
     counter_list_correct = []

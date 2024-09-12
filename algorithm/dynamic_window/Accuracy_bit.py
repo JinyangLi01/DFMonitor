@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 
-class DF_Accuracy_Dynamic_Window:
+class DF_Accuracy_Dynamic_Window_Bit:
     def __init__(self, monitored_groups, alpha, threshold, T_b, T_in):
         df = pd.DataFrame(monitored_groups)
         unique_keys = set()
