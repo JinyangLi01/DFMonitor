@@ -37,6 +37,28 @@ def compute_time_window_key(row, window_type, window_size, first_row_time):
         return "{}-{}-{}".format(row.year, row.month, row.day // window_size * window_size)
 
 
+def get_label_for_row(row, correctness_column, label_prediction, label_ground_truth):
+    # print("row = {}".format(row))
+    if len(correctness_column) > 0:
+        value = row[correctness_column]
+        value_str = str(value).strip().lower()
+        if value_str == '1':
+            return 'correct'
+        elif value_str == '0':
+            return 'incorrect'
+        else:
+            return 'incorrect'
+    else:
+        if not row[label_prediction] or not row[label_ground_truth]:
+            return 'incorrect'
+        if row[label_prediction] == row[label_ground_truth]:
+            label = 'correct'
+        else:
+            label = 'incorrect'
+        return label
+
+
+
 def belong_to_group(row, group):
     for key in group.keys():
         if row[key] != group[key]:
@@ -46,7 +68,7 @@ def belong_to_group(row, group):
 
 def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_str, date_time_format, monitored_groups,
                                          threshold, alpha, label_prediction="predicted",
-                                         label_ground_truth="ground_truth"):
+                                     label_ground_truth="ground_truth", correctness_column=""):
     if date_time_format:
         window_size, window_type = time_window_str.split()
         # Apply the function to compute the window key for each row
@@ -96,11 +118,8 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_st
                 first_window_processed = True
             else:
                 DFMonitor.new_window()
-        if row[label_prediction] == row[label_ground_truth]:
-            label = 'correct'
-        else:
-            label = 'incorrect'
-            DFMonitor_baseline.insert(row, label)
+        label = get_label_for_row(row, correctness_column, label_prediction, label_ground_truth)
+        DFMonitor_baseline.insert(row, label)
         if not first_window_processed:
             for group_idx, group in enumerate(monitored_groups):
                 if belong_to_group(row, group):
@@ -121,7 +140,8 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_st
 
 def traverse_data_DFMonitor_only(timed_data, date_column, time_window_str, date_time_format, monitored_groups,
                                  threshold,
-                                 alpha, label_prediction="predicted", label_ground_truth="ground_truth"):
+                                 alpha, label_prediction="predicted",
+                                     label_ground_truth="ground_truth", correctness_column=""):
     global time1
     if date_time_format:
         window_size, window_type = time_window_str.split()
@@ -169,10 +189,7 @@ def traverse_data_DFMonitor_only(timed_data, date_column, time_window_str, date_
                 DFMonitor.new_window()
                 timeb = time.time()
                 total_time_new_window += timeb - timea
-        if row[label_prediction] == row[label_ground_truth]:
-            label = 'correct'
-        else:
-            label = 'incorrect'
+        label = get_label_for_row(row, correctness_column, label_prediction, label_ground_truth)
         if first_window_processed:
             DFMonitor.insert(row, label)
         else:
@@ -188,7 +205,8 @@ def traverse_data_DFMonitor_only(timed_data, date_column, time_window_str, date_
 
 
 def traverse_data_DFMonitor(timed_data, date_column, time_window_str, date_time_format, monitored_groups, threshold,
-                            alpha, label_prediction="predicted", label_ground_truth="ground_truth"):
+                            alpha, label_prediction="predicted",
+                                     label_ground_truth="ground_truth", correctness_column=""):
     if date_time_format:
         window_size, window_type = time_window_str.split()
         first_row_time = timed_data.loc[0, date_column]
@@ -236,10 +254,7 @@ def traverse_data_DFMonitor(timed_data, date_column, time_window_str, date_time_
                 first_window_processed = True
             else:
                 DFMonitor.new_window()
-        if row[label_prediction] == row[label_ground_truth]:
-            label = 'correct'
-        else:
-            label = 'incorrect'
+        label = get_label_for_row(row, correctness_column, label_prediction, label_ground_truth)
         if first_window_processed:
             DFMonitor.insert(row, label)
         for i, g in enumerate(monitored_groups):
@@ -260,7 +275,8 @@ def traverse_data_DFMonitor(timed_data, date_column, time_window_str, date_time_
 
 
 def traverse_data_DF_baseline_only(timed_data, date_column, time_window_str, date_time_format, monitored_groups,
-                                     threshold, alpha, label_prediction="predicted", label_ground_truth="ground_truth"):
+                                     threshold, alpha, label_prediction="predicted",
+                                     label_ground_truth="ground_truth", correctness_column=""):
     global time1
     if date_time_format:
         window_size, window_type = time_window_str.split()
@@ -291,10 +307,7 @@ def traverse_data_DF_baseline_only(timed_data, date_column, time_window_str, dat
             if not first_window_processed:
                 first_window_processed = True
                 time1 = time.time()
-        if row[label_prediction] == row[label_ground_truth]:
-            label = 'correct'
-        else:
-            label = 'incorrect'
+        label = get_label_for_row(row, correctness_column, label_prediction, label_ground_truth)
         DFMonitor_baseline.insert(row, label)
     time2 = time.time()
     elapsed_time = time2 - time1
@@ -304,7 +317,8 @@ def traverse_data_DF_baseline_only(timed_data, date_column, time_window_str, dat
 
 
 def traverse_data_DFMonitor_baseline(timed_data, date_column, time_window_str, date_time_format, monitored_groups,
-                                     threshold, alpha, label_prediction="predicted", label_ground_truth="ground_truth"):
+                                     threshold, alpha, label_prediction="predicted",
+                                     label_ground_truth="ground_truth", correctness_column=""):
     if date_time_format:
         window_size, window_type = time_window_str.split()
         # Apply the function to compute the window key for each row
@@ -336,10 +350,7 @@ def traverse_data_DFMonitor_baseline(timed_data, date_column, time_window_str, d
             counter_values_incorrect = [x * alpha for x in counter_values_incorrect]
             counter_values_correct = [x * alpha for x in counter_values_correct]
             DFMonitor_baseline.new_window()
-        if row[label_prediction] == row[label_ground_truth]:
-            label = 'correct'
-        else:
-            label = 'incorrect'
+        label = get_label_for_row(row, correctness_column, label_prediction, label_ground_truth)
         DFMonitor_baseline.insert(row, label)
         for i, g in enumerate(monitored_groups):
             if belong_to_group(row, g):
@@ -359,7 +370,8 @@ def traverse_data_DFMonitor_baseline(timed_data, date_column, time_window_str, d
 
 
 def Accuracy_traditional(timed_data, date_column, time_window_str, date_time_format, monitored_groups, threshold,
-                   label_prediction="predicted", label_ground_truth="ground_truth"):
+                         label_prediction="predicted",
+                         label_ground_truth="ground_truth", correctness_column=""):
     if date_time_format:
         window_size, window_type = time_window_str.split()
         # Apply the function to compute the window key for each row
@@ -391,11 +403,7 @@ def Accuracy_traditional(timed_data, date_column, time_window_str, date_time_for
             uf_list.append([True if accuracy[i] <= threshold else False for i in range(len(accuracy))])
             counter_values_correct = [0] * len(monitored_groups)
             counter_values_incorrect = [0] * len(monitored_groups)
-        if row[label_prediction] == row[label_ground_truth]:
-            label = 'correct'
-        else:
-            label = 'incorrect'
-
+        label = get_label_for_row(row, correctness_column, label_prediction, label_ground_truth)
         # all value in counter_map of the group that the tuple satisfies add 1
         for i, g in enumerate(monitored_groups):
             if belong_to_group(row, g):
@@ -427,6 +435,7 @@ if __name__ == "__main__":
     threshold = 0.8
     label_prediction = "sex"
     label_ground_truth = "predicted_gender"
+    correctness_column = "diff_binary_correctness"
 
     (DFMonitor_baseline, uf_list_baseline, accuracy_list_baseline, counter_list_correct_baseline,
      counter_list_incorrect_baseline) = traverse_data_DFMonitor_baseline(data, date_column,
@@ -434,7 +443,7 @@ if __name__ == "__main__":
                                                                          date_time_format,
                                                                          monitored_groups,
                                                                          threshold,
-                                                                         alpha, label_prediction, label_ground_truth)
+                                                                         alpha, label_prediction, label_ground_truth, correctness_column)
 
     # use CR for compas dataset, a time window = 1 month, record the result of each uf in each month and draw a plot
     DFMonitor, uf_list_DF, accuracy_list_DF, counter_list_correct_DF, counter_list_incorrect_DF \
@@ -443,13 +452,13 @@ if __name__ == "__main__":
                                   date_time_format,
                                   monitored_groups,
                                   threshold,
-                                  alpha, label_prediction, label_ground_truth)
+                                  alpha, label_prediction, label_ground_truth, correctness_column)
 
     # uf_list_tra, accuracy_list_trad, counter_list_correct_trad, counter_list_incorrect_trad \
     #     = CR_traditional(data, date_column,
     #                      time_window_str, date_time_format,
     #                      monitored_groups,
-    #                      threshold, label_prediction, label_ground_truth)
+    #                      threshold, label_prediction, label_ground_truth, correctness_column)
 
     for i in range(0, len(accuracy_list_DF)):
         print(accuracy_list_DF[i], accuracy_list_baseline[i])
