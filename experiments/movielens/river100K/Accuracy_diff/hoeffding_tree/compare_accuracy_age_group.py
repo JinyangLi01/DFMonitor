@@ -31,7 +31,7 @@ def scale_lightness(rgb, scale_l):
 
 #  all time:
 
-data = pd.read_csv('../result_hoeffding_classifier.csv')
+data = pd.read_csv('../../result_hoeffding_classifier.csv')
 print(data["gender"].unique())
 date_column = "datetime"
 # get distribution of compas_screening_date
