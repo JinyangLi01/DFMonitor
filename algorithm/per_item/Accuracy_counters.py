@@ -115,8 +115,8 @@ class DF_Accuracy_Per_Item_Counter:
                         self.tn_counters[index] += 1
 
                     # Calculate accuracy (TP / (TP + FP))
-                    total = self.tp_counters[index] + self.fp_counters[index]
-                    accuracy = self.tp_counters[index] / total if total > 0 else 0
+                    total = self.tp_counters[index] + self.fp_counters[index] + self.fn_counters[index] + self.tn_counters[index]
+                    accuracy = (self.tp_counters[index] + self.fn_counters[index]) / total if total > 0 else 0
 
                 # Update the unfair/fair flag based on the threshold
                 self.uf[index] = accuracy <= self.threshold
@@ -168,3 +168,7 @@ class DF_Accuracy_Per_Item_Counter:
         else:
             total = tp_val + fp_val + fn_val + tn_val
             return (tp_val + fn_val) / total if total > 0 else 0
+
+    def get_uf_list(self):
+        return self.uf.tolist()
+

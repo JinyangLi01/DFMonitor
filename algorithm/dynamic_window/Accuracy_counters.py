@@ -4,7 +4,7 @@ import pandas as pd
 
 
 class DF_Accuracy_Dynamic_Window_Counter:
-    def __init__(self, monitored_groups, alpha, threshold, T_b, T_in):
+    def __init__(self, monitored_groups, alpha, threshold, T_b, T_in, use_two_counters=True):
         df = pd.DataFrame(monitored_groups)
         unique_keys = set()
         for item in monitored_groups:
@@ -12,12 +12,17 @@ class DF_Accuracy_Dynamic_Window_Counter:
         for key in unique_keys:
             df[key] = df[key].astype("category")
         self.groups = df
-
-        # Initialize counters for FP, FN, TP, TN
-        self.fp_counters = np.array([0] * len(monitored_groups), dtype=np.float64)  # False Positives
-        self.fn_counters = np.array([0] * len(monitored_groups), dtype=np.float64)  # False Negatives
-        self.tp_counters = np.array([0] * len(monitored_groups), dtype=np.float64)  # True Positives
-        self.tn_counters = np.array([0] * len(monitored_groups), dtype=np.float64)  # True Negatives
+        self.use_two_counters = use_two_counters
+        if use_two_counters:
+            # Initialize counters for correct and incorrect predictions
+            self.correct_prediction_counters = np.array([0] * len(monitored_groups), dtype=np.float64)
+            self.incorrect_prediction_counters = np.array([0] * len(monitored_groups), dtype=np.float64)
+        else:
+            # Initialize counters for FP, FN, TP, TN
+            self.fp_counters = np.array([0] * len(monitored_groups), dtype=np.float64)  # False Positives
+            self.fn_counters = np.array([0] * len(monitored_groups), dtype=np.float64)  # False Negatives
+            self.tp_counters = np.array([0] * len(monitored_groups), dtype=np.float64)  # True Positives
+            self.tn_counters = np.array([0] * len(monitored_groups), dtype=np.float64)  # True Negatives
 
         self.uf = np.array([False] * len(monitored_groups), dtype=bool)  # Fair/unfair flag
         self.alpha = alpha
@@ -33,9 +38,17 @@ class DF_Accuracy_Dynamic_Window_Counter:
         self.current_time = 0  # Current system time, incremented per item
         self.current_batch_size = 0  # Tracks the size of the current batch
 
-    def initialization(self, uf, delta):
+    def initialization(self, uf, correct_prediction_counters=None, incorrect_prediction_counters=None,
+                        fp_counters=None, fn_counters=None, tp_counters=None, tn_counters=None):
         self.uf = np.array(uf, dtype=bool)
-        self.delta = np.array(delta, dtype=np.float64)
+        if self.use_two_counters:
+            self.correct_prediction_counters = np.array(correct_prediction_counters, dtype=np.float64)
+            self.incorrect_prediction_counters = np.array(incorrect_prediction_counters, dtype=np.float64)
+        else:
+            self.fp_counters = np.array(fp_counters, dtype=np.float64)
+            self.fn_counters = np.array(fn_counters, dtype=np.float64)
+            self.tp_counters = np.array(tp_counters, dtype=np.float64)
+            self.tn_counters = np.array(tn_counters, dtype=np.float64)
 
     def find(self, group):
         idx = self.groups.index(group)
@@ -46,20 +59,37 @@ class DF_Accuracy_Dynamic_Window_Counter:
         size += sys.getsizeof(self.groups) + self.groups.memory_usage(
             deep=True).sum() - self.groups.memory_usage().sum()
         size += sys.getsizeof(self.uf) + self.uf.nbytes
-        size += sys.getsizeof(self.fp_counters) + self.fp_counters.nbytes
-        size += sys.getsizeof(self.fn_counters) + self.fn_counters.nbytes
-        size += sys.getsizeof(self.tp_counters) + self.tp_counters.nbytes
-        size += sys.getsizeof(self.tn_counters) + self.tn_counters.nbytes
+        if self.use_two_counters:
+            size += sys.getsizeof(self.correct_prediction_counters) + self.correct_prediction_counters.nbytes
+            size += sys.getsizeof(self.incorrect_prediction_counters) + self.incorrect_prediction_counters.nbytes
+        else:
+            size += sys.getsizeof(self.fp_counters) + self.fp_counters.nbytes
+            size += sys.getsizeof(self.fn_counters) + self.fn_counters.nbytes
+            size += sys.getsizeof(self.tp_counters) + self.tp_counters.nbytes
+            size += sys.getsizeof(self.tn_counters) + self.tn_counters.nbytes
         size += sys.getsizeof(self.threshold)
         size += sys.getsizeof(self.alpha)
+        size += sys.getsizeof(self.T_b)
+        size += sys.getsizeof(self.T_in)
+        size += sys.getsizeof(self.Delta_a)
+        size += sys.getsizeof(self.Delta_b)
+        size += sys.getsizeof(self.Delta_in)
+        size += sys.getsizeof(self.last_item_time)
+        size += sys.getsizeof(self.current_time)
+        size += sys.getsizeof(self.current_batch_size)
         return size
 
     def print(self):
         print("uf", self.uf)
-        print("FP Counters", self.fp_counters)
-        print("FN Counters", self.fn_counters)
-        print("TP Counters", self.tp_counters)
-        print("TN Counters", self.tn_counters)
+        if self.use_two_counters:
+            print("Correct Prediction Counters", self.correct_prediction_counters)
+            print("Incorrect Prediction Counters", self.incorrect_prediction_counters)
+        else:
+            print("FP Counters", self.fp_counters)
+            print("FN Counters", self.fn_counters)
+            print("TP Counters", self.tp_counters)
+            print("TN Counters", self.tn_counters)
+
 
     def belong_to_group(self, tuple_, group):
         for key in group.keys():
@@ -85,23 +115,35 @@ class DF_Accuracy_Dynamic_Window_Counter:
         # Insert the new tuple and update relevant fields
         for index in self.groups.index:
             row = self.groups.loc[index]
-            if all(row.get(key, None) == value for key, value in tuple_.items()):
-                # Update the respective counter based on the label
-                if label == 'fp':
-                    self.fp_counters[index] += 1
-                elif label == 'fn':
-                    self.fn_counters[index] += 1
-                elif label == 'tp':
-                    self.tp_counters[index] += 1
-                elif label == 'tn':
-                    self.tn_counters[index] += 1
+            if all(tuple_.get(key, None) == value for key, value in row.items()):
+                if self.use_two_counters:
+                    # Update correct/incorrect counters
+                    if label == 'correct':
+                        self.correct_prediction_counters[index] += 1
+                    elif label == 'incorrect':
+                        self.incorrect_prediction_counters[index] += 1
 
-                # Calculate the accuracy for the group
-                total = self.tp_counters[index] + self.fp_counters[index]
-                if total > 0:  # Avoid division by zero
-                    accuracy = self.tp_counters[index] / total
+                    # Calculate accuracy
+                    total = self.correct_prediction_counters[index] + self.incorrect_prediction_counters[index]
+                    accuracy = self.correct_prediction_counters[index] / total if total > 0 else 0
                 else:
-                    accuracy = 0
+                    # Update the respective counter based on the label
+                    if label == 'fp':
+                        self.fp_counters[index] += 1
+                    elif label == 'fn':
+                        self.fn_counters[index] += 1
+                    elif label == 'tp':
+                        self.tp_counters[index] += 1
+                    elif label == 'tn':
+                        self.tn_counters[index] += 1
+
+                    # Calculate the accuracy for the group
+                    total = (self.tp_counters[index] + self.fp_counters[index]
+                             + self.fn_counters[index] + self.tn_counters[index])
+                    if total > 0:  # Avoid division by zero
+                        accuracy = (self.tp_counters[index] + self.fn_counters[index]) / total
+                    else:
+                        accuracy = 0
 
                 # Update the unfair/fair flag based on the threshold
                 self.uf[index] = accuracy <= self.threshold
@@ -115,13 +157,21 @@ class DF_Accuracy_Dynamic_Window_Counter:
     def batch_update(self):
         # Apply time decay to the current batch
         time_decay_factor = self.alpha ** (self.Delta_a + (self.Delta_b / 2))
-        self.fp_counters *= time_decay_factor
-        self.fn_counters *= time_decay_factor
-        self.tp_counters *= time_decay_factor
-        self.tn_counters *= time_decay_factor
+        if self.use_two_counters:
+            self.correct_prediction_counters *= time_decay_factor
+            self.incorrect_prediction_counters *= time_decay_factor
+        else:
+            self.fp_counters *= time_decay_factor
+            self.fn_counters *= time_decay_factor
+            self.tp_counters *= time_decay_factor
+            self.tn_counters *= time_decay_factor
 
         # Start a new batch and update the timers
         self.Delta_a = (self.Delta_b / 2) + self.Delta_in
         self.Delta_b = 0
         self.Delta_in = 0
         self.current_batch_size = 0
+
+    def get_uf_list(self):
+        return self.uf.tolist()
+

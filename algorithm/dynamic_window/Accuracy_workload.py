@@ -2,8 +2,8 @@
 import time
 
 import pandas as pd
-from algorithm.per_item import Accuracy_bit
-from algorithm.per_item import Accuracy_counters
+from algorithm.dynamic_window import Accuracy_bit
+from algorithm.dynamic_window import Accuracy_counters
 import copy
 import numpy as np
 
