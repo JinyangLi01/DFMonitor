@@ -3,7 +3,9 @@ import csv
 
 import pandas as pd
 import matplotlib.pyplot as plt
-from algorithm.fixed_window import Accuracy_workload as workload
+from numpy import dtype
+
+from algorithm.dynamic_window import Accuracy_workload as workload
 import seaborn as sns
 
 # sns.set_style("whitegrid")
@@ -30,15 +32,16 @@ def scale_lightness(rgb, scale_l):
 
 
 #  all time:
-
-data = pd.read_csv('../../result_hoeffding_classifier.csv')
+method_name = "hoeffding_classifier"
+data = pd.read_csv('result_' + method_name + '.csv', dtype={"zip_code": str})
 print(data["gender"].unique())
 date_column = "datetime"
 # get distribution of compas_screening_date
 data[date_column] = pd.to_datetime(data[date_column])
+print(data[date_column].min(), data[date_column].max())
 date_time_format = True
 time_window_str = "1 month"
-monitored_groups = [{"age_group_4": '7-25'}, {"age_group_4": '26-31'}, {'age_group_4': '32-40'}, {'age_group_4': '41-73'}]
+monitored_groups = [{"gender": 'M'}, {"gender": 'F'}]
 print(data[:5])
 alpha = 0.5
 threshold = 0.3
@@ -52,7 +55,10 @@ DFMonitor_baseline, uf_list_baseline, accuracy_list_baseline, counter_list_corre
                                                 monitored_groups,
                                                 threshold,
                                                 alpha, label_prediction,
-                                    label_ground_truth, correctness_column)
+                                                label_ground_truth, correctness_column)
+
+print("accuracy_list_baseline", accuracy_list_baseline)
+print("counter_list_correct_baseline", counter_list_correct_baseline)
 
 # use CR for compas dataset, a time window = 1 month, record the result of each uf in each month and draw a plot
 DFMonitor, uf_list_DF, accuracy_list_DF, counter_list_correct_DF, counter_list_incorrect_DF \
@@ -61,7 +67,7 @@ DFMonitor, uf_list_DF, accuracy_list_DF, counter_list_correct_DF, counter_list_i
                                        monitored_groups,
                                        threshold,
                                        alpha, label_prediction,
-                                    label_ground_truth, correctness_column)
+                                       label_ground_truth, correctness_column)
 
 uf_list_trad, accuracy_list_trad, counter_list_correct_trad, counter_list_incorrect_trad \
     = workload.Accuracy_traditional(data, date_column,
@@ -72,32 +78,19 @@ uf_list_trad, accuracy_list_trad, counter_list_correct_trad, counter_list_incorr
 
 print(len(uf_list_trad), len(uf_list_trad))
 
+# save the result to a file
+male_time_decay = [x[0] for x in accuracy_list_DF]
+male_traditional = [x[0] for x in accuracy_list_trad]
+female_time_decay = [x[1] for x in accuracy_list_DF]
+female_traditional = [x[1] for x in accuracy_list_trad]
 
-
-age_7_25_time_decay = [x[0] for x in accuracy_list_DF]
-age_7_25_traditional = [x[0] for x in accuracy_list_trad]
-age_26_31_time_decay = [x[1] for x in accuracy_list_DF]
-age_26_31_traditional = [x[1] for x in accuracy_list_trad]
-age_32_40_time_decay = [x[2] for x in accuracy_list_DF]
-age_32_40_traditional = [x[2] for x in accuracy_list_trad]
-age_41_73_time_decay = [x[3] for x in accuracy_list_DF]
-age_41_73_traditional = [x[3] for x in accuracy_list_trad]
-
-
-# save to file
-
-with open("movielens_compare_Accuracy_hoeffding_classifier_age_group.csv", "w", newline='') as csvfile:
+filename = "movielens_compare_Accuracy_" + method_name + "_gender.csv"
+with open(filename, "w", newline='') as csvfile:
     writer = csv.writer(csvfile, delimiter=',')
-    writer.writerow(["age_7_25_time_decay", "age_7_25_traditional", "age_26_31_time_decay",
-                     "age_26_31_traditional", "age_32_40_time_decay", "age_32_40_traditional",
-                     "age_41_73_time_decay", "age_41_73_traditional"])
-    for i in range(len(age_32_40_traditional)):
-        writer.writerow([age_7_25_time_decay[i], age_7_25_traditional[i],
-                         age_26_31_time_decay[i], age_26_31_traditional[i],
-                         age_32_40_time_decay[i], age_32_40_traditional[i],
-                         age_41_73_time_decay[i], age_41_73_traditional[i]])
-
-
+    writer.writerow(["male_time_decay", "female_time_decay", "male_traditional", "female_traditional"])
+    for i in range(len(female_traditional)):
+        writer.writerow([accuracy_list_DF[i][0], accuracy_list_DF[i][1],
+                         accuracy_list_trad[i][0], accuracy_list_trad[i][1]])
 
 if len(uf_list_baseline) != len(uf_list_DF):
     print("uf_list_baseline and uf_list_DF have different length")
@@ -105,7 +98,6 @@ if len(uf_list_baseline) != len(uf_list_DF):
 for i in range(0, len(accuracy_list_DF)):
     if accuracy_list_DF[i] != accuracy_list_baseline[i]:
         print("cr_list_baseline and cr_list_DF have different length")
-
 
 # ################################################## draw the plot #####################################################
 #

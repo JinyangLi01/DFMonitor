@@ -101,17 +101,14 @@ class DF_Accuracy_Dynamic_Window_Counter:
     label = one of 'fp', 'fn', 'tp', 'tn'
     """
 
-    def insert(self, tuple_, label, current_time):
-        self.current_time = current_time
-        time_interval = self.current_time - self.last_item_time
-
+    def insert(self, tuple_, label, time_interval):
         # Update Delta_in to track the time since the last item
         self.Delta_in = time_interval
-
+        new_batch = False
         # Check if batch updating is required based on the conditions
         if self.Delta_in >= self.T_in or self.Delta_b + self.Delta_in >= self.T_b:
             self.batch_update()
-
+            new_batch = True
         # Insert the new tuple and update relevant fields
         for index in self.groups.index:
             row = self.groups.loc[index]
@@ -153,6 +150,8 @@ class DF_Accuracy_Dynamic_Window_Counter:
         self.Delta_in = 0  # Reset Delta_in after each insertion
         self.current_batch_size += 1
         self.last_item_time = self.current_time
+        return new_batch
+
 
     def batch_update(self):
         # Apply time decay to the current batch

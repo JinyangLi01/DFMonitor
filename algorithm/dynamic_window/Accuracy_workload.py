@@ -17,10 +17,11 @@ def belong_to_group(row, group):
 
 def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_format, monitored_groups,
                                          threshold, alpha, time_unit, label_prediction="predicted",
-                                         label_ground_truth="ground_truth", correctness_column="", use_two_counters=True):
-    # Initialize DFMonitor counter and bit objects
-    DFMonitor_counter = Accuracy_counters.DF_Accuracy_Per_Item_Counter(monitored_groups, alpha, threshold, use_two_counters)
-    DFMonitor_bit = Accuracy_bit.DF_Accuracy_Per_Item_Bit(monitored_groups, alpha, threshold, use_two_counters)
+                                         label_ground_truth="ground_truth", correctness_column="",
+                                         T_b=100, T_in=10, use_two_counters=True):
+    # Initialize DF_Accuracy_Dynamic_Window_Counter objects
+    DFMonitor_counter = Accuracy_counters.DF_Accuracy_Dynamic_Window_Counter(monitored_groups, alpha, threshold, T_b, T_in, use_two_counters)
+    DFMonitor_bit = Accuracy_bit.DF_Accuracy_Dynamic_Window_Bit(monitored_groups, alpha, threshold, T_b, T_in, use_two_counters)
 
     # Initialize the time for the first row
     last_clock = timed_data.iloc[0][date_column]
@@ -34,7 +35,7 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_form
 
     # Traverse through the data
     for index, row in timed_data.iterrows():
-        if int(timed_data.loc[index, correctness_column] ) == 1:
+        if int(timed_data.loc[index, correctness_column]) == 1:
             label = "correct"
         else:
             label = "incorrect"
@@ -44,47 +45,40 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_form
             time_diff = (current_clock - last_clock).total_seconds()
         elif time_unit == "hour":
             time_diff = (current_clock - last_clock).total_seconds() / 3600
-        # Calculate time difference in seconds
 
-        # print(index, row, label, current_clock, time_diff)
-        # DFMonitor_counter.print()
         # Update DFMonitor_bit and DFMonitor_counter with the new item
-        DFMonitor_bit.insert(row, label, time_diff)
+        new_batch = DFMonitor_bit.insert(row, label, time_diff)
         DFMonitor_counter.insert(row, label, time_diff)
-        # DFMonitor_counter.print()
 
-        uf_list.append(copy.deepcopy(DFMonitor_bit.uf))
-        counter_values_incorrect = [x * (alpha**time_diff) for x in counter_values_incorrect]
-        counter_values_correct = [x * (alpha**time_diff) for x in counter_values_correct]
+        # Append UF list for tracking fairness/unfairness
+        uf_list.append(copy.deepcopy(DFMonitor_bit.get_uf_list()))
+
+        if new_batch:
+            # Apply time decay to counters
+            counter_values_incorrect = [x * (alpha**time_diff) for x in counter_values_incorrect]
+            counter_values_correct = [x * (alpha**time_diff) for x in counter_values_correct]
+
+        # Update the correct/incorrect counters based on group membership
         for i, g in enumerate(monitored_groups):
-            if belong_to_group(row, g):
+            if DFMonitor_counter.belong_to_group(row, g):
                 if label == "correct":
                     counter_values_correct[i] += 1
                 else:
                     counter_values_incorrect[i] += 1
-        if time_diff > 0:
-            counter_list_correct.append(copy.deepcopy(counter_values_correct))
-            counter_list_incorrect.append(copy.deepcopy(counter_values_incorrect))
-            # print(counter_values_correct, counter_values_incorrect)
-            accuracy_list.append([counter_values_correct[j] / (counter_values_correct[j] + counter_values_incorrect[j]) if counter_values_correct[j] + counter_values_incorrect[j] > 0 else 0
-                                  for j in range(len(counter_values_correct)) ])
-        # print("==================== stream finished. compare the accuracy list with those in DFMonitor_counter =======================\n")
-        # print(DFMonitor_counter.get_accuracy_list())
-        # print(accuracy_list[-1])
-        # compare
-        # Use np.allclose() to compare with a default or custom tolerance
-            are_close = np.allclose(DFMonitor_counter.get_accuracy_list(), accuracy_list[-1], rtol=1e-07, atol=1e-08)
+
+        # Append accuracy calculations if time has passed
+        if new_batch:
+            # Calculate accuracy for each group
+            accuracy_list.append([counter_values_correct[j] / (counter_values_correct[j] + counter_values_incorrect[j])
+                                  if counter_values_correct[j] + counter_values_incorrect[j] > 0 else 0
+                                  for j in range(len(counter_values_correct))])
+
+            # Compare with DFMonitor_counter accuracy list
+            are_close = np.allclose(DFMonitor_counter.get_uf_list(), accuracy_list[-1], rtol=1e-07, atol=1e-08)
             if not are_close:
                 raise ValueError("The accuracy list from DFMonitor_counter is not the same as the one from the traversal")
+
+        # Update the last clock for the next iteration
         last_clock = current_clock
+
     return DFMonitor_bit, DFMonitor_counter, uf_list, accuracy_list, counter_list_correct, counter_list_incorrect
-
-
-
-
-
-
-
-
-
-

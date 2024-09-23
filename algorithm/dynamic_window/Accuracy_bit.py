@@ -4,7 +4,7 @@ import numpy as np
 
 
 class DF_Accuracy_Dynamic_Window_Bit:
-    def __init__(self, monitored_groups, alpha, threshold, T_b, T_in):
+    def __init__(self, monitored_groups, alpha, threshold, T_b, T_in,  use_two_counters=True):
         df = pd.DataFrame(monitored_groups)
         unique_keys = set()
         for item in monitored_groups:
@@ -55,9 +55,7 @@ class DF_Accuracy_Dynamic_Window_Bit:
                 return False
         return True
 
-    def insert(self, tuple_, label, current_time):
-        self.current_time = current_time
-        time_interval = self.current_time - self.last_item_time
+    def insert(self, tuple_, label, time_interval):
 
         # Update Delta_in to track the time since the last item
         self.Delta_in = time_interval
@@ -106,3 +104,6 @@ class DF_Accuracy_Dynamic_Window_Bit:
         self.Delta_b = 0
         self.Delta_in = 0
         self.current_batch_size = 0
+
+    def get_uf_list(self):
+        return self.uf.tolist()
