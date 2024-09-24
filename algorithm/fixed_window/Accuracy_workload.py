@@ -3,7 +3,7 @@ import time
 import pandas as pd
 from algorithm.fixed_window import Accuracy_baseline_0_20240206 as Accuracy_baseline, Accuracy_0_20240206 as CR, config
 import copy
-
+import numpy as np
 
 # use CR to monitor tpr of different races over time
 # a time window is a month
@@ -66,6 +66,9 @@ def belong_to_group(row, group):
     return True
 
 
+
+
+
 def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_str, date_time_format, monitored_groups,
                                          threshold, alpha, label_prediction="predicted",
                                      label_ground_truth="ground_truth", correctness_column=""):
@@ -81,7 +84,7 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_st
     timed_data['new_window'] = False
     # Determine the start of a new window for all rows except the first
     timed_data['new_window'] = timed_data['window_key'] != timed_data['window_key'].shift(1)
-    timed_data["new_window"].loc[0] = False
+    timed_data.loc[0, "new_window"] = False
     DFMonitor = CR.DF_Accuracy_Fixed_Window_Bit(monitored_groups, alpha, threshold)
     DFMonitor_baseline = Accuracy_baseline.DF_Accuracy_Fixed_Window_Counter(monitored_groups, alpha, threshold)
     counter_first_window_correct = [0] * len(monitored_groups)
@@ -89,16 +92,29 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_st
     first_window_processed = False
     index = 0
 
+    counter_values_correct = [0] * len(monitored_groups)
+    counter_values_incorrect = [0] * len(monitored_groups)
+    counter_list_correct = []
+    counter_list_incorrect = []
+    uf_list = []
+    accuracy_list = []
+
+
     for index, row in timed_data.iterrows():
         if first_window_processed:
-            if DFMonitor.uf != DFMonitor_baseline.uf:
-                print("index = {}, row={}, {}".format(index, row['id'], row['compas_screening_date']))
+            print("index = {}".format(index))
+            if np.array_equal(DFMonitor.uf, DFMonitor_baseline.uf):
+                # print("index = {}, row={}, {}".format(index, row['id'], row['compas_screening_date']))
                 DFMonitor.print()
                 DFMonitor_baseline.print()
-                return DFMonitor, DFMonitor_baseline
+                return DFMonitor, DFMonitor_baseline, uf_list, accuracy_list, counter_list_correct, counter_list_incorrect
 
         if row['new_window']:
             DFMonitor_baseline.new_window()
+            # Apply time decay to counters
+            counter_values_incorrect = [x * (alpha ** 1) for x in counter_values_incorrect]
+            counter_values_correct = [x * (alpha ** 1) for x in counter_values_correct]
+
             if not first_window_processed:
                 uf = []
                 for k in range(len(monitored_groups)):
@@ -120,6 +136,15 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_st
                 DFMonitor.new_window()
         label = get_label_for_row(row, correctness_column, label_prediction, label_ground_truth)
         DFMonitor_baseline.insert(row, label)
+
+        # Update the correct/incorrect counters based on group membership
+        for i, g in enumerate(monitored_groups):
+            if DFMonitor.belong_to_group(row, g):
+                if label == "correct":
+                    counter_values_correct[i] += 1
+                else:
+                    counter_values_incorrect[i] += 1
+
         if not first_window_processed:
             for group_idx, group in enumerate(monitored_groups):
                 if belong_to_group(row, group):
@@ -130,12 +155,23 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_st
         else:
             DFMonitor_baseline.insert(row, label)
 
+        if row["new_window"]:
+            # Calculate accuracy for each group
+            accuracy_list.append([counter_values_correct[j] / (counter_values_correct[j] + counter_values_incorrect[j])
+                                  if counter_values_correct[j] + counter_values_incorrect[j] > 0 else 0
+                                  for j in range(len(counter_values_correct))])
+        # # Compare with DFMonitor_counter accuracy list
+        # are_close = np.allclose(DFMonitor.uf(), accuracy_list[-1], rtol=1e-07, atol=1e-08)
+        # if not are_close:
+        #     raise ValueError(
+        #         "The accuracy list from DFMonitor_counter is not the same as the one from the traversal")
+
     # last window:
     if DFMonitor.uf != DFMonitor_baseline.uf:
         # print("index = {}, row={}, {}".format(index, row['id'], row['compas_screening_date']))
         DFMonitor.print()
         DFMonitor_baseline.print()
-    return DFMonitor, DFMonitor_baseline
+    return DFMonitor, DFMonitor_baseline, uf_list, accuracy_list, counter_list_correct, counter_list_incorrect
 
 
 def traverse_data_DFMonitor_only(timed_data, date_column, time_window_str, date_time_format, monitored_groups,
@@ -437,8 +473,8 @@ if __name__ == "__main__":
     label_ground_truth = "predicted_gender"
     correctness_column = "diff_binary_correctness"
 
-    (DFMonitor_baseline, uf_list_baseline, accuracy_list_baseline, counter_list_correct_baseline,
-     counter_list_incorrect_baseline) = traverse_data_DFMonitor_baseline(data, date_column,
+    DFMonitor_baseline, uf_list_baseline, accuracy_list_baseline, counter_list_correct_baseline,\
+     counter_list_incorrect_baseline = traverse_data_DFMonitor_baseline(data, date_column,
                                                                          time_window_str,
                                                                          date_time_format,
                                                                          monitored_groups,

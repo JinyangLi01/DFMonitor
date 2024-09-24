@@ -20,6 +20,8 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_form
                                          label_ground_truth="ground_truth", correctness_column="",
                                          T_b=100, T_in=10, use_two_counters=True):
     # Initialize DF_Accuracy_Dynamic_Window_Counter objects
+    print("monitored_groups", monitored_groups)
+
     DFMonitor_counter = Accuracy_counters.DF_Accuracy_Dynamic_Window_Counter(monitored_groups, alpha, threshold, T_b, T_in, use_two_counters)
     DFMonitor_bit = Accuracy_bit.DF_Accuracy_Dynamic_Window_Bit(monitored_groups, alpha, threshold, T_b, T_in, use_two_counters)
 
@@ -40,7 +42,7 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_form
         else:
             label = "incorrect"
         current_clock = row[date_column]  # Current timestamp
-
+        time_diff = 0
         if time_unit == "second":
             time_diff = (current_clock - last_clock).total_seconds()
         elif time_unit == "hour":

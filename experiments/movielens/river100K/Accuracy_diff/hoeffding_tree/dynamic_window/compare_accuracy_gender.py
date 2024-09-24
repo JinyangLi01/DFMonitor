@@ -5,7 +5,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from numpy import dtype
 
-from algorithm.dynamic_window import Accuracy_workload as workload
+from algorithm.dynamic_window import Accuracy_workload as workload_dynamic
+from algorithm.fixed_window import Accuracy_workload as workload_fixed
 import seaborn as sns
 
 # sns.set_style("whitegrid")
@@ -33,7 +34,7 @@ def scale_lightness(rgb, scale_l):
 
 #  all time:
 method_name = "hoeffding_classifier"
-data = pd.read_csv('result_' + method_name + '.csv', dtype={"zip_code": str})
+data = pd.read_csv('../../../result_' + method_name + '.csv', dtype={"zip_code": str})
 print(data["gender"].unique())
 date_column = "datetime"
 # get distribution of compas_screening_date
@@ -48,55 +49,56 @@ threshold = 0.3
 label_prediction = "prediction"
 label_ground_truth = "rating"
 correctness_column = "diff_binary_correctness"
+time_unit = "hour"
+T_b = 100
+T_in = 10
 
-DFMonitor_baseline, uf_list_baseline, accuracy_list_baseline, counter_list_correct_baseline, counter_list_incorrect_baseline \
-    = workload.traverse_data_DFMonitor_baseline(data, date_column,
+print("====================== dynamic workload ==================")
+
+DFMonitor_bit_dynamic, DFMonitor_counter_dynamic, uf_list_dynamic, accuracy_list_dynamic, counter_list_correct_dynamic, counter_list_incorrect_dynamic \
+= workload_dynamic.traverse_data_DFMonitor_and_baseline(data, date_column,date_time_format,
+                                                monitored_groups,
+                                                threshold,
+                                                alpha, time_unit, label_prediction,
+                                                label_ground_truth, correctness_column, T_b, T_in)
+
+print("====================== fixed window workload ==================")
+
+DFMonitor_bit_fixed, DFMonitor_counter_fixed, uf_list_fixed, accuracy_list_fixed, counter_list_correct_fixed, counter_list_incorrect_fixed \
+    = workload_fixed.traverse_data_DFMonitor_and_baseline(data, date_column,
                                                 time_window_str, date_time_format,
                                                 monitored_groups,
                                                 threshold,
                                                 alpha, label_prediction,
                                                 label_ground_truth, correctness_column)
 
-print("accuracy_list_baseline", accuracy_list_baseline)
-print("counter_list_correct_baseline", counter_list_correct_baseline)
+# print("accuracy_list_dynamic", accuracy_list_dynamic)
+# print("counter_list_incorrect_dynamic", counter_list_incorrect_dynamic)
+# print("counter_list_correct_dynamic", counter_list_correct_dynamic)
+# print("uf_list_dynamic", uf_list_dynamic)
+print(len(uf_list_dynamic))
 
-# use CR for compas dataset, a time window = 1 month, record the result of each uf in each month and draw a plot
-DFMonitor, uf_list_DF, accuracy_list_DF, counter_list_correct_DF, counter_list_incorrect_DF \
-    = workload.traverse_data_DFMonitor(data, date_column,
-                                       time_window_str, date_time_format,
-                                       monitored_groups,
-                                       threshold,
-                                       alpha, label_prediction,
-                                       label_ground_truth, correctness_column)
 
-uf_list_trad, accuracy_list_trad, counter_list_correct_trad, counter_list_incorrect_trad \
-    = workload.Accuracy_traditional(data, date_column,
-                                    time_window_str, date_time_format,
-                                    monitored_groups,
-                                    threshold, label_prediction,
-                                    label_ground_truth, correctness_column)
-
-print(len(uf_list_trad), len(uf_list_trad))
 
 # save the result to a file
-male_time_decay = [x[0] for x in accuracy_list_DF]
-male_traditional = [x[0] for x in accuracy_list_trad]
-female_time_decay = [x[1] for x in accuracy_list_DF]
-female_traditional = [x[1] for x in accuracy_list_trad]
+male_time_decay_dynamic = [x[0] for x in accuracy_list_dynamic]
+male__fixed = [x[0] for x in accuracy_list_fixed]
+female_time_decay_dynamic = [x[1] for x in accuracy_list_dynamic]
+female__fixed = [x[1] for x in accuracy_list_fixed]
 
 filename = "movielens_compare_Accuracy_" + method_name + "_gender.csv"
 with open(filename, "w", newline='') as csvfile:
     writer = csv.writer(csvfile, delimiter=',')
     writer.writerow(["male_time_decay", "female_time_decay", "male_traditional", "female_traditional"])
-    for i in range(len(female_traditional)):
-        writer.writerow([accuracy_list_DF[i][0], accuracy_list_DF[i][1],
-                         accuracy_list_trad[i][0], accuracy_list_trad[i][1]])
+    for i in range(len(female_time_decay_dynamic)):
+        writer.writerow([accuracy_list_dynamic[i][0], accuracy_list_dynamic[i][1],
+                         accuracy_list_fixed[i][0], accuracy_list_fixed[i][1]])
 
-if len(uf_list_baseline) != len(uf_list_DF):
+if len(uf_list_fixed) != len(uf_list_dynamic):
     print("uf_list_baseline and uf_list_DF have different length")
 
-for i in range(0, len(accuracy_list_DF)):
-    if accuracy_list_DF[i] != accuracy_list_baseline[i]:
+for i in range(0, len(accuracy_list_dynamic)):
+    if accuracy_list_dynamic[i] != accuracy_list_fixed[i]:
         print("cr_list_baseline and cr_list_DF have different length")
 
 # ################################################## draw the plot #####################################################
