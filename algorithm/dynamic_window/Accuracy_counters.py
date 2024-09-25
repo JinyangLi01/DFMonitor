@@ -38,6 +38,24 @@ class DF_Accuracy_Dynamic_Window_Counter:
         self.current_time = 0  # Current system time, incremented per item
         self.current_batch_size = 0  # Tracks the size of the current batch
 
+    def get_counter_correctness(self):
+        return self.correct_prediction_counters, self.incorrect_prediction_counters
+
+    def get_counter_fp_fn_tp_tn(self):
+        return self.fp_counters, self.fn_counters, self.tp_counters, self.tn_counters
+
+    def get_accuracy_list(self):
+        if self.use_two_counters:
+            # Avoid division by zero for the two-counter scenario
+            total_predictions = self.correct_prediction_counters + self.incorrect_prediction_counters
+            return [correct / (correct + incorrect) if correct + incorrect > 0 else 0 for correct, incorrect in
+                    zip(self.correct_prediction_counters, self.incorrect_prediction_counters)]
+        else:
+            # Avoid division by zero for the four-counter scenario (tp and fp)
+            total_predictions = self.tp_counters + self.fp_counters + self.fn_counters + self.tn_counters
+            return [(tp + fn) / total if total > 0 else 0 for tp, fn, total in
+                    zip(self.tp_counters, self.fn_counters, total_predictions)]
+
     def initialization(self, uf, correct_prediction_counters=None, incorrect_prediction_counters=None,
                         fp_counters=None, fn_counters=None, tp_counters=None, tn_counters=None):
         self.uf = np.array(uf, dtype=bool)
@@ -101,14 +119,14 @@ class DF_Accuracy_Dynamic_Window_Counter:
     label = one of 'fp', 'fn', 'tp', 'tn'
     """
 
-    def insert(self, tuple_, label, time_interval):
-        # Update Delta_in to track the time since the last item
+    def whether_need_batch_renewal(self, time_interval):
         self.Delta_in = time_interval
-        new_batch = False
-        # Check if batch updating is required based on the conditions
+        return self.Delta_in >= self.T_in or self.Delta_b + self.Delta_in >= self.T_b
+
+    def insert(self, tuple_, label, time_interval):
+        self.Delta_in = time_interval
         if self.Delta_in >= self.T_in or self.Delta_b + self.Delta_in >= self.T_b:
             self.batch_update()
-            new_batch = True
         # Insert the new tuple and update relevant fields
         for index in self.groups.index:
             row = self.groups.loc[index]
@@ -150,7 +168,7 @@ class DF_Accuracy_Dynamic_Window_Counter:
         self.Delta_in = 0  # Reset Delta_in after each insertion
         self.current_batch_size += 1
         self.last_item_time = self.current_time
-        return new_batch
+        return
 
 
     def batch_update(self):

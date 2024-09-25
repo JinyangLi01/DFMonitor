@@ -14,6 +14,7 @@ def compute_time_window_key(row, window_type, window_size, first_row_time):
         return row.year
     elif window_type == 'month':
         if window_size == 1:
+            # print(row.year, row.month)
             return "{}-{}".format(row.year, row.month)
         else:
             # if row.month == 2:
@@ -78,6 +79,7 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_st
         first_row_time = timed_data.loc[0, date_column]
         timed_data['window_key'] = timed_data[date_column].apply(compute_time_window_key,
                                                                  args=(window_type, int(window_size), first_row_time))
+        print(timed_data['window_key'].unique())
     else:
         timed_data['window_key'] = timed_data[date_column]
     # Initialize all rows as not the start of a new window
@@ -85,6 +87,7 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_st
     # Determine the start of a new window for all rows except the first
     timed_data['new_window'] = timed_data['window_key'] != timed_data['window_key'].shift(1)
     timed_data.loc[0, "new_window"] = False
+    print("number of windows", len(timed_data[timed_data['new_window'] == True]) + 1)
     DFMonitor = CR.DF_Accuracy_Fixed_Window_Bit(monitored_groups, alpha, threshold)
     DFMonitor_baseline = Accuracy_baseline.DF_Accuracy_Fixed_Window_Counter(monitored_groups, alpha, threshold)
     counter_first_window_correct = [0] * len(monitored_groups)
@@ -101,15 +104,17 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_st
 
 
     for index, row in timed_data.iterrows():
-        if first_window_processed:
-            print("index = {}".format(index))
-            if np.array_equal(DFMonitor.uf, DFMonitor_baseline.uf):
-                # print("index = {}, row={}, {}".format(index, row['id'], row['compas_screening_date']))
-                DFMonitor.print()
-                DFMonitor_baseline.print()
-                return DFMonitor, DFMonitor_baseline, uf_list, accuracy_list, counter_list_correct, counter_list_incorrect
+        # only check data in first window
+        # if first_window_processed:
+        #     print("first window finish at index = {}".format(index))
+        #     if np.array_equal(DFMonitor.uf, DFMonitor_baseline.uf):
+        #         # print("index = {}, row={}, {}".format(index, row['id'], row['compas_screening_date']))
+        #         DFMonitor.print()
+        #         DFMonitor_baseline.print()
+        #         return DFMonitor, DFMonitor_baseline, uf_list, accuracy_list, counter_list_correct, counter_list_incorrect
 
         if row['new_window']:
+            print("new window, index = {}, datetime = {}".format(index, row[date_column]))
             DFMonitor_baseline.new_window()
             # Apply time decay to counters
             counter_values_incorrect = [x * (alpha ** 1) for x in counter_values_incorrect]
@@ -167,7 +172,7 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, time_window_st
         #         "The accuracy list from DFMonitor_counter is not the same as the one from the traversal")
 
     # last window:
-    if DFMonitor.uf != DFMonitor_baseline.uf:
+    if np.array_equal(DFMonitor.uf, DFMonitor_baseline.uf):
         # print("index = {}, row={}, {}".format(index, row['id'], row['compas_screening_date']))
         DFMonitor.print()
         DFMonitor_baseline.print()
@@ -498,7 +503,7 @@ if __name__ == "__main__":
 
     for i in range(0, len(accuracy_list_DF)):
         print(accuracy_list_DF[i], accuracy_list_baseline[i])
-        if accuracy_list_baseline[i] != accuracy_list_DF[i]:
+        if np.array_equal(accuracy_list_baseline[i], accuracy_list_DF[i]):
             print("accuracy_list_baseline {} != accuracy_list_DF {}".format(accuracy_list_baseline[i],
                                                                             accuracy_list_DF[i]))
 

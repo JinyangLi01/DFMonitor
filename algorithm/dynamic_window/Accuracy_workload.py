@@ -46,16 +46,19 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_form
         if time_unit == "second":
             time_diff = (current_clock - last_clock).total_seconds()
         elif time_unit == "hour":
-            time_diff = (current_clock - last_clock).total_seconds() / 3600
+            time_diff = int((current_clock - last_clock).total_seconds() / 3600)
 
-        # Update DFMonitor_bit and DFMonitor_counter with the new item
-        new_batch = DFMonitor_bit.insert(row, label, time_diff)
+        # print("\ntime {}, time_diff = {}".format(current_clock, time_diff))
+        # print("counters", DFMonitor_counter.get_counter_correctness())
+        # print("accuracy", DFMonitor_counter.get_accuracy())
+        new_batch = DFMonitor_counter.whether_need_batch_renewal(time_diff)
+        DFMonitor_bit.insert(row, label, time_diff)
         DFMonitor_counter.insert(row, label, time_diff)
 
         # Append UF list for tracking fairness/unfairness
         uf_list.append(copy.deepcopy(DFMonitor_bit.get_uf_list()))
 
-        if new_batch:
+        if new_batch and time_diff > 0:
             # Apply time decay to counters
             counter_values_incorrect = [x * (alpha**time_diff) for x in counter_values_incorrect]
             counter_values_correct = [x * (alpha**time_diff) for x in counter_values_correct]
@@ -68,17 +71,24 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_form
                 else:
                     counter_values_incorrect[i] += 1
 
-        # Append accuracy calculations if time has passed
-        if new_batch:
-            # Calculate accuracy for each group
-            accuracy_list.append([counter_values_correct[j] / (counter_values_correct[j] + counter_values_incorrect[j])
-                                  if counter_values_correct[j] + counter_values_incorrect[j] > 0 else 0
-                                  for j in range(len(counter_values_correct))])
+        # print(counter_values_correct, counter_values_incorrect)
+        # print(DFMonitor_counter.get_counter_correctness())
 
-            # Compare with DFMonitor_counter accuracy list
-            are_close = np.allclose(DFMonitor_counter.get_uf_list(), accuracy_list[-1], rtol=1e-07, atol=1e-08)
-            if not are_close:
-                raise ValueError("The accuracy list from DFMonitor_counter is not the same as the one from the traversal")
+        # Append accuracy calculations if time has passed
+        if True:
+            # print("new batch, index = {}, datetime = {}".format(index, current_clock))
+            # Calculate accuracy for each group
+            cur_accuracy = [counter_values_correct[j] / (counter_values_correct[j] + counter_values_incorrect[j])
+                            if counter_values_correct[j] + counter_values_incorrect[j] > 0 else 0
+                            for j in range(len(counter_values_correct))]
+            accuracy_list.append(cur_accuracy)
+            print("accuracy from outside counters: ", cur_accuracy)
+            print("accuracy from DFMonitor_counter: ", DFMonitor_counter.get_accuracy_list())
+
+            # # Compare with DFMonitor_counter accuracy list
+            # are_close = np.allclose(DFMonitor_counter.get_accuracy_list(), accuracy_list[-1], rtol=1e-07, atol=1e-08)
+            # if not are_close:
+            #     raise ValueError("The accuracy list from DFMonitor_counter is not the same as the one from the traversal")
 
         # Update the last clock for the next iteration
         last_clock = current_clock

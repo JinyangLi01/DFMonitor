@@ -20,7 +20,7 @@ def scale_lightness(rgb, scale_l):
 
 
 
-df = pd.read_csv("../movielens_compare_Accuracy_hoeffding_classifier_gender_per_item_50.csv")[:200]
+df = pd.read_csv("../movielens_compare_Accuracy_hoeffding_classifier_gender_per_item_50.csv")
 print(df)
 
 x_list = np.arange(0, len(df))
@@ -31,7 +31,7 @@ female_time_decay = df["female_time_decay"].tolist()
 pair_colors = [scale_lightness(matplotlib.colors.ColorConverter.to_rgb("navy"), 2.2), 'cyan',
                '#287c37', '#cccc00']
 
-fig, ax = plt.subplots(figsize=(6, 3.5))
+fig, ax = plt.subplots(figsize=(20, 3.5))
 plt.subplots_adjust(left=0.1, right=0.9, top=0.8, bottom=0.1)
 
 
@@ -40,7 +40,7 @@ ax.plot(x_list, female_time_decay, linewidth=0.5, markersize=1, label='Female ti
 
 
 plt.xticks(np.arange(0, len(x_list)), [], rotation=0, fontsize=20)
-plt.xlabel('baby name date starting\n from 01/01/2013, 1m interval',
+plt.xlabel('time stamps\n from 01/01/2013, 1m interval',
            fontsize=20, labelpad=-2).set_position((0.47, 0.1))
 plt.ylabel('Accuracy', fontsize=20, labelpad=-1)
 plt.ylim(0, 1.0)

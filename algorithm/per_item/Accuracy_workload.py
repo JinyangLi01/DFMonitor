@@ -43,7 +43,9 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_form
         if time_unit == "second":
             time_diff = (current_clock - last_clock).total_seconds()
         elif time_unit == "hour":
-            time_diff = (current_clock - last_clock).total_seconds() / 3600
+            time_diff = int((current_clock - last_clock).total_seconds() / 3600)
+        elif time_unit == "day":
+            time_diff = int((current_clock - last_clock).total_seconds() / 86400)
         # Calculate time difference in seconds
 
         # print(index, row, label, current_clock, time_diff)
@@ -63,6 +65,7 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_form
                 else:
                     counter_values_incorrect[i] += 1
         if time_diff > 0:
+            print("time_diff: ", time_diff, "current_clock: ", current_clock, "last_clock: ", last_clock)
             counter_list_correct.append(copy.deepcopy(counter_values_correct))
             counter_list_incorrect.append(copy.deepcopy(counter_values_incorrect))
             # print(counter_values_correct, counter_values_incorrect)

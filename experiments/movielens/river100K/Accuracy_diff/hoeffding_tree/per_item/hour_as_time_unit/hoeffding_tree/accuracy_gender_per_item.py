@@ -33,7 +33,7 @@ def scale_lightness(rgb, scale_l):
 
 #  all time:
 method_name = "hoeffding_classifier"
-data = pd.read_csv('../../result_' + method_name + '.csv', dtype={"zip_code": str})
+data = pd.read_csv('../../../result_' + method_name + '.csv', dtype={"zip_code": str})
 print(data["gender"].unique())
 date_column = "datetime"
 # get distribution of compas_screening_date
@@ -43,7 +43,7 @@ date_time_format = True
 # time_window_str = "1 month"
 monitored_groups = [{"gender": 'M'}, {"gender": 'F'}]
 print(data[:5])
-alpha = 0.5
+alpha = 0.9
 threshold = 0.3
 label_prediction = "prediction"
 label_ground_truth = "rating"

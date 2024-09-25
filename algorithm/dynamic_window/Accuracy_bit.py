@@ -56,10 +56,8 @@ class DF_Accuracy_Dynamic_Window_Bit:
         return True
 
     def insert(self, tuple_, label, time_interval):
-
         # Update Delta_in to track the time since the last item
         self.Delta_in = time_interval
-
         # Check if batch updating is required based on the conditions
         if self.Delta_in >= self.T_in or self.Delta_b + self.Delta_in >= self.T_b:
             self.batch_update()

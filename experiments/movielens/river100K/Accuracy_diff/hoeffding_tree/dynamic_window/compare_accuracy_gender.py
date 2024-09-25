@@ -42,19 +42,31 @@ data[date_column] = pd.to_datetime(data[date_column])
 print(data[date_column].min(), data[date_column].max())
 date_time_format = True
 time_window_str = "1 month"
+
 monitored_groups = [{"gender": 'M'}, {"gender": 'F'}]
 print(data[:5])
-alpha = 0.5
+alpha = 1
 threshold = 0.3
 label_prediction = "prediction"
 label_ground_truth = "rating"
 correctness_column = "diff_binary_correctness"
 time_unit = "hour"
-T_b = 100
-T_in = 10
+T_b = 10
+T_in = 4
+
+# print("====================== fixed window workload ==================")
+#
+# DFMonitor_bit_fixed, DFMonitor_counter_fixed, uf_list_fixed, accuracy_list_fixed, counter_list_correct_fixed, counter_list_incorrect_fixed \
+#     = workload_fixed.traverse_data_DFMonitor_and_baseline(data, date_column,
+#                                                 time_window_str, date_time_format,
+#                                                 monitored_groups,
+#                                                 threshold,
+#                                                 alpha, label_prediction,
+#                                                 label_ground_truth, correctness_column)
+
 
 print("====================== dynamic workload ==================")
-
+print("T_b = {}, T_in = {}".format(T_b, T_in))
 DFMonitor_bit_dynamic, DFMonitor_counter_dynamic, uf_list_dynamic, accuracy_list_dynamic, counter_list_correct_dynamic, counter_list_incorrect_dynamic \
 = workload_dynamic.traverse_data_DFMonitor_and_baseline(data, date_column,date_time_format,
                                                 monitored_groups,
@@ -62,15 +74,6 @@ DFMonitor_bit_dynamic, DFMonitor_counter_dynamic, uf_list_dynamic, accuracy_list
                                                 alpha, time_unit, label_prediction,
                                                 label_ground_truth, correctness_column, T_b, T_in)
 
-print("====================== fixed window workload ==================")
-
-DFMonitor_bit_fixed, DFMonitor_counter_fixed, uf_list_fixed, accuracy_list_fixed, counter_list_correct_fixed, counter_list_incorrect_fixed \
-    = workload_fixed.traverse_data_DFMonitor_and_baseline(data, date_column,
-                                                time_window_str, date_time_format,
-                                                monitored_groups,
-                                                threshold,
-                                                alpha, label_prediction,
-                                                label_ground_truth, correctness_column)
 
 # print("accuracy_list_dynamic", accuracy_list_dynamic)
 # print("counter_list_incorrect_dynamic", counter_list_incorrect_dynamic)
@@ -78,28 +81,28 @@ DFMonitor_bit_fixed, DFMonitor_counter_fixed, uf_list_fixed, accuracy_list_fixed
 # print("uf_list_dynamic", uf_list_dynamic)
 print(len(uf_list_dynamic))
 
-
-
-# save the result to a file
-male_time_decay_dynamic = [x[0] for x in accuracy_list_dynamic]
-male__fixed = [x[0] for x in accuracy_list_fixed]
-female_time_decay_dynamic = [x[1] for x in accuracy_list_dynamic]
-female__fixed = [x[1] for x in accuracy_list_fixed]
-
-filename = "movielens_compare_Accuracy_" + method_name + "_gender.csv"
-with open(filename, "w", newline='') as csvfile:
-    writer = csv.writer(csvfile, delimiter=',')
-    writer.writerow(["male_time_decay", "female_time_decay", "male_traditional", "female_traditional"])
-    for i in range(len(female_time_decay_dynamic)):
-        writer.writerow([accuracy_list_dynamic[i][0], accuracy_list_dynamic[i][1],
-                         accuracy_list_fixed[i][0], accuracy_list_fixed[i][1]])
-
-if len(uf_list_fixed) != len(uf_list_dynamic):
-    print("uf_list_baseline and uf_list_DF have different length")
-
-for i in range(0, len(accuracy_list_dynamic)):
-    if accuracy_list_dynamic[i] != accuracy_list_fixed[i]:
-        print("cr_list_baseline and cr_list_DF have different length")
+#
+#
+# # save the result to a file
+# male_time_decay_dynamic = [x[0] for x in accuracy_list_dynamic]
+# male__fixed = [x[0] for x in accuracy_list_fixed]
+# female_time_decay_dynamic = [x[1] for x in accuracy_list_dynamic]
+# female__fixed = [x[1] for x in accuracy_list_fixed]
+#
+# filename = "movielens_compare_Accuracy_" + method_name + "_gender.csv"
+# with open(filename, "w", newline='') as csvfile:
+#     writer = csv.writer(csvfile, delimiter=',')
+#     writer.writerow(["male_time_decay", "female_time_decay", "male_traditional", "female_traditional"])
+#     for i in range(len(female_time_decay_dynamic)):
+#         writer.writerow([accuracy_list_dynamic[i][0], accuracy_list_dynamic[i][1],
+#                          accuracy_list_fixed[i][0], accuracy_list_fixed[i][1]])
+#
+# if len(uf_list_fixed) != len(uf_list_dynamic):
+#     print("uf_list_baseline and uf_list_DF have different length")
+#
+# for i in range(0, len(accuracy_list_dynamic)):
+#     if accuracy_list_dynamic[i] != accuracy_list_fixed[i]:
+#         print("cr_list_baseline and cr_list_DF have different length")
 
 # ################################################## draw the plot #####################################################
 #
