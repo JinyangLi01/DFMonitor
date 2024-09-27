@@ -48,13 +48,15 @@ class DF_Accuracy_Dynamic_Window_Counter:
         if self.use_two_counters:
             # Avoid division by zero for the two-counter scenario
             total_predictions = self.correct_prediction_counters + self.incorrect_prediction_counters
-            return [correct / (correct + incorrect) if correct + incorrect > 0 else 0 for correct, incorrect in
+            s = [correct / (correct + incorrect) if correct + incorrect > 0 else 0 for correct, incorrect in
                     zip(self.correct_prediction_counters, self.incorrect_prediction_counters)]
+            return s
         else:
             # Avoid division by zero for the four-counter scenario (tp and fp)
             total_predictions = self.tp_counters + self.fp_counters + self.fn_counters + self.tn_counters
-            return [(tp + fn) / total if total > 0 else 0 for tp, fn, total in
+            s = [(tp + fn) / total if total > 0 else 0 for tp, fn, total in
                     zip(self.tp_counters, self.fn_counters, total_predictions)]
+            return s
 
     def initialization(self, uf, correct_prediction_counters=None, incorrect_prediction_counters=None,
                         fp_counters=None, fn_counters=None, tp_counters=None, tn_counters=None):
@@ -121,6 +123,8 @@ class DF_Accuracy_Dynamic_Window_Counter:
 
     def whether_need_batch_renewal(self, time_interval):
         self.Delta_in = time_interval
+        print(
+            f"func whether_need_batch_renewal, Delta_in = {self.Delta_in}, T_in = {self.T_in}, Delta_b = {self.Delta_b}, T_b = {self.T_b}, time_interval = {time_interval}")
         return self.Delta_in >= self.T_in or self.Delta_b + self.Delta_in >= self.T_b
 
     def insert(self, tuple_, label, time_interval):

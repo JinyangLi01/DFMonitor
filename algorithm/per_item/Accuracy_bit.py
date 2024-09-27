@@ -52,9 +52,9 @@ class DF_Accuracy_Per_Item_Bit:
     label = one of 'correct', 'incorrect' or 'fp', 'fn', 'tp', 'tn'
     """
 
-    def insert(self, tuple_, label, time_diff_seconds):
+    def insert(self, tuple_, label, time_diff):
         # Apply time decay to all delta values before processing the new item
-        self.apply_time_decay(time_diff_seconds)
+        self.apply_time_decay(time_diff)
 
         # Update delta and fairness flag based on the new item
         for index in self.groups.index:

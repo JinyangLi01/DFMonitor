@@ -43,13 +43,13 @@ date_time_format = True
 # time_window_str = "1 month"
 monitored_groups = [{"gender": 'M'}, {"gender": 'F'}]
 print(data[:5])
-alpha = 0.9
+alpha = 0.99
 threshold = 0.3
 label_prediction = "prediction"
 label_ground_truth = "rating"
 correctness_column = "diff_binary_correctness"
 use_two_counters = True
-time_unit = "hour"
+time_unit = "1 min"
 
 DFMonitor_bit, DFMonitor_counter, uf_list, accuracy_list, counter_list_correct, counter_list_incorrect \
     = workload.traverse_data_DFMonitor_and_baseline(data, date_column,
@@ -69,7 +69,8 @@ print("final_accuracy", final_accuracy)
 male_time_decay = [x[0] for x in accuracy_list]
 female_time_decay = [x[1] for x in accuracy_list]
 
-filename = "movielens_compare_Accuracy_" + method_name + "_gender_per_item_50.csv"
+filename = f"movielens_compare_Accuracy_{method_name}_gender_fixed_window_alpha_{str(int(alpha*100))}_time_unit_{time_unit}.csv"
+
 with open(filename, "w", newline='') as csvfile:
     writer = csv.writer(csvfile, delimiter=',')
     writer.writerow(["male_time_decay", "female_time_decay"])

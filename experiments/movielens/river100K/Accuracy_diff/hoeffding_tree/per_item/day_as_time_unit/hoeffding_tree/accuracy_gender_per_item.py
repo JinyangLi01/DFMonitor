@@ -53,10 +53,6 @@ time_unit = "day"
 
 
 
-# Print unique dates
-print("Unique Dates:")
-for date in unique_dates:
-    print(date)
 
 DFMonitor_bit, DFMonitor_counter, uf_list, accuracy_list, counter_list_correct, counter_list_incorrect \
     = workload.traverse_data_DFMonitor_and_baseline(data, date_column,

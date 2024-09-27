@@ -172,3 +172,8 @@ class DF_Accuracy_Per_Item_Counter:
     def get_uf_list(self):
         return self.uf.tolist()
 
+    def get_counter_correctness(self):
+        return self.correct_prediction_counters, self.incorrect_prediction_counters
+
+    def get_counter_fp_fn_tp_tn(self):
+        return self.fp_counters, self.fn_counters, self.tp_counters, self.tn_counters

@@ -3,6 +3,7 @@ import csv
 
 import pandas as pd
 import matplotlib.pyplot as plt
+from joblib.parallel import method
 from numpy import dtype
 
 from algorithm.dynamic_window import Accuracy_workload as workload_dynamic
@@ -45,15 +46,15 @@ time_window_str = "1 month"
 
 monitored_groups = [{"gender": 'M'}, {"gender": 'F'}]
 print(data[:5])
-alpha = 1
+alpha = 0.998
 threshold = 0.3
 label_prediction = "prediction"
 label_ground_truth = "rating"
 correctness_column = "diff_binary_correctness"
-time_unit = "hour"
-T_b = 10
-T_in = 4
-
+time_unit = "1 hour"
+T_b = 24 * 7
+T_in = 24
+checking_interval = 24
 # print("====================== fixed window workload ==================")
 #
 # DFMonitor_bit_fixed, DFMonitor_counter_fixed, uf_list_fixed, accuracy_list_fixed, counter_list_correct_fixed, counter_list_incorrect_fixed \
@@ -71,7 +72,7 @@ DFMonitor_bit_dynamic, DFMonitor_counter_dynamic, uf_list_dynamic, accuracy_list
 = workload_dynamic.traverse_data_DFMonitor_and_baseline(data, date_column,date_time_format,
                                                 monitored_groups,
                                                 threshold,
-                                                alpha, time_unit, label_prediction,
+                                                alpha, time_unit, checking_interval, label_prediction,
                                                 label_ground_truth, correctness_column, T_b, T_in)
 
 
@@ -81,22 +82,22 @@ DFMonitor_bit_dynamic, DFMonitor_counter_dynamic, uf_list_dynamic, accuracy_list
 # print("uf_list_dynamic", uf_list_dynamic)
 print(len(uf_list_dynamic))
 
-#
-#
-# # save the result to a file
-# male_time_decay_dynamic = [x[0] for x in accuracy_list_dynamic]
-# male__fixed = [x[0] for x in accuracy_list_fixed]
-# female_time_decay_dynamic = [x[1] for x in accuracy_list_dynamic]
-# female__fixed = [x[1] for x in accuracy_list_fixed]
-#
-# filename = "movielens_compare_Accuracy_" + method_name + "_gender.csv"
-# with open(filename, "w", newline='') as csvfile:
-#     writer = csv.writer(csvfile, delimiter=',')
-#     writer.writerow(["male_time_decay", "female_time_decay", "male_traditional", "female_traditional"])
-#     for i in range(len(female_time_decay_dynamic)):
-#         writer.writerow([accuracy_list_dynamic[i][0], accuracy_list_dynamic[i][1],
-#                          accuracy_list_fixed[i][0], accuracy_list_fixed[i][1]])
-#
+# accuracy_list_dynamic = DFMonitor_counter_dynamic.get_accuracy_list()
+print(accuracy_list_dynamic[:5])
+
+# save the result to a file
+male_time_decay_dynamic = [x[0] for x in accuracy_list_dynamic]
+# male_time_decay_fixed = [x[0] for x in accuracy_list_fixed]
+female_time_decay_dynamic = [x[1] for x in accuracy_list_dynamic]
+# female_time_decay_fixed = [x[1] for x in accuracy_list_fixed]
+
+filename = f"movielens_compare_Accuracy_{method_name}_gender_dynamic_Tb_{T_b}_Tin_{T_in}_alpha_{str(int(alpha*100))}_time_unit_{time_unit}.csv"
+with open(filename, "w", newline='') as csvfile:
+    writer = csv.writer(csvfile, delimiter=',')
+    writer.writerow(["male_time_decay_dynamic", "female_time_decay_dynamic"])
+    for i in range(len(female_time_decay_dynamic)):
+        writer.writerow([accuracy_list_dynamic[i][0], accuracy_list_dynamic[i][1]])
+
 # if len(uf_list_fixed) != len(uf_list_dynamic):
 #     print("uf_list_baseline and uf_list_DF have different length")
 #
@@ -105,48 +106,59 @@ print(len(uf_list_dynamic))
 #         print("cr_list_baseline and cr_list_DF have different length")
 
 # ################################################## draw the plot #####################################################
-#
-# white_time_decay = [x[0] for x in cr_list_DF]
-# white_traditional = [x[0] for x in cr_list_trad]
-# black_time_decay = [x[1] for x in cr_list_DF]
-# black_traditional = [x[1] for x in cr_list_trad]
-#
-# x_list = np.arange(1880, 2021)
-# # pair_colors = ['blue', '#27bcf6', 'green', 'lightgreen', 'chocolate', 'gold']
-#
-# fig, ax = plt.subplots(figsize=(6, 3.5))
-# # Get the "Paired" color palette
-# paired_palette = sns.color_palette("Paired")
-# # Rearrange the colors within each pair
-# # pair_colors = [paired_palette[i + 1] if i % 2 == 0 else paired_palette[i - 1] for i in range(len(paired_palette))]
+import csv
+
+import matplotlib
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from algorithm.fixed_window import FNR_workload as workload
+import seaborn as sns
+import colorsys
+import colormaps as cmaps
+
+sns.set_palette("Paired")
+sns.set_context("paper", font_scale=2)
+
+plt.figure(figsize=(6, 3.5))
+plt.rcParams['font.size'] = 20
+
+def scale_lightness(rgb, scale_l):
+    h, l, s = colorsys.rgb_to_hls(*rgb)
+    return colorsys.hls_to_rgb(h, min(1, l * scale_l), s=s)
+
+
+df = pd.read_csv(f"movielens_compare_Accuracy_hoeffding_classifier_gender_dynamic_Tb_{T_b}_Tin_{T_in}_alpha_{str(int(alpha*100))}_time_unit_{time_unit}.csv")
+print(df)
+
+x_list = np.arange(0, len(df))
+male_time_decay = df["male_time_decay_dynamic"].tolist()
+female_time_decay = df["female_time_decay_dynamic"].tolist()
+
+
 # pair_colors = [scale_lightness(matplotlib.colors.ColorConverter.to_rgb("navy"), 2.2), 'cyan',
-#                '#287c37', '#cccc00',
-#                'indianred', '#fe01b1']
-#
-# # Plot the first curve (y1_values)
-# ax.plot(x_list, black_time_decay, linewidth=3, markersize=6, label='Black time decay', linestyle='-', marker='o',
-#         color=pair_colors[0])
-#
-# # Plot the second curve (y2_values)
-# ax.plot(x_list, black_traditional, linewidth=3, markersize=6, label='Black traditional', linestyle='--', marker='s',
-#         color=pair_colors[1])
-#
-# ax.plot(x_list, white_time_decay, linewidth=3, markersize=6, label='White time decay', linestyle='-', marker='o',
-#         color=pair_colors[2])
-# ax.plot(x_list, white_traditional, linewidth=3, markersize=6, label='White traditional', linestyle='--', marker='s',
-#         color=pair_colors[3])
-#
-#
-#
-# plt.xticks(np.arange(0, len(x_list)), [], rotation=0, fontsize=20)
-# plt.yticks([0.0, 0.2, 0.4, 0.6], fontsize=20)
-# plt.xlabel('year',
-#            fontsize=20, labelpad=-2).set_position((0.47, -0.1))
-# plt.ylabel('coverage ratio (CR)', fontsize=20, labelpad=-1)
-# plt.grid(True)
-# plt.tight_layout()
-# plt.legend(loc='lower left', bbox_to_anchor=(-0.142, 1), fontsize=15,
-#            ncol=2, labelspacing=0.2, handletextpad=0.2, markerscale=1.5,
-#            columnspacing=0.2, borderpad=0.2, frameon=True)
-# plt.savefig("CR_baby_names.png", bbox_inches='tight')
-# plt.show()
+#                '#287c37', '#cccc00']
+pair_colors = ["blue", "orange"]
+
+num_lines = len(x_list)
+pair_colors = cmaps.set1.colors
+
+fig, ax = plt.subplots(figsize=(6, 3.5))
+plt.subplots_adjust(left=0.1, right=0.9, top=0.8, bottom=0.1)
+
+
+ax.plot(x_list, male_time_decay, linewidth=1, markersize=2, label='Male time decay', linestyle='-', marker='o', color=pair_colors[1])
+ax.plot(x_list, female_time_decay, linewidth=1, markersize=2, label='Female time decay', linestyle='-', marker='o', color=pair_colors[4])
+
+
+plt.xticks(np.arange(0, len(x_list)), [], rotation=0, fontsize=20)
+plt.xlabel('time stamps\n from 01/01/2013, 1m interval',
+           fontsize=20, labelpad=-2).set_position((0.47, 0.1))
+plt.ylabel('Accuracy', fontsize=20, labelpad=-1)
+plt.grid(True, axis='y')
+plt.tight_layout()
+plt.legend(loc='upper left', bbox_to_anchor=(-0.1, 1.3), fontsize=15,
+               ncol=2, labelspacing=0.2, handletextpad=0.2, markerscale=1.5,
+               columnspacing=0.2, borderpad=0.2, frameon=True)
+plt.savefig(f"Acc_hoeffding_time_decay_gender_dynamic_Tb_{T_b}_Tin_{T_in}_alpha_{str(int(alpha*100))}_time_unit_{time_unit}.png", bbox_inches='tight')
+plt.show()
