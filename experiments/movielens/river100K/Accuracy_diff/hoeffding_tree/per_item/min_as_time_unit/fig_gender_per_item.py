@@ -20,8 +20,8 @@ def scale_lightness(rgb, scale_l):
     return colorsys.hls_to_rgb(h, min(1, l * scale_l), s=s)
 
 
-alpha10 = "90"
-time_unit = "1 day"
+alpha10 = "98"
+time_unit = "72 hour"
 df = pd.read_csv(f"movielens_compare_Accuracy_hoeffding_classifier_gender_per_item_alpha_{alpha10}_time_unit_{time_unit}.csv")
 print(df)
 
@@ -50,6 +50,7 @@ plt.xlabel('time stamps\n from 01/01/2013, 1m interval',
            fontsize=20, labelpad=-2).set_position((0.47, 0.1))
 plt.ylabel('Accuracy', fontsize=20, labelpad=-1)
 plt.grid(True, axis='y')
+plt.ylim(0.7, 1.0)
 plt.tight_layout()
 plt.legend(loc='upper left', bbox_to_anchor=(-0.1, 1.3), fontsize=15,
                ncol=2, labelspacing=0.2, handletextpad=0.2, markerscale=1.5,

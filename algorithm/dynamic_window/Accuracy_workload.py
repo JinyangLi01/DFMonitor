@@ -16,9 +16,10 @@ def belong_to_group(row, group):
 
 
 def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_format, monitored_groups,
-                                         threshold, alpha, time_unit, checking_interval = 24, label_prediction="predicted",
+                                         threshold, alpha, time_unit, checking_interval_units = 1,
+                                         label_prediction="predicted",
                                          label_ground_truth="ground_truth", correctness_column="",
-                                         T_b=100, T_in=10, use_two_counters=True):
+                                         T_b=50, T_in=10, use_two_counters=True):
     # Initialize DF_Accuracy_Dynamic_Window_Counter objects
     print("monitored_groups", monitored_groups)
 
@@ -35,6 +36,8 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_form
     uf_list = []
     accuracy_list = []
     current_clock = 0
+    checking_interval_seconds = 0
+    dynamic_window_times = []
 
     # Traverse through the data
     for index, row in timed_data.iterrows():
@@ -45,43 +48,51 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_form
         current_clock = row[date_column]  # Current timestamp
         time_unit_val, time_unit_str = time_unit.split(" ")
         time_unit_val = int(time_unit_val)
-        time_diff = 0
+        time_diff_units = 0
         print(f"current_clock {current_clock}, last_clock {last_clock}, time_unit_val {time_unit_val}, time_unit_str {time_unit_str}")
         print(f"current_clock - last_clock {(current_clock - last_clock).total_seconds()}")
-        if time_unit_str == "second":
-            time_diff = ((current_clock - last_clock).total_seconds() / time_unit_val)
-        elif time_unit_str == "hour":
-            time_diff = int((current_clock - last_clock).total_seconds() / (3600 * time_unit_val))
-        elif time_unit_str == "day":
-            time_diff = int((current_clock - last_clock).total_seconds() / (86400 * time_unit_val))
-        elif time_unit_str == "min":
-            time_diff = int((current_clock - last_clock).total_seconds() / (60 * time_unit_val))
 
-        # Loop to handle intervals where no data arrives but checks need to be done
-        while (current_clock - last_accuracy_check).total_seconds() >= checking_interval * 3600:
-            print("=============query ============== Performing scheduled accuracy check")
+        if time_unit_str == "second":
+            time_diff_units = ((current_clock - last_clock).total_seconds() / time_unit_val)
+        elif time_unit_str == "hour":
+            time_diff_units = int((current_clock - last_clock).total_seconds() / (3600 * time_unit_val))
+        elif time_unit_str == "day":
+            time_diff_units = int((current_clock - last_clock).total_seconds() / (86400 * time_unit_val))
+        elif time_unit_str == "min":
+            time_diff_units = int((current_clock - last_clock).total_seconds() / (60 * time_unit_val))
+
+        # Handle intervals where no data arrives but accuracy checks are needed
+        checking_interval_seconds = checking_interval_units * time_unit_val * (
+            1 if time_unit_str == "second" else
+            60 if time_unit_str == "min" else
+            3600 if time_unit_str == "hour" else
+            86400)  # Handling different time units for checking intervals
+
+        while (current_clock - last_accuracy_check).total_seconds() >= checking_interval_seconds:
+            print("============= Performing scheduled accuracy check =============")
             print("counters", DFMonitor_counter.get_counter_correctness())
             cur_accuracy = DFMonitor_counter.get_accuracy_list()
             accuracy_list.append(cur_accuracy)
             counter_corr, counter_incorr = DFMonitor_counter.get_counter_correctness()
             counter_list_correct.append(counter_corr)
             counter_list_incorrect.append(counter_incorr)
-            last_accuracy_check += pd.Timedelta(hours=checking_interval)  # Move the accuracy check window forward
+            last_accuracy_check += pd.Timedelta(seconds=checking_interval_seconds)
 
-        new_batch = DFMonitor_counter.whether_need_batch_renewal(time_diff)
-        DFMonitor_bit.insert(row, label, time_diff)
-        DFMonitor_counter.insert(row, label, time_diff)
+        new_batch = DFMonitor_counter.whether_need_batch_renewal(time_diff_units)
+        DFMonitor_bit.insert(row, label, time_diff_units)
+        DFMonitor_counter.insert(row, label, time_diff_units)
 
         # Append UF list for tracking fairness/unfairness
         uf_list.append(copy.deepcopy(DFMonitor_bit.get_uf_list()))
 
         if new_batch:
-            print("==================  new batch, index = {}, datetime = {}".format(index, current_clock))
+            print(f"==================  new batch, applying exponential time decay")
             # Apply time decay to counters
-            counter_values_incorrect = [x * (alpha**time_diff) for x in counter_values_incorrect]
-            counter_values_correct = [x * (alpha**time_diff) for x in counter_values_correct]
+            counter_values_incorrect = [x * (alpha**time_diff_units) for x in counter_values_incorrect]
+            counter_values_correct = [x * (alpha**time_diff_units) for x in counter_values_correct]
             # Update the last clock for the next iteration
             last_clock = current_clock
+            dynamic_window_times.append(current_clock)
 
         # Update the correct/incorrect counters based on group membership
         for i, g in enumerate(monitored_groups):
@@ -92,13 +103,13 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_form
                     counter_values_incorrect[i] += 1
 
     # Perform a final accuracy check after the last data point
-    while (current_clock - last_accuracy_check).total_seconds() >= checking_interval * 3600:
-        print("=============query ============== Performing final accuracy check")
+    while (current_clock - last_accuracy_check).total_seconds() >= checking_interval_seconds:
+        print("============= Performing final accuracy check =============")
         cur_accuracy = DFMonitor_counter.get_accuracy_list()
         accuracy_list.append(cur_accuracy)
         counter_corr, counter_incorr = DFMonitor_counter.get_counter_correctness()
         counter_list_correct.append(counter_corr)
         counter_list_incorrect.append(counter_incorr)
-        last_accuracy_check += pd.Timedelta(hours=checking_interval)
+        last_accuracy_check += pd.Timedelta(seconds=checking_interval_seconds)
 
-    return DFMonitor_bit, DFMonitor_counter, uf_list, accuracy_list, counter_list_correct, counter_list_incorrect
+    return DFMonitor_bit, DFMonitor_counter, uf_list, accuracy_list, counter_list_correct, counter_list_incorrect, dynamic_window_times

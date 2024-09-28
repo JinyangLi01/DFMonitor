@@ -84,10 +84,7 @@ class DF_Accuracy_Per_Item_Counter:
                 return False
         return True
 
-    def insert(self, tuple_, label, time_diff_seconds):
-        # Apply time decay to all counters before processing the new item
-        self.apply_time_decay(time_diff_seconds)
-
+    def insert(self, tuple_, label, window_num):
         # Update counters and fairness flag based on the new item
         for index in self.groups.index:
             row = self.groups.loc[index]
@@ -121,18 +118,18 @@ class DF_Accuracy_Per_Item_Counter:
                 # Update the unfair/fair flag based on the threshold
                 self.uf[index] = accuracy <= self.threshold
 
-    def apply_time_decay(self, time_diff_seconds):
-        if time_diff_seconds > 0:
+    def apply_time_decay(self, window_num):
+        if window_num > 0:
             if self.use_two_counters:
                 # Apply the time decay factor alpha to correct and incorrect counters
-                self.correct_prediction_counters = self.correct_prediction_counters * (self.alpha ** time_diff_seconds)
-                self.incorrect_prediction_counters = self.incorrect_prediction_counters * (self.alpha ** time_diff_seconds)
+                self.correct_prediction_counters = self.correct_prediction_counters * (self.alpha ** window_num)
+                self.incorrect_prediction_counters = self.incorrect_prediction_counters * (self.alpha ** window_num)
             else:
                 # Apply the time decay factor alpha to all four counters
-                self.fp_counters = self.fp_counters * (self.alpha ** time_diff_seconds)
-                self.fn_counters = self.fn_counters * (self.alpha ** time_diff_seconds)
-                self.tp_counters = self.tp_counters * (self.alpha ** time_diff_seconds)
-                self.tn_counters = self.tn_counters * (self.alpha ** time_diff_seconds)
+                self.fp_counters = self.fp_counters * (self.alpha ** window_num)
+                self.fn_counters = self.fn_counters * (self.alpha ** window_num)
+                self.tp_counters = self.tp_counters * (self.alpha ** window_num)
+                self.tn_counters = self.tn_counters * (self.alpha ** window_num)
 
     def get_accuracy_list(self):
         if self.use_two_counters:

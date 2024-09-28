@@ -46,15 +46,16 @@ time_window_str = "1 month"
 
 monitored_groups = [{"gender": 'M'}, {"gender": 'F'}]
 print(data[:5])
-alpha = 0.998
+alpha = 0.98
 threshold = 0.3
 label_prediction = "prediction"
 label_ground_truth = "rating"
 correctness_column = "diff_binary_correctness"
-time_unit = "1 hour"
-T_b = 24 * 7
-T_in = 24
-checking_interval = 24
+use_two_counters = True
+time_unit = "24 hour"
+T_b = 3
+T_in = 1
+checking_interval_units = 1
 # print("====================== fixed window workload ==================")
 #
 # DFMonitor_bit_fixed, DFMonitor_counter_fixed, uf_list_fixed, accuracy_list_fixed, counter_list_correct_fixed, counter_list_incorrect_fixed \
@@ -68,12 +69,12 @@ checking_interval = 24
 
 print("====================== dynamic workload ==================")
 print("T_b = {}, T_in = {}".format(T_b, T_in))
-DFMonitor_bit_dynamic, DFMonitor_counter_dynamic, uf_list_dynamic, accuracy_list_dynamic, counter_list_correct_dynamic, counter_list_incorrect_dynamic \
-= workload_dynamic.traverse_data_DFMonitor_and_baseline(data, date_column,date_time_format,
+DFMonitor_bit_dynamic, DFMonitor_counter_dynamic, uf_list_dynamic, accuracy_list_dynamic, counter_list_correct_dynamic, counter_list_incorrect_dynamic, dynamic_window_times \
+= workload_dynamic.traverse_data_DFMonitor_and_baseline(data, date_column, date_time_format,
                                                 monitored_groups,
                                                 threshold,
-                                                alpha, time_unit, checking_interval, label_prediction,
-                                                label_ground_truth, correctness_column, T_b, T_in)
+                                                alpha, time_unit, checking_interval_units, label_prediction,
+                                                label_ground_truth, correctness_column, T_b, T_in, use_two_counters)
 
 
 # print("accuracy_list_dynamic", accuracy_list_dynamic)
@@ -98,12 +99,14 @@ with open(filename, "w", newline='') as csvfile:
     for i in range(len(female_time_decay_dynamic)):
         writer.writerow([accuracy_list_dynamic[i][0], accuracy_list_dynamic[i][1]])
 
-# if len(uf_list_fixed) != len(uf_list_dynamic):
-#     print("uf_list_baseline and uf_list_DF have different length")
-#
-# for i in range(0, len(accuracy_list_dynamic)):
-#     if accuracy_list_dynamic[i] != accuracy_list_fixed[i]:
-#         print("cr_list_baseline and cr_list_DF have different length")
+
+filename = f"movielens_dynamic_window_time_{method_name}_gender_dynamic_Tb_{T_b}_Tin_{T_in}_alpha_{str(int(alpha*100))}_time_unit_{time_unit}.csv"
+with open(filename, "w", newline='') as csvfile:
+    writer = csv.writer(csvfile, delimiter=',')
+    writer.writerow(["dynamic_window_times"])
+    for i in range(len(dynamic_window_times)):
+        writer.writerow([dynamic_window_times[i]])
+
 
 # ################################################## draw the plot #####################################################
 import csv
