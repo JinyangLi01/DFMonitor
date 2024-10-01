@@ -43,15 +43,15 @@ date_time_format = True
 # time_window_str = "1 month"
 monitored_groups = [{"gender": 'M'}, {"gender": 'F'}]
 print(data[:5])
-alpha = 0.997
+alpha = 0.9997
 threshold = 0.3
 label_prediction = "prediction"
 label_ground_truth = "rating"
 correctness_column = "diff_binary_correctness"
 use_two_counters = True
-time_unit = "1 hour"
-window_size_units = 1
-checking_interval_units = 1
+time_unit = "30 min"
+window_size_units = 4
+checking_interval_units = 2
 
 DFMonitor_bit, DFMonitor_counter, uf_list, accuracy_list, counter_list_correct, counter_list_incorrect, fixed_window_times \
     = workload.traverse_data_DFMonitor_and_baseline(data, date_column,
@@ -71,7 +71,7 @@ print("final_accuracy", final_accuracy)
 male_time_decay = [x[0] for x in accuracy_list]
 female_time_decay = [x[1] for x in accuracy_list]
 
-filename = f"movielens_compare_Accuracy_{method_name}_gender_per_item_alpha_{str(int(alpha*1000))}_time_unit_{time_unit}.csv"
+filename = f"movielens_compare_Accuracy_{method_name}_gender_per_item_alpha_{str(int(alpha*10000))}_time_unit_{time_unit}.csv"
 
 with open(filename, "w", newline='') as csvfile:
     writer = csv.writer(csvfile, delimiter=',')
@@ -79,11 +79,39 @@ with open(filename, "w", newline='') as csvfile:
     for i in range(len(male_time_decay)):
         writer.writerow([accuracy_list[i][0], accuracy_list[i][1]])
 
-filename = f"movielens_fixed_window_time_{method_name}_gender_per_item_alpha_{str(int(alpha*1000))}_time_unit_{time_unit}.csv"
+
+
+# get the first time stamp in the data
+fixed_window_times = data.iloc[0][date_column]
+last_timestamp = data.iloc[len(data)-1][date_column]
+
+# Extract the time unit and value
+time_value, time_unit_str = time_unit.split(" ")
+time_value = int(time_value)
+
+# Compute the total window size based on the number of time units
+total_window_size = pd.Timedelta(minutes=time_value * window_size_units)  # 4 * 30 min = 120 min (2 hours)
+
+
+# List to store reset times
+reset_times = []
+
+# Loop to generate all reset times from fixed_window_times to last_timestamp
+current_time = fixed_window_times
+
+while current_time <= last_timestamp:
+    reset_times.append(current_time)
+    current_time += total_window_size  # Move forward by the total window size (2 hours)
+
+# Now, reset_times contains all the reset times for the 2-hour windows
+print(reset_times)
+
+
+filename = f"movielens_fixed_window_resets_time_unit_{time_unit}.csv"
 
 with open(filename, "w", newline='') as csvfile:
     writer = csv.writer(csvfile, delimiter=',')
-    writer.writerow(["fixed_window_times"])
+    writer.writerow(["fixed_window_reset_times"])
     for i in range(len(fixed_window_times)):
         writer.writerow([fixed_window_times[i]])
 
@@ -113,7 +141,7 @@ def scale_lightness(rgb, scale_l):
 
 
 
-df = pd.read_csv(f"movielens_compare_Accuracy_hoeffding_classifier_gender_per_item_alpha_{str(int(alpha*1000))}_time_unit_{time_unit}.csv")
+df = pd.read_csv(f"movielens_compare_Accuracy_hoeffding_classifier_gender_per_item_alpha_{str(int(alpha*10000))}_time_unit_{time_unit}.csv")
 print(df)
 
 x_list = np.arange(0, len(df))
@@ -146,5 +174,5 @@ plt.tight_layout()
 plt.legend(loc='upper left', bbox_to_anchor=(-0.1, 1.3), fontsize=15,
                ncol=2, labelspacing=0.2, handletextpad=0.2, markerscale=1.5,
                columnspacing=0.2, borderpad=0.2, frameon=True)
-plt.savefig(f"Acc_hoeffding_timedecay_traditional_gender_per_item_alpha_{str(int(alpha*1000))}_time_unit_{time_unit}.png", bbox_inches='tight')
+plt.savefig(f"Acc_hoeffding_timedecay_traditional_gender_per_item_alpha_{str(int(alpha*10000))}_time_unit_{time_unit}.png", bbox_inches='tight')
 plt.show()

@@ -1,4 +1,5 @@
-import csv
+
+#import csv
 
 import matplotlib
 import pandas as pd
@@ -20,9 +21,9 @@ def scale_lightness(rgb, scale_l):
     return colorsys.hls_to_rgb(h, min(1, l * scale_l), s=s)
 
 
-alpha10 = "98"
-time_unit = "72 hour"
-df = pd.read_csv(f"movielens_compare_Accuracy_hoeffding_classifier_gender_per_item_alpha_{alpha10}_time_unit_{time_unit}.csv")
+alpha = 0.9997
+time_unit = "30 min"
+df = pd.read_csv(f"movielens_compare_Accuracy_hoeffding_classifier_gender_per_item_alpha_{str(int(alpha*10000))}_time_unit_{time_unit}.csv")
 print(df)
 
 x_list = np.arange(0, len(df))
@@ -49,11 +50,11 @@ plt.xticks(np.arange(0, len(x_list)), [], rotation=0, fontsize=20)
 plt.xlabel('time stamps\n from 01/01/2013, 1m interval',
            fontsize=20, labelpad=-2).set_position((0.47, 0.1))
 plt.ylabel('Accuracy', fontsize=20, labelpad=-1)
-plt.grid(True, axis='y')
 plt.ylim(0.7, 1.0)
+plt.grid(True, axis='y')
 plt.tight_layout()
 plt.legend(loc='upper left', bbox_to_anchor=(-0.1, 1.3), fontsize=15,
                ncol=2, labelspacing=0.2, handletextpad=0.2, markerscale=1.5,
                columnspacing=0.2, borderpad=0.2, frameon=True)
-plt.savefig(f"Acc_hoeffding_timedecay_traditional_gender_per_item_alpha_{alpha10}_time_unit_{time_unit}.png", bbox_inches='tight')
+plt.savefig(f"Acc_hoeffding_timedecay_traditional_gender_per_item_alpha_{str(int(alpha*10000))}_time_unit_{time_unit}.png", bbox_inches='tight')
 plt.show()

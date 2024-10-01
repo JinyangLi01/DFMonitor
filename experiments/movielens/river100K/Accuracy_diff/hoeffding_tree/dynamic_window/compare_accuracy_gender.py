@@ -42,20 +42,20 @@ date_column = "datetime"
 data[date_column] = pd.to_datetime(data[date_column])
 print(data[date_column].min(), data[date_column].max())
 date_time_format = True
-time_window_str = "1 month"
+
 
 monitored_groups = [{"gender": 'M'}, {"gender": 'F'}]
 print(data[:5])
-alpha = 0.98
+alpha = 0.9998
 threshold = 0.3
 label_prediction = "prediction"
 label_ground_truth = "rating"
 correctness_column = "diff_binary_correctness"
 use_two_counters = True
-time_unit = "24 hour"
-T_b = 3
-T_in = 1
-checking_interval_units = 1
+time_unit = "30 min"
+T_b = 8
+T_in = 2
+checking_interval_units = 2
 # print("====================== fixed window workload ==================")
 #
 # DFMonitor_bit_fixed, DFMonitor_counter_fixed, uf_list_fixed, accuracy_list_fixed, counter_list_correct_fixed, counter_list_incorrect_fixed \
@@ -92,7 +92,7 @@ male_time_decay_dynamic = [x[0] for x in accuracy_list_dynamic]
 female_time_decay_dynamic = [x[1] for x in accuracy_list_dynamic]
 # female_time_decay_fixed = [x[1] for x in accuracy_list_fixed]
 
-filename = f"movielens_compare_Accuracy_{method_name}_gender_dynamic_Tb_{T_b}_Tin_{T_in}_alpha_{str(int(alpha*100))}_time_unit_{time_unit}.csv"
+filename = f"movielens_compare_Accuracy_{method_name}_gender_dynamic_Tb_{T_b}_Tin_{T_in}_alpha_{str(int(alpha*10000))}_time_unit_{time_unit}.csv"
 with open(filename, "w", newline='') as csvfile:
     writer = csv.writer(csvfile, delimiter=',')
     writer.writerow(["male_time_decay_dynamic", "female_time_decay_dynamic"])
@@ -100,10 +100,16 @@ with open(filename, "w", newline='') as csvfile:
         writer.writerow([accuracy_list_dynamic[i][0], accuracy_list_dynamic[i][1]])
 
 
-filename = f"movielens_dynamic_window_time_{method_name}_gender_dynamic_Tb_{T_b}_Tin_{T_in}_alpha_{str(int(alpha*100))}_time_unit_{time_unit}.csv"
+fixed_window_times = []
+# get the first time stamp in the data
+fixed_window_times = data.iloc[0][date_column]
+last_timestamp = data.iloc[len(data)-1][date_column]
+
+
+filename = f"movielens_dynamic_window_reset_time_Tb_{T_b}_Tin_{T_in}_time_unit_{time_unit}.csv"
 with open(filename, "w", newline='') as csvfile:
     writer = csv.writer(csvfile, delimiter=',')
-    writer.writerow(["dynamic_window_times"])
+    writer.writerow(["dynamic_window_reset_time"])
     for i in range(len(dynamic_window_times)):
         writer.writerow([dynamic_window_times[i]])
 
@@ -131,7 +137,7 @@ def scale_lightness(rgb, scale_l):
     return colorsys.hls_to_rgb(h, min(1, l * scale_l), s=s)
 
 
-df = pd.read_csv(f"movielens_compare_Accuracy_hoeffding_classifier_gender_dynamic_Tb_{T_b}_Tin_{T_in}_alpha_{str(int(alpha*100))}_time_unit_{time_unit}.csv")
+df = pd.read_csv(f"movielens_compare_Accuracy_hoeffding_classifier_gender_dynamic_Tb_{T_b}_Tin_{T_in}_alpha_{str(int(alpha*10000))}_time_unit_{time_unit}.csv")
 print(df)
 
 x_list = np.arange(0, len(df))
@@ -159,9 +165,10 @@ plt.xlabel('time stamps\n from 01/01/2013, 1m interval',
            fontsize=20, labelpad=-2).set_position((0.47, 0.1))
 plt.ylabel('Accuracy', fontsize=20, labelpad=-1)
 plt.grid(True, axis='y')
+plt.ylim(0.7, 1.0)
 plt.tight_layout()
 plt.legend(loc='upper left', bbox_to_anchor=(-0.1, 1.3), fontsize=15,
                ncol=2, labelspacing=0.2, handletextpad=0.2, markerscale=1.5,
                columnspacing=0.2, borderpad=0.2, frameon=True)
-plt.savefig(f"Acc_hoeffding_time_decay_gender_dynamic_Tb_{T_b}_Tin_{T_in}_alpha_{str(int(alpha*100))}_time_unit_{time_unit}.png", bbox_inches='tight')
+plt.savefig(f"Acc_hoeffding_time_decay_gender_dynamic_Tb_{T_b}_Tin_{T_in}_alpha_{str(int(alpha*10000))}_time_unit_{time_unit}.png", bbox_inches='tight')
 plt.show()

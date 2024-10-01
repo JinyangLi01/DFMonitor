@@ -86,6 +86,7 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_form
         # Apply decay and reset after the window size (e.g., after 2 days or any custom window size)
         if time_diff_units >= window_size_units:
             print(f"Window size reached ({window_size_units} units), applying exponential time decay")
+            fixed_window_times.append(current_clock)  # Record the time of window reset
             counter_values_incorrect = [x * (alpha ** time_diff_units) for x in counter_values_incorrect]
             counter_values_correct = [x * (alpha ** time_diff_units) for x in counter_values_correct]
             last_clock = current_clock  # Reset the last clock to the current one

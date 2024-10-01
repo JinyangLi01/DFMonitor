@@ -87,12 +87,14 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_form
 
         if new_batch:
             print(f"==================  new batch, applying exponential time decay")
+            # Append the current time as the reset time
+            dynamic_window_times.append(current_clock)
             # Apply time decay to counters
             counter_values_incorrect = [x * (alpha**time_diff_units) for x in counter_values_incorrect]
             counter_values_correct = [x * (alpha**time_diff_units) for x in counter_values_correct]
             # Update the last clock for the next iteration
             last_clock = current_clock
-            dynamic_window_times.append(current_clock)
+
 
         # Update the correct/incorrect counters based on group membership
         for i, g in enumerate(monitored_groups):
