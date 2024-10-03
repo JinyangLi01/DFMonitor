@@ -43,13 +43,13 @@ date_time_format = True
 # time_window_str = "1 month"
 monitored_groups = [{"gender": 'M'}, {"gender": 'F'}]
 print(data[:5])
-alpha = 0.9997
+alpha = 0.999997
 threshold = 0.3
 label_prediction = "prediction"
 label_ground_truth = "rating"
 correctness_column = "diff_binary_correctness"
 use_two_counters = True
-time_unit = "30 min"
+time_unit = "1 min"
 window_size_units = 4
 checking_interval_units = 2
 
@@ -112,8 +112,8 @@ filename = f"movielens_fixed_window_resets_time_unit_{time_unit}.csv"
 with open(filename, "w", newline='') as csvfile:
     writer = csv.writer(csvfile, delimiter=',')
     writer.writerow(["fixed_window_reset_times"])
-    for i in range(len(fixed_window_times)):
-        writer.writerow([fixed_window_times[i]])
+    for i in range(len(reset_times)):
+        writer.writerow([reset_times[i]])
 
 
 # ################################################## draw the plot #####################################################
