@@ -70,24 +70,6 @@ import matplotlib.scale as mscale
 mscale.register_scale(LogLinearLogScale)
 
 
-# Define thresholds
-# linear_threshold # Transition to log after this value
-# log_linear_transition  # Transition back to linear after this value
-def get_y_transformed(y, linear_threshold, log_linear_transition):
-    # Apply transformation
-    y_transformed = np.zeros_like(y)
-    for i, value in enumerate(y):
-        if value <= linear_threshold:
-            y_transformed[i] = value
-        elif value <= log_linear_transition:
-            y_transformed[i] = linear_threshold + np.log(value - linear_threshold + 1)
-        else:
-            # Adjust the offset to smoothly transition back to linear
-            log_offset = linear_threshold + np.log(log_linear_transition - linear_threshold + 1)
-            y_transformed[i] = log_offset + (value - log_linear_transition)
-    return y_transformed
-
-
 # read Accuracy
 df_Accuracy = pd.read_csv("Accuracy_window_size.csv", sep=",")
 # print(df_CR.head)

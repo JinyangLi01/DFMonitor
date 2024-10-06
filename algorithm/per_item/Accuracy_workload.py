@@ -17,11 +17,13 @@ def belong_to_group(row, group):
 
 # time_unit = 10 hour
 def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_format, monitored_groups,
-                                         threshold, alpha, time_unit, window_size_units, checking_interval_units = 1, label_prediction="predicted",
+                                         threshold, alpha, time_unit, window_size_units, checking_interval = "1 hour", label_prediction="predicted",
                                          label_ground_truth="ground_truth", correctness_column="", use_two_counters=True):
     # Initialize DFMonitor counter and bit objects
     DFMonitor_counter = Accuracy_counters.DF_Accuracy_Per_Item_Counter(monitored_groups, alpha, threshold, use_two_counters)
     DFMonitor_bit = Accuracy_bit.DF_Accuracy_Per_Item_Bit(monitored_groups, alpha, threshold, use_two_counters)
+
+    check_points = []
 
     # Initialize the time for the first row
     last_clock = timed_data.iloc[0][date_column]
@@ -35,7 +37,7 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_form
     accuracy_list = []
     current_clock = 0
     checking_interval_seconds = 0
-    fixed_window_times = []
+    window_reset_times = []
 
     # Traverse through the data
     for index, row in timed_data.iterrows():
@@ -57,16 +59,22 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_form
         elif time_unit_str == "min":
             time_diff_units = int((current_clock - last_clock).total_seconds() / (60 * time_unit_val))
 
+        num_resets = int(time_diff_units / window_size_units)
+
+        checking_interval_units_str = checking_interval.split(" ")[1]
+        checking_interval_units_num = int(checking_interval.split(" ")[0])
         # Loop to cover intervals where no data arrives but checks need to be done
-        checking_interval_seconds = checking_interval_units * time_unit_val * (
-            1 if time_unit_str == "second" else
-            60 if time_unit_str == "min" else
-            3600 if time_unit_str == "hour" else
-            86400)  # Handling different time units for checking intervals
+        checking_interval_seconds = checking_interval_units_num * (
+            1 if checking_interval_units_str == "second" else
+            60 if checking_interval_units_str == "min" else
+            3600 if checking_interval_units_str == "hour" else
+            86400 if checking_interval_units_str == "day" else 0)  # Handling different time units for checking intervals
+
+
 
         # Loop to cover intervals where no data arrives but checks need to be done
         while (current_clock - last_accuracy_check).total_seconds() >= checking_interval_seconds:
-            fixed_window_times.append(last_accuracy_check)
+            check_points.append(last_accuracy_check)
             print("=============query ============== Performing scheduled accuracy check")
             print("counters", DFMonitor_counter.get_counter_correctness())
             cur_accuracy = DFMonitor_counter.get_accuracy_list()
@@ -86,7 +94,7 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_form
         # Apply decay and reset after the window size (e.g., after 2 days or any custom window size)
         if time_diff_units >= window_size_units:
             print(f"Window size reached ({window_size_units} units), applying exponential time decay")
-            fixed_window_times.append(current_clock)  # Record the time of window reset
+            window_reset_times.append(current_clock)  # Record the time of window reset
             counter_values_incorrect = [x * (alpha ** time_diff_units) for x in counter_values_incorrect]
             counter_values_correct = [x * (alpha ** time_diff_units) for x in counter_values_correct]
             last_clock = current_clock  # Reset the last clock to the current one
@@ -108,6 +116,7 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_form
                     counter_values_incorrect[i] += 1
     # Perform a final accuracy check if the last row doesn't trigger an update
     while (current_clock - last_accuracy_check).total_seconds() >= checking_interval_seconds:
+        check_points.append(last_accuracy_check)
         print("=============query ============== Performing final accuracy check")
         cur_accuracy = DFMonitor_counter.get_accuracy_list()
         accuracy_list.append(cur_accuracy)
@@ -116,7 +125,7 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_form
         counter_list_incorrect.append(counter_incorr)
         last_accuracy_check += pd.Timedelta(seconds=checking_interval_seconds)
 
-    return DFMonitor_bit, DFMonitor_counter, uf_list, accuracy_list, counter_list_correct, counter_list_incorrect, fixed_window_times
+    return DFMonitor_bit, DFMonitor_counter, uf_list, accuracy_list, counter_list_correct, counter_list_incorrect, window_reset_times, check_points
 
 
 
