@@ -81,7 +81,7 @@ import seaborn as sns
 #
 # accuracy_df.to_csv(f"movielens_compare_Accuracy_{method_name}_traditional_gender.csv")
 #
-
+#
 
 #
 # # ################################################## draw the plot #####################################################
@@ -129,11 +129,14 @@ curve_colors = sns.color_palette(palette=['firebrick', 'darkorange', '#004b00', 
 curve_colors = sns.color_palette(palette=[ 'lightsteelblue', 'blue', 'cyan', '#004b00', 'darkorange', 'firebrick',
                                            'blueviolet', 'magenta'])
 
-window_size = "3M"
+
+window_size = "3D"
 method_name = "hoeffding_classifier"
 df = pd.read_csv(f"movielens_compare_Accuracy_{method_name}_traditional_gender_{window_size}.csv")
 print(df)
 value_col_name = "calculated_value"
+
+
 
 
 
@@ -163,69 +166,74 @@ def plot_certain_time_window(window_size, axs):
 
 
     axs.grid(True)
-    female_lst = df_female[value_col_name].dropna().tolist()
-    male_lst = df_male[value_col_name].dropna().tolist()
+    female_lst = df_female[value_col_name].tolist()
+    male_lst = df_male[value_col_name].tolist()
     print(male_lst, female_lst)
-    axs.plot(np.arange(len(male_lst)), male_lst, linewidth=2.5, markersize=3.5,
+    axs.plot(np.arange(len(male_lst)), male_lst, linewidth=2.1, markersize=3.5,
              label="male", linestyle='-', marker='o', color="blue")
-    axs.plot(np.arange(len(female_lst)), female_lst, linewidth=2.5, markersize=3.5,
+    axs.plot(np.arange(len(female_lst)), female_lst, linewidth=2.1, markersize=3.5,
                 label='female', linestyle='-', marker='o', color="orange")
-    axs.legend(loc='lower right',
-           bbox_to_anchor=(1.0, 0),  # Adjust this value (lower the second number)
+    axs.legend(loc='lower left',
+           bbox_to_anchor=(-0.2, -0.16),  # Adjust this value (lower the second number)
            fontsize=12, ncol=1, labelspacing=0.2, handletextpad=0.5,
            markerscale=1, handlelength=1, columnspacing=0.6,
            borderpad=0.2, frameon=True)
-    axs.set_xlabel('(e) window size = 3 months', fontsize=14, labelpad=0, fontweight='bold').set_position([0.41, 0])
-    # fig.text(0.5, 0.04, 'normalized measuring time',
-    #          ha='center', va='center', fontsize=16, fontweight='bold')
 
-    decline_threshold = 0.07
+    axs.set_xlabel('(a) window size = 3 days', fontsize=14, labelpad=-4, fontweight='bold').set_position([0.38, 0])
+
+
+    decline_threshold = 0.2
     decline_points = []
     differences = []
     print(decline_points)
-    for i in range(0, len(df_male)):
-        if abs(female_lst[i - 1] - female_lst[i]) > decline_threshold:
+    print(len(female_lst))
+    for i in range(1, len(df_female)):
+        if (female_lst[i - 1] - female_lst[i]) > decline_threshold:
             plt.axvline(x=i, color='black', linestyle=(0, (5, 5)), linewidth=1.5, alpha=1)
             # plt.text(i, y_margin, check_points[i].replace(" ", "\n"), color='red', fontsize=13,
             #          verticalalignment='bottom', horizontalalignment='center')
             decline_points.append(i)
             differences.append(female_lst[i - 1] - female_lst[i])
 
+    # plt.xticks(decline_points,
+    #            [datetime[decline_points[i]].replace(" ", "\n") for i in range(len(decline_points))] ,
+    #            color='black',
+    #            rotation=0, fontsize=12)
+
+    # plt.xticks([13, 31, 40], [datetime[13] + '             ', datetime[31] + "   ",
+    #                           '                     ' + datetime[40]], fontsize=12, rotation=45)
+
+    plt.xticks([13, 31, 40, 59], [datetime[13], datetime[31], "   " + datetime[40], datetime[59]],
+               fontsize=12, rotation=15)
+
+    # Access current axis and adjust labels manually
+    ax = plt.gca()
+    for tick in ax.get_xticklabels():
+        tick.set_y(0.04)  # Adjust this value to move labels closer to the axis (smaller negative moves closer)
+
+    ax.get_xticklabels()[1].set_y(0.06)
+    ax.get_xticklabels()[2].set_y(0.04)
+
     print(decline_points, differences)
-    print(datetime)
 
-    # # Annotate the difference between the 4th and 5th points (manually picked)
-    # x4, y4 = 3, female_lst[3]
-    # x5, y5 = 4, female_lst[4]
-    # distance = y4 - y5
-    #
-    # # Add annotation with the difference
-    # axs.annotate('', xy=(x4, y4), xytext=(x4, y5),
-    #               arrowprops=dict(arrowstyle='-', linestyle=':', color='black', lw=1.5),
-    #              fontsize=12, ha='center')
-    # axs.annotate('', xy=(2.5, y5), xytext=(4.5, y5),
-    #               arrowprops=dict(arrowstyle='-', linestyle=":", color='black', lw=1.5),
-    #              fontsize=12, ha='center')
+    plt.axvline(x=59, color='black', linestyle=(0, (5, 5)), linewidth=1.5, alpha=1)
+    print("datetime[59]={}".format(datetime[59]))
 
-    plt.yticks([0.5, 0.6, 0.7, 0.8, 0.9], fontsize=12)
-    plt.ylabel('accuracy', fontsize=14)
+    x = []
+    y = []
+    for i in range(0, len(female_lst)):
+        x.append(i)
+        y.append(female_lst[i])
 
-    plt.xticks(np.arange(len(datetime)), ["",
-                                          datetime[1] + "    ",
-                                          "    " + datetime[2],
-                                          ""], color='black',
-                rotation=0, fontsize=12)
-
-    plt.axvline(x=1, color='black', linestyle=(0, (5, 5)), linewidth=1.5, alpha=1)
+    plt.ylabel('accuracy', fontsize=14, labelpad=0)
+    plt.yticks(fontsize=13)
     axs.grid(axis='x')
-
-    plt.text(2.5, 0.75, round(differences[0], 2), fontsize=11, va='bottom')
-
-    plt.tick_params(axis='x', pad=2)
+    plt.tick_params(axis='x', pad=1)
     plt.tick_params(axis='y', pad=1)
+
     plt.savefig(f"Acc_hoeffding_timedecay_traditional_gender_{window_size}.png", bbox_inches='tight')
     plt.show()
 
 
-plot_certain_time_window('3M', axs)
+plot_certain_time_window('3D', axs)
 
