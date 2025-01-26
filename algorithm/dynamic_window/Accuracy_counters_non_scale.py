@@ -1,28 +1,28 @@
 import sys
 import numpy as np
 import pandas as pd
-from line_profiler_pycharm import profile
+
 
 class DF_Accuracy_Dynamic_Window_Counter:
     def __init__(self, monitored_groups, alpha, threshold, T_b, T_in, use_two_counters=True):
         self.groups = pd.DataFrame(monitored_groups).astype('category')
         self.use_two_counters = use_two_counters
         self.alpha = alpha
-        self.threshold = int(threshold * 10000)  # Scale threshold by 10000
+        self.threshold = threshold
         self.T_b = T_b  # Maximum batch size (time duration limit)
         self.T_in = T_in  # Maximum time interval between items
 
         num_groups = len(monitored_groups)
         if use_two_counters:
             # Initialize counters for correct and incorrect predictions
-            self.correct_prediction_counters = np.zeros(num_groups, dtype=int)
-            self.incorrect_prediction_counters = np.zeros(num_groups, dtype=int)
+            self.correct_prediction_counters = np.zeros(num_groups, dtype=np.float16)
+            self.incorrect_prediction_counters = np.zeros(num_groups, dtype=np.float16)
         else:
             # Initialize counters for FP, FN, TP, TN
-            self.fp_counters = np.zeros(num_groups, dtype=int)
-            self.fn_counters = np.zeros(num_groups, dtype=int)
-            self.tp_counters = np.zeros(num_groups, dtype=int)
-            self.tn_counters = np.zeros(num_groups, dtype=int)
+            self.fp_counters = np.zeros(num_groups, dtype=np.float16)
+            self.fn_counters = np.zeros(num_groups, dtype=np.float16)
+            self.tp_counters = np.zeros(num_groups, dtype=np.float16)
+            self.tn_counters = np.zeros(num_groups, dtype=np.float16)
 
         self.uf = np.zeros(num_groups, dtype=bool)  # Fair/unfair flag
 
@@ -36,10 +36,10 @@ class DF_Accuracy_Dynamic_Window_Counter:
 
 
     def get_counter_correctness(self):
-        return self.correct_prediction_counters/10000, self.incorrect_prediction_counters/10000
+        return self.correct_prediction_counters, self.incorrect_prediction_counters
 
     def get_counter_fp_fn_tp_tn(self):
-        return self.fp_counters/10000, self.fn_counters/10000, self.tp_counters/10000, self.tn_counters/10000
+        return self.fp_counters, self.fn_counters, self.tp_counters, self.tn_counters
 
     def get_accuracy_list(self):
         if self.use_two_counters:
@@ -58,15 +58,15 @@ class DF_Accuracy_Dynamic_Window_Counter:
                         fp_counters=None, fn_counters=None, tp_counters=None, tn_counters=None):
         self.uf = np.array(uf, dtype=bool)
         if self.use_two_counters:
-            self.correct_prediction_counters = np.array(correct_prediction_counters, dtype=int)
-            self.incorrect_prediction_counters = np.array(incorrect_prediction_counters, dtype=int)
+            self.correct_prediction_counters = np.array(correct_prediction_counters, dtype=np.float16)
+            self.incorrect_prediction_counters = np.array(incorrect_prediction_counters, dtype=np.float16)
         else:
-            self.fp_counters = np.array(fp_counters, dtype=int)
-            self.fn_counters = np.array(fn_counters, dtype=int)
-            self.tp_counters = np.array(tp_counters, dtype=int)
-            self.tn_counters = np.array(tn_counters, dtype=int)
+            self.fp_counters = np.array(fp_counters, dtype=np.float16)
+            self.fn_counters = np.array(fn_counters, dtype=np.float16)
+            self.tp_counters = np.array(tp_counters, dtype=np.float16)
+            self.tn_counters = np.array(tn_counters, dtype=np.float16)
 
-    def get_uf_of_group(self, group):
+    def find(self, group):
         idx = self.groups.index(group)
         return self.uf[idx]
 
@@ -88,13 +88,13 @@ class DF_Accuracy_Dynamic_Window_Counter:
     def print(self):
         print("uf", self.uf)
         if self.use_two_counters:
-            print("Correct Prediction Counters", self.correct_prediction_counters/10000)
-            print("Incorrect Prediction Counters", self.incorrect_prediction_counters/10000)
+            print("Correct Prediction Counters", self.correct_prediction_counters)
+            print("Incorrect Prediction Counters", self.incorrect_prediction_counters)
         else:
-            print("FP Counters", self.fp_counters/10000)
-            print("FN Counters", self.fn_counters/10000)
-            print("TP Counters", self.tp_counters/10000)
-            print("TN Counters", self.tn_counters/10000)
+            print("FP Counters", self.fp_counters)
+            print("FN Counters", self.fn_counters)
+            print("TP Counters", self.tp_counters)
+            print("TN Counters", self.tn_counters)
 
 
     def belong_to_group(self, tuple_, group):
@@ -106,7 +106,7 @@ class DF_Accuracy_Dynamic_Window_Counter:
     """
     label = one of 'fp', 'fn', 'tp', 'tn'
     """
-    @profile
+
     def whether_need_batch_renewal(self, time_interval):
         self.Delta_in = time_interval
         if self.Delta_in >= self.T_in or self.Delta_b + self.Delta_in >= self.T_b:
@@ -114,37 +114,38 @@ class DF_Accuracy_Dynamic_Window_Counter:
             return True
         return False
 
-    @profile
     def insert(self, tuple_, label, time_interval, new_batch=False):
         self.Delta_in = time_interval
+        # Convert input tuple to a DataFrame row for vectorized comparison
+        input_row = pd.DataFrame([tuple_])
         col_name = self.groups.columns[0]
-        col_value = tuple_[col_name]
-        try:
-            series = self.groups[col_name]
-            index = series[series == col_value].index[0]
-        except KeyError:
-            return  # If group not found, exit
+        col_value = input_row.iloc[0][col_name]
+        match = (self.groups.eq(col_value)).all(axis=1).values
+        matched_indices = np.where(match)[0]
+        if matched_indices.size > 0:
+            index = matched_indices[0]
+            if self.use_two_counters:
+                if label == 'correct':
+                    self.correct_prediction_counters[index] += 1
+                elif label == 'incorrect':
+                    self.incorrect_prediction_counters[index] += 1
 
-        if self.use_two_counters:
-            if label == 'correct':
-                self.correct_prediction_counters[index] += 10000
-            elif label == 'incorrect':
-                self.incorrect_prediction_counters[index] += 10000
-            total = self.correct_prediction_counters[index] + self.incorrect_prediction_counters[index]
-            accuracy = self.correct_prediction_counters[index] / total if total > 0 else 0
-            self.uf[index] = accuracy <= self.threshold
-        else:
-            if label == 'fp':
-                self.fp_counters[index] += 10000
-            elif label == 'fn':
-                self.fn_counters[index] += 10000
-            elif label == 'tp':
-                self.tp_counters[index] += 10000
-            elif label == 'tn':
-                self.tn_counters[index] += 10000
-            total = (self.tp_counters[index] + self.fp_counters[index] +
-                     self.fn_counters[index] + self.tn_counters[index])
-            accuracy = (self.tp_counters[index] + self.fn_counters[index]) / total if total > 0 else 0
+                total = self.correct_prediction_counters[index] + self.incorrect_prediction_counters[index]
+                accuracy = self.correct_prediction_counters[index] / total if total > 0 else 0
+            else:
+                if label == 'fp':
+                    self.fp_counters[index] += 1
+                elif label == 'fn':
+                    self.fn_counters[index] += 1
+                elif label == 'tp':
+                    self.tp_counters[index] += 1
+                elif label == 'tn':
+                    self.tn_counters[index] += 1
+
+                total = (self.tp_counters[index] + self.fp_counters[index] +
+                         self.fn_counters[index] + self.tn_counters[index])
+                accuracy = (self.tp_counters[index] + self.fn_counters[index]) / total if total > 0 else 0
+
             self.uf[index] = accuracy <= self.threshold
         if not new_batch:
             self.Delta_b += self.Delta_in
@@ -153,34 +154,24 @@ class DF_Accuracy_Dynamic_Window_Counter:
             self.last_item_time = self.current_time
 
 
-    def np_list_scale(self, list, time_decay_factor):
-        list = np.array(list, dtype=np.float64)
-        list *= time_decay_factor
-        list = list.astype(np.int32)
-        return list
 
-    @profile
+
     def batch_update(self):
-        time_decay_factor = (self.alpha) ** (self.Delta_a + (self.Delta_b / 2))
+        time_decay_factor = self.alpha ** (self.Delta_a + (self.Delta_b / 2))
         if self.use_two_counters:
-            self.correct_prediction_counters = np.array(self.correct_prediction_counters, dtype=np.float64)
             self.correct_prediction_counters *= time_decay_factor
-            self.correct_prediction_counters = self.correct_prediction_counters.astype(np.int32)
-            self.incorrect_prediction_counters = np.array(self.incorrect_prediction_counters, dtype=np.float64)
             self.incorrect_prediction_counters *= time_decay_factor
-            self.incorrect_prediction_counters = self.incorrect_prediction_counters.astype(np.int32)
         else:
-            self.fp_counters = self.np_list_scale(self.fp_counters, time_decay_factor)
-            self.fn_counters = self.np_list_scale(self.fn_counters, time_decay_factor)
-            self.tp_counters = self.np_list_scale(self.tp_counters, time_decay_factor)
-            self.tn_counters = self.np_list_scale(self.tn_counters, time_decay_factor)
+            self.fp_counters *= time_decay_factor
+            self.fn_counters *= time_decay_factor
+            self.tp_counters *= time_decay_factor
+            self.tn_counters *= time_decay_factor
 
         self.Delta_a = (self.Delta_b / 2) + self.Delta_in
         self.Delta_b = 0
         self.Delta_in = 0
         self.current_batch_size = 0
 
-    @profile
     def get_uf_list(self):
         return self.uf.tolist()
 

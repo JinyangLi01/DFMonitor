@@ -7,4 +7,10 @@ data/name_gender/names
 data/name_gender/namesbystate
 data/name_gender/namesbyterritory
 *.zip
-
+data/Australian_electricity
+data/tourism
+data/sales
+data/crypto_online
+data/databento
+data/crypto-forecasting
+*.data
