@@ -50,7 +50,7 @@ date_time_format = True
 # time_window_str = "1 month"
 monitored_groups = [{"gender": 'M'}, {"gender": 'F'}]
 print(data[:5])
-alpha = 0.996
+alpha = 0.995
 # 0.996^(24*7) = 0.5
 # 0.998^(24*7*2) = 0.51 # 2 weeks
 # 0.99993^(24*60*7) = 0.4938 # 1 week
@@ -74,9 +74,10 @@ def calculate_accuracy(group):
     return correct / total if total > 0 else 0
 
 
-window_size_list = ['1D', '10D', '1W', '2W', '1M', '3M', '6M', '1Y']
+window_size_list = ["1H", '1D', '10D', '1W', '2W', '1M', '3M', '6M', '1Y']
 accuracy_dict = {}
-for w in window_size_list:
+window_size = ""
+for w in window_size_list[:1]:
     window_size = w
     acc = data.groupby(pd.Grouper(key='datetime', freq=window_size)).apply(calculate_accuracy)
     accuracy_dict[window_size] = acc
@@ -85,7 +86,7 @@ accuracy_df = pd.DataFrame(accuracy_dict)
 
 # print(accuracy_df)
 
-accuracy_df.to_csv(f"movielens_compare_Accuracy_{method_name}_traditional.csv")
+accuracy_df.to_csv(f"movielens_compare_Accuracy_{method_name}_traditional_{window_size}.csv")
 
 
 
@@ -135,7 +136,7 @@ max_length = len(datetime)
 print("max_length", max_length)
 
 
-for i in range(len(window_size_list)):
+for i in range(len(window_size_list[:1])):
     col = all_col[i+1]
     curve = list(df[col][df[col].notna()])
     proportional_x = np.linspace(0, max_length - 1, len(curve))
@@ -156,5 +157,5 @@ plt.tight_layout()
 plt.legend(loc='upper left', bbox_to_anchor=(0, 1.1), fontsize=15,
                ncol=4, labelspacing=0.2, handletextpad=0.2, markerscale=1.5,
                columnspacing=0.8, borderpad=0.2, frameon=True)
-plt.savefig(f"Acc_hoeffding_timedecay_traditional.png", bbox_inches='tight')
+plt.savefig(f"Acc_hoeffding_timedecay_traditional_gender_{window_size}.png", bbox_inches='tight')
 plt.show()
