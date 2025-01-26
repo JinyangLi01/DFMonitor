@@ -1,5 +1,3 @@
-smoothness
-male_time_decay,0.00681283265623195
-male_traditional,0.011395015469538439
-female_time_decay,0.006277579743323773
-female_traditional,0.01255046141114553
+version https://git-lfs.github.com/spec/v1
+oid sha256:389184b4adc52cc66a0d6f458d843f1d284ac7213500ca00acff067e61cef413
+size 163

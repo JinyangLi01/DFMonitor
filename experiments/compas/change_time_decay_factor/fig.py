@@ -109,7 +109,8 @@ for col_name in df_CR.columns:
 
 x_list = np.arange(0, len(ast.literal_eval(col_data_FPR['black_time_decay'][0])))
 alpha_list = col_data_FPR['alpha']
-fig, axs = plt.subplots(3, 2, figsize=(6, 6))
+fig, axs = plt.subplots(2, 3, figsize=(8, 2.8))
+plt.subplots_adjust(left=0.0, right=1, top=0.98, bottom=0.05, wspace=0.3, hspace=0.3)
 plt.rcParams['font.size'] = 10
 curve_colors = sns.color_palette(palette=['navy', 'blue', 'cornflowerblue', 'lightgreen', '#41ab5d', '#006837'])
 curve_colors.append('magenta')
@@ -118,82 +119,84 @@ curve_colors.append('magenta')
 
 
 for i in range(1, len(alpha_list)):
-    axs[0, 0].plot(x_list, ast.literal_eval(col_data_FPR['black_time_decay'][i]), linewidth=2, markersize=4,
+    axs[0, 0].plot(x_list, ast.literal_eval(col_data_FPR['black_time_decay'][i]), linewidth=2, markersize=3,
                    label='{}'.format(alpha_list[i]), linestyle='-', marker='o', color=curve_colors[i])
 
-    axs[0, 1].plot(x_list, ast.literal_eval(col_data_CR['black_time_decay'][i]), linewidth=2, markersize=4,
+    axs[1, 0].plot(x_list, ast.literal_eval(col_data_CR['black_time_decay'][i]), linewidth=2, markersize=3,
                    label='{}'.format(alpha_list[i]), linestyle='-', marker='o', color=curve_colors[i])
 
     y = ast.literal_eval(col_data_FPR['white_time_decay'][i])
-    axs[1, 0].plot(x_list, y, linewidth=2, markersize=4,
+    axs[0, 1].plot(x_list, y, linewidth=2, markersize=3,
                    label='{}'.format(alpha_list[i]), linestyle='-', marker='o', color=curve_colors[i])
     # axs[1, 0].axhline(linear_threshold, color='red', linestyle='--', label='Linear to Log Transition')
     # axs[1, 0].axhline(log_linear_transition, color='green', linestyle='--', label='Log to Linear Transition')
 
-    axs[1, 1].plot(x_list, ast.literal_eval(col_data_CR['white_time_decay'][i]), linewidth=2, markersize=4,
+    axs[1, 1].plot(x_list, ast.literal_eval(col_data_CR['white_time_decay'][i]), linewidth=2, markersize=3,
                    label='{}'.format(alpha_list[i]), linestyle='-', marker='o', color=curve_colors[i])
-    # axs[1, 1].plot(x_list, (col_data_CR['white_traditional']), linewidth=2, markersize=4,
+    # axs[1, 1].plot(x_list, (col_data_CR['white_traditional']), linewidth=2, markersize=3,
     #             label='{}'.format(alpha_list[i]), linestyle='-', marker='o', color=curve_colors[i])
-    axs[2, 0].plot(x_list, ast.literal_eval(col_data_FPR['hispanic_time_decay'][i]), linewidth=2, markersize=4,
+    axs[0, 2].plot(x_list, ast.literal_eval(col_data_FPR['hispanic_time_decay'][i]), linewidth=2, markersize=3,
                    label='{}'.format(alpha_list[i]), linestyle='-', marker='o', color=curve_colors[i])
-    # axs[2, 0].plot(x_list, (col_data_CR['hispanic_traditional']), linewidth=2, markersize=4,
+    # axs[2, 0].plot(x_list, (col_data_CR['hispanic_traditional']), linewidth=2, markersize=3,
     #             label='{}'.format(alpha_list[i]), linestyle='-', marker='o', color=curve_colors[i])
-    axs[2, 1].plot(x_list, ast.literal_eval(col_data_CR['hispanic_time_decay'][i]), linewidth=2, markersize=4,
+    axs[1, 2].plot(x_list, ast.literal_eval(col_data_CR['hispanic_time_decay'][i]), linewidth=2, markersize=3,
                    label='{}'.format(alpha_list[i]), linestyle='-', marker='o', color=curve_colors[i])
-    # axs[2, 1].plot(x_list, (col_data_FPR['hispanic_traditional']), linewidth=2, markersize=4,
+    # axs[2, 1].plot(x_list, (col_data_FPR['hispanic_traditional']), linewidth=2, markersize=3,
     #             label='{}'.format(alpha_list[i]), linestyle='-', marker='o', color=curve_colors[i])
 
 i = 0
-axs[0, 0].plot(x_list, ast.literal_eval(col_data_FPR['black_time_decay'][i]), linewidth=2, markersize=3,
+axs[0, 0].plot(x_list, ast.literal_eval(col_data_FPR['black_time_decay'][i]), linewidth=2, markersize=2,
                label='{}'.format(alpha_list[i]), linestyle=':', marker='s', color=curve_colors[i])
-axs[0, 1].plot(x_list, ast.literal_eval(col_data_CR['black_time_decay'][i]), linewidth=2, markersize=3,
+axs[1, 0].plot(x_list, ast.literal_eval(col_data_CR['black_time_decay'][i]), linewidth=2, markersize=2,
                label='{}'.format(alpha_list[i]), linestyle=':', marker='s', color=curve_colors[i])
-axs[1, 0].plot(x_list, ast.literal_eval(col_data_FPR['white_time_decay'][i]), linewidth=2, markersize=3,
+axs[0, 1].plot(x_list, ast.literal_eval(col_data_FPR['white_time_decay'][i]), linewidth=2, markersize=2,
                label='{}'.format(alpha_list[i]), linestyle=':', marker='s', color=curve_colors[i])
-axs[1, 1].plot(x_list, ast.literal_eval(col_data_CR['white_time_decay'][i]), linewidth=2, markersize=3,
+axs[1, 1].plot(x_list, ast.literal_eval(col_data_CR['white_time_decay'][i]), linewidth=2, markersize=2,
                label='{}'.format(alpha_list[i]), linestyle=':', marker='s', color=curve_colors[i])
-axs[2, 0].plot(x_list, ast.literal_eval(col_data_FPR['hispanic_time_decay'][i]), linewidth=2, markersize=3,
+axs[0, 2].plot(x_list, ast.literal_eval(col_data_FPR['hispanic_time_decay'][i]), linewidth=2, markersize=2,
                label='{}'.format(alpha_list[i]), linestyle=':', marker='s', color=curve_colors[i])
-axs[2, 1].plot(x_list, ast.literal_eval(col_data_CR['hispanic_time_decay'][i]), linewidth=2, markersize=3,
+axs[1, 2].plot(x_list, ast.literal_eval(col_data_CR['hispanic_time_decay'][i]), linewidth=2, markersize=2,
                label='{}'.format(alpha_list[i]), linestyle=':', marker='s', color=curve_colors[i])
 
-axs[0, 0].set_title('(a) FPR, Black', y=-0.19, pad=-0.5, fontweight='bold')
-axs[0, 1].set_title('(d) CR, Black', y=-0.19, pad=-0.5, fontweight='bold')
-axs[1, 0].set_title('(b) FPR, White', y=-0.19, pad=-0.5, fontweight='bold')
-axs[1, 1].set_title('(e) CR, White', y=-0.19, pad=-0.5, fontweight='bold')
-axs[2, 0].set_title('(c) FPR, Hispanic', y=-0.19, pad=-0.5, fontweight='bold')
-axs[2, 1].set_title('(f) CR, Hispanic', y=-0.19, pad=-0.5, fontweight='bold')
+axs[0, 0].set_title('(a) FPR, Black', y=-0.22, pad=-1.0,)
+axs[1, 0].set_title('(d) CR, Black', y=-0.22, pad=-1.0,)
+axs[0, 1].set_title('(b) FPR, White', y=-0.22, pad=-1.0,)
+axs[1, 1].set_title('(e) CR, White', y=-0.22, pad=-1.0,)
+axs[0, 2].set_title('(c) FPR, Hispanic', y=-0.22, pad=-1.0,)
+axs[1, 2].set_title('(f) CR, Hispanic', y=-0.22, pad=-1.0,)
 
 for ax in axs.flat:
     ax.grid(True)
-    ax.set_xticks(np.arange(0, len(x_list)), [], rotation=0, fontsize=20)
+    ax.set_xticks(np.arange(0, len(x_list)), [], rotation=0, fontsize=14)
 
 axs[0, 0].set_yscale('symlog', linthresh=0.29, linscale=0.15, base=2)
 axs.flat[0].set_yticks([0, 0.3, 0.4, 0.5], ['0', '0.3', '0.4', '0.5'])
 #
-axs.flat[2].set_yscale('loglinearlog', A=0.05, linthresh=0.28)
-axs.flat[2].set_ylim(0.08, 1.1)
-axs.flat[2].set_yticks([0.1, 0.2, 0.3, 1], ['0.1', '0.2', '0.3', '1'])
+axs.flat[2].set_yscale('loglinearlog', A=0.08, linthresh=0.4)
+# axs.flat[2].set_ylim(0.08, 1.15)
+axs.flat[2].set_yticks([0.1, 0.2, 0.3, 1], ['0.1', '0.2', '0.3', '1.0'])
 # axs.flat[2].set_yscale('symlog', linthresh=0.08, linscale=0.1, base=2)
-axs.flat[2].set_ylabel('false positive rate (FPR)', fontsize=16, labelpad=1, fontweight='bold')
+# axs.flat[2].set_ylabel('false positive rate (FPR)', fontsize=14, labelpad=1,)
 
 axs.flat[4].set_yscale('symlog', linthresh=0.08, linscale=0.08, base=2)
-axs.flat[4].set_yticks([0, 0.1, 0.2, 0.3, 0.5], ['0', '0.1', '0.2', '0.3', '0.5'])
+axs.flat[4].set_yticks([0.2, 0.3, 0.5], ['0.2', '0.3', '0.5'])
 
-axs.flat[1].set_yscale('linear')
-axs.flat[1].set_yticks([0.4, 0.5, 0.6], ['0.4', '0.5', '0.6'])
+axs.flat[1].set_yscale('loglinearlog', A=0.05, linthresh=0.28)
+axs.flat[1].set_ylim(0.1, 1.05)
+axs.flat[1].set_yticks([0.1, 0.2, 0.3, 1], ['0.1', '0.2', '0.3', '1.0'])
 
-# axs.flat[3].set_yscale('log')
-axs.flat[3].set_yticks([0.2, 0.3, 0.4, 0.5], ['0.2', '0.3', '0.4', '0.5'])
-axs.flat[3].set_ylabel('coverage ratio (CR)', fontsize=16, labelpad=1, fontweight='bold')
+axs.flat[3].set_yscale('linear')
+axs.flat[3].set_yticks([0.3, 0.4, 0.5, 0.6], ['0.3', '0.4', '0.5', '0.6'])
+
+
 axs.flat[5].set_yscale('log')
 axs.flat[5].set_yticks([0.04, 0.06, 0.1, 0.2, 0.3], ['0.04', '0.06', '0.1', '0.2', '0.3'])
 
 # Add a common x-axis label
-fig.text(0.44, -0.05, 'compas screening date, from 01/01/2013 \nto 12/31/2014, time window = 1 month',
-         ha='center', va='center', fontsize=16, fontweight='bold')
+fig.text(0.48, -0.1, 'compas screening date, from 01/01/2013 to 12/31/2014, time window = 1 month',
+         ha='center', va='center', fontsize=14,)
 # # Add a common y-axis label
-# fig.text(-0.07, 0.55, 'y-axis: value of false positive rate (FPR) or coverage ratio (CR)', ha='center', va='center', fontsize=15, rotation='vertical')
+# fig.text(-0.07, 0.55, 'y-axis: value of false positive rate (FPR) or coverage ratio (CR)', ha='center', va='center', fontsize=14, rotation='vertical')
 
 # create a common legend
 handles, labels = axs[-1, -1].get_legend_handles_labels()
@@ -201,12 +204,11 @@ handles, labels = axs[-1, -1].get_legend_handles_labels()
 # handles = [handles[-1]] + handles[:-1]
 # labels = [labels[-1]] + labels[:-1]
 
-plt.legend(title='Alpha Values', title_fontsize=14, loc='upper left', bbox_to_anchor=(-1.7, 4.1), fontsize=14,
+plt.legend(title='Alpha Values', title_fontsize=14, loc='upper left', bbox_to_anchor=(-2.7, 3), fontsize=14,
            ncol=7, labelspacing=0.3, handletextpad=0.3, markerscale=1.6,
            columnspacing=0.4, borderpad=0.2, frameon=True, handles=handles, labels=labels)
 
-plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05, wspace=0.4, hspace=0.3)
-plt.tight_layout()
+
 plt.savefig("compas_time_decay_factor.png", bbox_inches='tight')
 plt.show()
 

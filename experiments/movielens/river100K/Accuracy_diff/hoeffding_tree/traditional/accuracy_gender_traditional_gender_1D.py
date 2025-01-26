@@ -161,8 +161,8 @@ def plot_certain_time_window(window_size, axs):
     from datetime import datetime
     datetime = df_male['datetime'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d').strftime('%m/%d/%Y')).tolist()
 
-    window_size_list = df.columns.tolist()[2:]
-    print("window_size_list", window_size_list)
+    # window_size_list = df.columns.tolist()[2:]
+    # print("window_size_list", window_size_list)
 
 
     axs.grid(True)
