@@ -1,24 +1,22 @@
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib
-import seaborn as sns
 import colorsys
 import csv
-from matplotlib.scale import ScaleBase
-from matplotlib.transforms import Transform
 
-# Enable LaTeX rendering
-# plt.rcParams['text.usetex'] = True
-# plt.rcParams['font.family'] = 'CMU.Serif'
-# plt.rcParams['font.serif'] = 'Computer Modern'
+import matplotlib
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from numpy import dtype
+import math
+import sys
+from algorithm.dynamic_window import Accuracy_workload as dynamic_window_workload
+from algorithm.per_item import Accuracy_workload as fixed_window_workload
+import seaborn as sns
+from matplotlib.gridspec import GridSpec
+# Set the font size for labels, legends, and titles
 
-# Set the global font family to serif
-plt.rcParams['font.family'] = 'arial'
 
-sns.set_palette("Paired")
-sns.set_context("paper", font_scale=1.6)
-
+plt.rcParams['font.size'] = 20
+plt.rcParams['font.family'] = 'Times New Roman'  # Replace with your desired font name
 
 
 def scale_lightness(rgb, scale_l):
@@ -27,314 +25,326 @@ def scale_lightness(rgb, scale_l):
     # manipulate h, l, s values and return as rgb
     return colorsys.hls_to_rgb(h, min(1, l * scale_l), s=s)
 
-
-class LogLinearLogTransform(Transform):
-    input_dims = output_dims = 1
-
-    def __init__(self, linthresh, A, **kwargs):
-        super().__init__(**kwargs)
-        self.linthresh = linthresh
-        self.A = A
-
-    def transform_non_affine(self, a):
-        # Adjust transformation to center linear region around y=A
-        with np.errstate(divide='ignore', invalid='ignore'):
-            # Example adjusted transformation logic; you will need to refine this
-            return np.where(np.abs(a - self.A) <= self.linthresh, a,
-                            np.sign(a - self.A) * np.log10(np.abs(a - self.A) + 1) + self.A)
-
-    def inverted(self):
-        return InvertedLogLinearLogTransform(self.linthresh, self.A)
+def get_integer(alpha):
+    while not math.isclose(alpha, round(alpha), rel_tol=1e-9):  # Use a small tolerance
+        alpha *= 10
+    return int(alpha)
 
 
-class InvertedLogLinearLogTransform(LogLinearLogTransform):
-    def transform_non_affine(self, a):
-        # Adjust inverse transformation logic accordingly
-        # This is a placeholder; you need to define the exact inverse math
-        return np.where(np.abs(a - self.A) <= self.linthresh, a,
-                        np.sign(a - self.A) * (np.exp(np.abs(a - self.A)) - 1) + self.A)
+threshold = 0.3
+label_prediction = "prediction"
+label_ground_truth = "rating"
+correctness_column = "diff_binary_correctness"
+use_two_counters = True
+time_unit = "1 hour"
+# window_size_units = "24*7*4*2"
+checking_interval = "500000000 nanosecond"
+use_nanosecond = False
 
 
-class LogLinearLogScale(ScaleBase):
-    name = 'loglinearlog'
 
-    def __init__(self, axis, *, linthresh=1, A=1, **kwargs):
-        super().__init__(axis)
-        self.linthresh = linthresh
-        self.A = A
-
-    def get_transform(self):
-        return LogLinearLogTransform(self.linthresh, self.A)
-
-    def set_default_locators_and_formatters(self, axis):
-        # Setup locators and formatters as needed
-        pass
+fig, axs = plt.subplots(3, 2, figsize=(6, 2.8), gridspec_kw={'width_ratios': [5, 2]})
+fig.subplots_adjust(left=0.0, right=1, top=1, bottom=0.0, wspace=0.3, hspace=0.38)
 
 
-# Register the custom scale
-import matplotlib.scale as mscale
-
-mscale.register_scale(LogLinearLogScale)
 
 
-# Define thresholds
-# linear_threshold # Transition to log after this value
-# log_linear_transition  # Transition back to linear after this value
-def get_y_transformed(y, linear_threshold, log_linear_transition):
-    # Apply transformation
-    y_transformed = np.zeros_like(y)
-    for i, value in enumerate(y):
-        if value <= linear_threshold:
-            y_transformed[i] = value
-        elif value <= log_linear_transition:
-            y_transformed[i] = linear_threshold + np.log(value - linear_threshold + 1)
-        else:
-            # Adjust the offset to smoothly transition back to linear
-            log_offset = linear_threshold + np.log(log_linear_transition - linear_threshold + 1)
-            y_transformed[i] = log_offset + (value - log_linear_transition)
-    return y_transformed
-
-
-# read FPR
-df_FPR = pd.read_csv("case_study_FPR.csv", sep=",")
-
-# print(df_FPR.columns)
-
-col_data_FPR = {}
-
-for col_name in df_FPR.columns:
-    col_data_FPR[col_name] = df_FPR[col_name].tolist()
-
-# read CR
-df_CR = pd.read_csv("case_study_CR.csv", sep=",")
-# print(df_CR.head)
-col_data_CR = {}
-for col_name in df_CR.columns:
-    col_data_CR[col_name] = df_CR[col_name].tolist()
-
-# draw the plot
-
-x_list = np.arange(0, len(df_CR))
-
-# print(len(x_list))
-
-fig, axs = plt.subplots(1, 2, figsize=(6, 2.55))
 plt.rcParams['font.size'] = 10
 curve_colors = sns.color_palette(palette=['navy', 'blue', 'cornflowerblue', 'lightgreen', '#730a47', '#d810ef'])
 
-
-pair_colors = [scale_lightness(matplotlib.colors.ColorConverter.to_rgb("navy"), 2.2), '#8ef1e8',
+curve_colors = [scale_lightness(matplotlib.colors.ColorConverter.to_rgb("navy"), 2.2), '#8ef1e8',
                '#287c37', '#cccc00',
                '#730a47', '#9966cc']
 
+colors_set1 = ["#1f77b4", "#76b7b2", "#17becf"]  # Blue, teal, light blue
+colors_set2 = ["#ff7f0e", "#ffbb78", "#d62728"]  # Orange, light orange, red
 
-axs[0].plot(x_list, col_data_FPR["hispanic_time_decay"], linewidth=2.5, markersize=3.5, label='Hispanic time decay',
+curve_colors = sns.color_palette("magma", 3) + sns.color_palette("viridis", 3)
+curve_colors = ["blue", "red", "green",  "hotpink", "DarkGrey", "darkorchid",  "Lime", "cyan", "gold",]
+
+######################################## Dynamic fixed window ########################################
+
+
+
+# Inset zoom
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+# axins = inset_axes(axs[0][0], width="30%", height="30%", loc="upper right")
+
+df_fixed = pd.read_csv(f"fixed_window_{checking_interval}.csv")
+
+x_list = np.arange(len(df_fixed))
+axs[0][0].plot(x_list, df_fixed['Technology_time_decay'], linewidth=1.5, markersize=2.5, label = 'Technology',
             linestyle='-', marker='o',
-            color=pair_colors[4])
-axs[0].plot(x_list, col_data_FPR["hispanic_traditional"], linewidth=2.5, markersize=3.5, label='Hispanic traditional',
-            linestyle='--', marker='s',
-            color=pair_colors[5])
-# Plot the first curve (y1_values)
-axs[0].plot(x_list, col_data_FPR["black_time_decay"], linewidth=2.5, markersize=3.5, label='Black time decay',
-            linestyle='-', marker='o', color=pair_colors[0])
-
-# Plot the second curve (y2_values)
-axs[0].plot(x_list, col_data_FPR["black_traditional"], linewidth=2.5, markersize=3.5, label='Black traditional',
-            linestyle='--', marker='s', color=pair_colors[1])
-
-axs[0].plot(x_list, col_data_FPR["white_time_decay"], linewidth=2.5, markersize=3.5, label='White time decay',
-            linestyle='-', marker='o', color=pair_colors[2])
-axs[0].plot(x_list, col_data_FPR["white_traditional"], linewidth=2.5, markersize=3.5, label='White traditional',
-            linestyle='--', marker='s', color=pair_colors[3])
+            color=curve_colors[0])
+axs[1][0].plot(x_list, df_fixed['ConsumerCyclical_time_decay'], linewidth=1.5, markersize=2.5, label = 'Consumer Cyclical',
+            linestyle='-', marker='o',
+            color=curve_colors[1])
+axs[2][0].plot(x_list, df_fixed['CommunicationServices_time_decay'], linewidth=1.5, markersize=2.5, label = "Communication Services",
+            linestyle='-', marker='o',
+            color=curve_colors[2])
 
 
 
-axs[1].plot(x_list, col_data_CR["black_time_decay"], linewidth=2.5, markersize=3.5, label='Black time decay',
-            linestyle='-', marker='o', color=pair_colors[0])
-axs[1].plot(x_list, col_data_CR["black_traditional"], linewidth=2.5, markersize=3.5, label='Black traditional',
-            linestyle='--', marker='s', color=pair_colors[1])
-axs[1].plot(x_list, col_data_CR["white_time_decay"], linewidth=2.5, markersize=3.5, label='White time decay',
-            linestyle='-', marker='o', color=pair_colors[2])
-axs[1].plot(x_list, col_data_CR["white_traditional"], linewidth=2.5, markersize=3.5, label='White traditional',
-            linestyle='--', marker='s', color=pair_colors[3])
-axs[1].plot(x_list, col_data_CR["hispanic_time_decay"], linewidth=2.5, markersize=3.5, label='Hispanic time decay',
-            linestyle='-', marker='o', color=pair_colors[4])
-axs[1].plot(x_list, col_data_CR["hispanic_traditional"], linewidth=2.5, markersize=3.5, label='Hispanic traditional',
-            linestyle='--', marker='s', color=pair_colors[5])
+######################################## Dynamic adaptive window ########################################
+
+Tb = 24*7
+Tin = 24
+
+df_adaptive = pd.read_csv(f"adaptive_window_{checking_interval}.csv")
+x_list = np.arange(len(df_adaptive))
+axs[0][0].plot(x_list, df_adaptive["Technology_time_decay"], linewidth=1.5, markersize=2.5, label='Technology',
+            linestyle='-', marker='o',
+            color=curve_colors[3])
+axs[1][0].plot(x_list, df_adaptive["ConsumerCyclical_time_decay"], linewidth=1.5, markersize=2.5, label='Consumer Cyclical',
+            linestyle='-', marker='o',
+            color=curve_colors[4])
+axs[2][0].plot(x_list, df_adaptive['CommunicationServices_time_decay'], linewidth=1.5, markersize=2.5, label = "Communication Services",
+            linestyle='-', marker='o',
+            color=curve_colors[5])
+
+
+######################################## traditional ########################################
 
 
 
-# add a common x-axis label
-fig.text(0.5, 0.01, 'compas screening date, from 01/01/2013 \nto 12/31/2014, time window = 1 month',
-            ha='center', va='center', fontsize=16, fontweight='bold')
-
-axs[0].set_ylabel('false positive rate', fontsize=17, labelpad=-1, fontweight='bold', y=0.46)
-axs[0].set_title('(a) FPR', y=-0.3, pad=0, fontweight='bold')
-axs[0].set_yscale('log')
-axs[0].set_yticks([0.1, 0.3, 0.5, 1.0], [0.1, 0.3, 0.5, 1.0])
-x_ticks = np.arange(0, len(x_list))
-x_labels = [""] * len(x_list)
-x_labels[5] = "6"
-x_labels[11] = "12"
-x_labels[15] = "16"
-axs[0].set_xticks(x_ticks, x_labels, rotation=0, fontsize=14)
-axs[0].grid(True)
-
-gridlines = axs[0].xaxis.get_gridlines()
-gridlines[5].set_color("k")
-gridlines[5].set_linewidth(2)
-gridlines[11].set_color("k")
-gridlines[11].set_linewidth(2)
-gridlines[15].set_color("k")
-gridlines[15].set_linewidth(2)
-#
-# xt=np.append(x_ticks,5)
-# xtl = xt.tolist()
-# xtl[-1] = "6"
-# axs[0].set_xticklabels(xtl)
+window_size = "500ms"
+df_traditional = pd.read_csv(f"../traditional_method/traditional_accuracy_time_window_{window_size}.csv")
+print(df_traditional)
+value_col_name = "accuracy"
+df_traditional['ts_event'] = pd.to_datetime(df_traditional['ts_event'], format='mixed')
 
 
 
-axs[1].set_ylabel('coverage rate', fontsize=17, labelpad=-1, fontweight='bold')
-axs[1].set_yticks([0.0, 0.2, 0.3, 0.4, 0.6])
-axs[1].set_title('(b) CR', y=-0.27, pad=-0.5, fontweight='bold')
-axs[1].grid(True)
-axs[1].set_xticks(x_ticks, [], rotation=0, fontsize=20)
+
+def plot_certain_time_window(df, value_col_name, window_size, axs):
+    df_tech = df[df["sector"] == 'Technology']
+    df_tech = df_tech[["ts_event", value_col_name]]
+
+    df_Consumer = df[df["sector"] == 'Consumer Cyclical']
+    # df_male = df_male[df_male[window_size].notna()]
+    df_Consumer = df_Consumer[["ts_event", value_col_name]]
+
+    df_Communication = df[df["sector"] == 'Communication Services']
+    df_Communication = df_Communication[["ts_event", value_col_name]]
 
 
-# create a common legend
-handles, labels = axs[-1].get_legend_handles_labels()
+    # print("df_tech: \n", df_tech)
+    # print("\ndf_Consumer: \n", df_Consumer)
+
+    x_list = np.arange(0, len(df_Consumer))
+
+    from datetime import datetime
+#    datetime = df_tech['ts_event'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d').strftime('%m/%d/%Y')).tolist()
+    datetime = df_tech['ts_event'].apply(lambda x: x.strftime('%m/%d/%Y')).tolist()
+
+    tech_lst = df_tech[value_col_name].dropna().tolist()
+    consumer_lst = df_Consumer[value_col_name].dropna().tolist()
+    communication_lst = df_Communication[value_col_name].dropna().tolist()
+
+    # df = pd.DataFrame({'datetime': datetime, 'Technology': tech_lst, 'Consumer Cyclical': consumer_lst, 'Communication Services': communication_lst})
+
+    axs[0][0].plot(np.arange(len(tech_lst)), tech_lst, linewidth=1.5, markersize=2,
+             label="Technology", linestyle='--', marker='o', color=curve_colors[6])
+    axs[1][0].plot(np.arange(len(consumer_lst)), consumer_lst, linewidth=1.5, markersize=2,
+             label='Consumer Cyclical', linestyle='--', marker='o', color=curve_colors[7])
+    axs[2][0].plot(np.arange(len(communication_lst)), communication_lst, linewidth=1.5, markersize=2,
+                   label='Communication Service', linestyle='--', marker='o', color=curve_colors[8])
+    # axs[0][0].legend(loc='lower left',
+    #            bbox_to_anchor=(-0.15, 0.08),  # Adjust this value (lower the second number)
+    #            fontsize=12, ncol=1, labelspacing=0.2, handletextpad=0.5,
+    #            markerscale=1, handlelength=1, columnspacing=0.6,
+    #            borderpad=0.2, frameon=True)
+    return tech_lst, consumer_lst, communication_lst
 
 
-fig.legend(handles=handles, labels=labels, loc='lower left', bbox_to_anchor=(0.01, 0.96), fontsize=12.8,
-           ncol=3, labelspacing=0.3, handletextpad=0.3, markerscale=2,
-           columnspacing=0.4, borderpad=0.2, frameon=True)
-fig.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.1, wspace=0.3, hspace=0)
+tech_lst, consumer_lst, communication_lst = plot_certain_time_window(df_traditional, value_col_name,'500ms', axs)
+
+# axs[0][0].set_ylabel('Accuracy', fontsize=14, labelpad=-1).set_position([0.4, -0.1])
+axs[0][0].set_ylim(0.6, 0.7)
+axs[0][0].set_yscale('symlog', linthresh=8)
+axs[0][0].set_title('(a) Technology Accuracy', y=-0.15, pad=-8, fontsize=14)
+axs[0][0].set_yticks([0.6, 0.7], ['0.6', '0.7'], fontsize=14)
+axs[0][0].set_xticks(range(len(tech_lst)), [""]*len(tech_lst), rotation=0, fontsize=14)
+
+axs[0][0].grid(True, axis="x", linestyle='--', alpha=0.6)
+axs[0][0].grid(True, axis="y", linestyle='--', alpha=0.6)
+axs[0][0].minorticks_on()
 
 
-plt.tight_layout()
-plt.savefig("compas_compare.png", bbox_inches='tight')
-plt.show()
+# axs[1][0].set_ylabel('accuracy', fontsize=14, labelpad=-1)
+axs[1][0].set_ylim(0.58, 0.7)
+axs[1][0].set_yscale('symlog', linthresh=8)
+axs[1][0].set_title('(c) Consumer Cyclical Accuracy', y=-0.15, pad=-8, fontsize=14)
+axs[1][0].set_yticks([0.6, 0.7], ['0.6', '0.7'], fontsize=14)
+axs[1][0].set_xticks([], [], rotation=0, fontsize=14)
+axs[1][0].set_xticks(range(len(consumer_lst)), [""]*len(consumer_lst), rotation=0, fontsize=14)
+
+axs[1][0].grid(True, axis="y", linestyle='--', alpha=0.6)
+axs[1][0].grid(True, axis="x", linestyle='--', alpha=0.6)
+axs[1][0].minorticks_on()
 
 
-####################### smoothness: standard deviation of the first derative of the curve ############################
+axs[2][0].set_ylim(0.5, 0.7)
+axs[2][0].set_yscale('symlog', linthresh=8)
+axs[2][0].set_title('(e) Comm. Services Accuracy', y=-0.15, pad=-8, fontsize=14)
+axs[2][0].set_yticks([0.5, 0.6, 0.7], ['0.5', '0.6', '0.7'], fontsize=14)
+axs[2][0].set_xticks([], [], rotation=0, fontsize=14)
+axs[2][0].set_xticks(range(len(communication_lst)), [""]*len(communication_lst), rotation=0, fontsize=14)
 
-smooth_FPR = {}
-smooth_CR = {}
+axs[2][0].grid(True, axis="y", linestyle='--', alpha=0.6)
+axs[2][0].grid(True, axis="x", linestyle='--', alpha=0.6)
+axs[2][0].minorticks_on()
+
+fig.savefig("curves.png", bbox_inches='tight')
 
 
+######################################## roughness ########################################
 
-# open a new file for FPR
+smooth_tech = {}
+smooth_consumer_cyclical = {}
+smooth_communication_services = {}
+
+
 with open("roughness_compas_FPR.csv", "w", newline='') as csvfile:
     writer = csv.writer(csvfile, delimiter=',')
-    writer.writerow(["smoothness"])
-    print("$$$$$$$$$$", col_data_FPR["black_time_decay"])
-    writer.writerow(["black_time_decay", np.std(np.diff(col_data_FPR["black_time_decay"]) / np.diff(x_list))])
-    smooth_FPR["black_time_decay"] = np.std(np.diff(col_data_FPR["black_time_decay"]) / np.diff(x_list))
-    # remove nan value in list
-    fpr = col_data_FPR["black_traditional"]
-    fpr = [x for x in fpr if str(x) != 'nan']
-    dydx = np.diff(fpr) / np.diff(np.arange(0, len(fpr)))
-    sm = np.std(dydx)
-    writer.writerow(["black_traditional", sm])
-    smooth_FPR["black_traditional"] = sm
-    writer.writerow(["white_time_decay", np.std(np.diff(col_data_FPR["white_time_decay"]) / np.diff(x_list))])
-    smooth_FPR["white_time_decay"] = np.std(np.diff(col_data_FPR["white_time_decay"]) / np.diff(x_list))
-    fpr = col_data_FPR["white_traditional"]
-    fpr = [x for x in fpr if str(x) != 'nan']
-    dydx = np.diff(fpr) / np.diff(np.arange(0, len(fpr)))
-    sm = np.std(dydx)
-    writer.writerow(["white_traditional", sm])
-    smooth_FPR["white_traditional"] = sm
-    writer.writerow(["hispanic_time_decay", np.std(np.diff(col_data_FPR["hispanic_time_decay"]) / np.diff(x_list))])
-    smooth_FPR["hispanic_time_decay"] = np.std(np.diff(col_data_FPR["hispanic_time_decay"]) / np.diff(x_list))
-    fpr = col_data_FPR["hispanic_traditional"]
-    fpr = [x for x in fpr if str(x) != 'nan']
-    dydx = np.diff(fpr) / np.diff(np.arange(0, len(fpr)))
-    sm = np.std(dydx)
-    writer.writerow(["hispanic_traditional", sm])
-    smooth_FPR["hispanic_traditional"] = sm
+    writer.writerow(["smoothness", "roughness", "check_points"])
+    writer.writerow(["tech_fixed_window", np.std(np.diff(df_fixed["Technology_time_decay"]) / np.diff(x_list))])
+    smooth_tech["tech_fixed_window_smoothness"] = np.std(np.diff(df_fixed["Technology_time_decay"]) / np.diff(x_list))
+    
+    writer.writerow(["tech_adaptive_window", np.std(np.diff(df_adaptive["Technology_time_decay"]) / np.diff(x_list))])
+    smooth_tech["tech_adaptive_window_smoothness"] = np.std(np.diff(df_fixed["Technology_time_decay"]) / np.diff(x_list))
 
-smooth_CR["black_time_decay"] = np.std(np.diff(col_data_CR["black_time_decay"]) / np.diff(x_list))
-smooth_CR["black_traditional"] = np.std(np.diff(col_data_CR["black_traditional"]) / np.diff(x_list))
-smooth_CR["white_time_decay"] = np.std(np.diff(col_data_CR["white_time_decay"]) / np.diff(x_list))
-smooth_CR["white_traditional"] = np.std(np.diff(col_data_CR["white_traditional"]) / np.diff(x_list))
-smooth_CR["hispanic_time_decay"] = np.std(np.diff(col_data_CR["hispanic_time_decay"]) / np.diff(x_list))
-smooth_CR["hispanic_traditional"] = np.std(np.diff(col_data_CR["hispanic_traditional"]) / np.diff(x_list))
+    tra = df_traditional["accuracy"].tolist()
+    tra = [x for x in tra if str(x) != 'nan']
+    dydx = np.diff(tra) / np.diff(np.arange(0, len(tra)))
+    sm = np.std(dydx)
+    writer.writerow(["tech_traditional", sm])
+    smooth_tech["tech_traditional_smoothness"] = sm
 
-# another file for CR
-with open("roughness_compas_CR.csv", "w", newline='') as csvfile:
+
+print(smooth_tech)
+
+smoothness_scores_tech = [1/sd for sd in list(smooth_tech.values())]  # Example data
+# Normalize based on the maximum value observed
+max_smoothness_tech = max(smoothness_scores_tech)
+smoothness_scores_normalized_tech = [score / max_smoothness_tech for score in smoothness_scores_tech]
+print("Normalized Smoothness Scores male fixed, adaptive, traditional:", smoothness_scores_normalized_tech)
+
+
+with open("roughness_compas_FPR.csv", "a", newline='') as csvfile:
     writer = csv.writer(csvfile, delimiter=',')
-    writer.writerow(["smoothness"])
-    writer.writerow(["black_time_decay", np.std(np.diff(col_data_CR["black_time_decay"]) / np.diff(x_list))])
-    writer.writerow(["black_traditional", np.std(np.diff(col_data_CR["black_traditional"]) / np.diff(x_list))])
-    writer.writerow(["white_time_decay", np.std(np.diff(col_data_CR["white_time_decay"]) / np.diff(x_list))])
-    writer.writerow(["white_traditional", np.std(np.diff(col_data_CR["white_traditional"]) / np.diff(x_list))])
-    writer.writerow(["hispanic_time_decay", np.std(np.diff(col_data_CR["hispanic_time_decay"]) / np.diff(x_list))])
-    writer.writerow(["hispanic_traditional", np.std(np.diff(col_data_CR["hispanic_traditional"]) / np.diff(x_list))])
-
-# roughness_scores_FPR = [1 / sd for sd in list(smooth_FPR.values())]
-# roughness_scores_CR = [1 / sd for sd in list(smooth_CR.values())]
-#
-# # Assuming roughness_scores is a 2D array where each row is a feature to be normalized
-# roughness_scores = np.array(roughness_scores_FPR).reshape(-1, 1)  # Reshape for scaler if it's a single feature
-
-# scaler = MinMaxScaler(feature_range=(0, 1))
-# smoothness_scores_normalized_FPR = scaler.fit_transform(roughness_scores).flatten()
+    # do the same for females
+    writer.writerow(["ConsumerCyclical_fixed_window", np.std(np.diff(df_fixed["ConsumerCyclical_time_decay"]) / np.diff(x_list))])
+    smooth_consumer_cyclical["ConsumerCyclical_fixed_window_smoothness"] = np.std(np.diff(df_fixed["ConsumerCyclical_time_decay"]) / np.diff(x_list))
+    writer.writerow(["ConsumerCyclical_adaptive_window", np.std(np.diff(df_adaptive["ConsumerCyclical_time_decay"]) / np.diff(x_list))])
+    smooth_consumer_cyclical["ConsumerCyclical_adaptive_window_smoothness"] = np.std(np.diff(df_adaptive["ConsumerCyclical_time_decay"]) / np.diff(x_list))
+    tra = df_traditional["accuracy"].tolist()
+    tra = [x for x in tra if str(x) != 'nan']
+    dydx = np.diff(tra) / np.diff(np.arange(0, len(tra)))
+    sm = np.std(dydx)
+    writer.writerow(["ConsumerCyclical_traditional_smoothness", sm])
+    smooth_consumer_cyclical["ConsumerCyclical_traditional_smoothness"] = sm
 
 
-smoothness_scores = [1/sd for sd in list(smooth_FPR.values())]  # Example data
+print(smooth_consumer_cyclical)
+
+
+smoothness_scores_consumer_cyclical = [1/sd for sd in list(smooth_consumer_cyclical.values())]  # Example data
 # Normalize based on the maximum value observed
-max_smoothness = max(smoothness_scores)
-smoothness_scores_normalized_FPR = [score / max_smoothness for score in smoothness_scores]
-print("Normalized Smoothness Scores :", smoothness_scores_normalized_FPR)
+max_smooth_consumer_cyclical = max(smoothness_scores_consumer_cyclical)
+smoothness_scores_normalized_consumer_cyclical = [score / max_smooth_consumer_cyclical for score in smoothness_scores_consumer_cyclical]
+print("Normalized smoothness Scores consumer_cyclical fixed, adaptive, traditional:", smoothness_scores_normalized_consumer_cyclical)
 
 
+with open("roughness_compas_FPR.csv", "a", newline='') as csvfile:
+    writer = csv.writer(csvfile, delimiter=',')
+    writer.writerow(["CommunicationServices_fixed_window", np.std(np.diff(df_fixed["CommunicationServices_time_decay"]) / np.diff(x_list))])
+    smooth_communication_services["CommunicationServices_fixed_window_smoothness"] = np.std(np.diff(df_fixed["CommunicationServices_time_decay"]) / np.diff(x_list))
+    writer.writerow(["CommunicationServices_adaptive_window", np.std(np.diff(df_adaptive["CommunicationServices_time_decay"]) / np.diff(x_list))])
+    smooth_communication_services["CommunicationServices_adaptive_window_smoothness"] = np.std(np.diff(df_adaptive["CommunicationServices_time_decay"]) / np.diff(x_list))
+    tra = df_traditional["accuracy"].tolist()
+    tra = [x for x in tra if str(x) != 'nan']
+    dydx = np.diff(tra) / np.diff(np.arange(0, len(tra)))
+    sm = np.std(dydx)
+    writer.writerow(["CommunicationServices_traditional_smoothness", sm])
+    smooth_communication_services["CommunicationServices_traditional_smoothness"] = sm
 
-# roughness_scores = np.array(roughness_scores_CR).reshape(-1, 1)  # Reshape for scaler if it's a single feature
-# smoothness_scores_normalized_CR = scaler.fit_transform(roughness_scores).flatten()
-#
+print(smooth_communication_services)
 
-smoothness_scores = [1/sd for sd in list(smooth_CR.values())]  # Example data
+smoothness_scores_communication_services = [1/sd for sd in list(smooth_communication_services.values())]  # Example data
 # Normalize based on the maximum value observed
-max_smoothness = max(smoothness_scores)
-smoothness_scores_normalized_CR = [score / max_smoothness for score in smoothness_scores]
-print("Normalized Smoothness Scores with :", smoothness_scores_normalized_CR)
+max_smooth_communication_services = max(smoothness_scores_communication_services)
+smoothness_scores_normalized_communication_services = [score / max_smooth_communication_services for score in smoothness_scores_communication_services]
+print("Normalized smoothness Scores communication_services fixed, adaptive, traditional:", smoothness_scores_normalized_communication_services)
 
 
 
-# draw two bar charts using FPR and CR smoothness
-fig, axs = plt.subplots(1, 2, figsize=(5.8, 1.7))
 
-legend_labels = ["Black time decay", "Black traditional", "White time decay", "White traditional", "Hispanic time decay", "Hispanic traditional"]
-
-axs[0].bar(smooth_FPR.keys(), smoothness_scores_normalized_FPR, color=pair_colors, label=legend_labels)
-axs[0].set_ylabel('smoothness', fontsize=17, labelpad=-1, fontweight='bold')
-axs[0].set_title('(a) FPR', y=-0.15, pad=0, fontweight='bold')
-axs[0].set_yticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0], [0.0, 0.2, 0.4, 0.6, 0.8, 1.0], fontsize=16)
-axs[0].grid(True)
-# remove x ticks
-axs[0].set_xticks([], [], rotation=0, fontsize=20)
-axs[0].bar_label(axs[0].containers[0], labels=["{:0.2f}".format(score) for score in smoothness_scores_normalized_FPR],
-                 fontsize=14, padding=-1.2)
+bar_colors = ["blue", "hotpink",  "Lime",  "red",  "DarkGrey", "cyan",  "green", "darkorchid","gold", ]
 
 
-axs[1].bar(smooth_CR.keys(), smoothness_scores_normalized_CR, color=pair_colors, label=legend_labels)
-axs[1].set_ylabel('smoothness', fontsize=17, labelpad=-1, fontweight='bold')
-axs[1].set_title('(b) CR', y=-0.15, pad=0, fontweight='bold')
-axs[1].set_yticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0], [0.0, 0.2, 0.4, 0.6, 0.8, 1.0], fontsize=16)
-axs[1].grid(True)
-axs[1].set_xticks([], [], rotation=0, fontsize=20)
-axs[1].bar_label(axs[1].containers[0], labels=["{:0.2f}".format(score) for score in smoothness_scores_normalized_CR],
-                 fontsize=14, padding=-1.2)
+
+# Male Smoothness Bar Chart
+axs[0][1].bar(["Fixed Window", "Adaptive Window", "Traditional Method"],
+           smoothness_scores_normalized_tech, color=bar_colors[:3], width=0.4,
+              label = ["Tech Fixed", "Tech Adaptive", "Tech Traditional"])
+axs[0][1].set_title("(b) Technology Smoothness", y=-0.15, pad=-8, fontsize=14).set_position([0.32, -0.14])
 
 
-handles, labels = axs[0].get_legend_handles_labels()
-fig.legend(handles=handles, labels=labels, loc='lower left', bbox_to_anchor=(-0.07, 0.95), fontsize=13,
-              ncol=3, labelspacing=0.3, handletextpad=0.3, markerscale=2, handlelength=1.9,
-              columnspacing=0.5, borderpad=0.2, frameon=True)
-# fig.legend()
-plt.tight_layout()
-fig.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.1, wspace=0.3, hspace=0)
-fig.savefig("compas_smoothness_normalized.png", bbox_inches='tight')
+axs[0][1].set_yscale("symlog", linthresh=0.1)
+axs[0][1].set_yticks([0.03, 0.1, 0.3, 1.0], ["0.03", "0.1", "0.3", "1.0"], fontsize=14)
+axs[0][1].grid(True, linestyle='--', alpha=0.6)
+axs[0][1].set_xticks([], [], rotation=0, fontsize=14)
+# axs[0][1].set_ylabel('Normalized Smoothness Score', fontsize=14, labelpad=-1).set_position([0.4, -0.1])
+
+
+# Female Smoothness Bar Chart
+axs[1][1].bar(["Fixed Window", "Adaptive Window", "Traditional Method"],
+           smoothness_scores_normalized_consumer_cyclical, color=bar_colors[3:6], width=0.4,
+              label = ["Con. Cyc. Fixed", "Con. Cyc. Adaptive",
+                       "Con. Cyc. Traditional"])
+axs[1][1].set_title("(d) Consumer Cyclical Smoothness", y=-0.15, pad=-8, fontsize=14).set_position([0.32, -0.14])
+axs[1][1].set_yscale("symlog", linthresh=0.1)
+axs[1][1].set_yticks([0.03, 0.1, 0.3, 1.0], ["0.03", "0.1", "0.3", "1.0"], fontsize=14)
+axs[1][1].grid(True, linestyle='--', alpha=0.6)
+axs[1][1].set_xticks([], [], rotation=0, fontsize=14)
+
+
+
+axs[2][1].bar(["Fixed Window", "Adaptive Window", "Traditional Method"],
+              smoothness_scores_normalized_communication_services, color=bar_colors[6:], width=0.4,
+                  label = ["Comm. Serv. Fixed", "Comm. Serv. Adaptive",
+                           "Comm. Serv. Traditional"])
+axs[2][1].set_title("(f) Comm. Services Smoothness", y=-0.15, pad=-8, fontsize=14).set_position([0.32, -0.14])
+axs[2][1].set_yscale("symlog", linthresh=0.1)
+axs[2][1].set_yticks([0.03, 0.1, 0.3, 1.0], ["0.03", "0.1", "0.3", "1.0"], fontsize=14)
+axs[2][1].grid(True, linestyle='--', alpha=0.6)
+axs[2][1].set_xticks([], [], rotation=0, fontsize=14)
+
+
+
+
+handles, labels = axs[0][1].get_legend_handles_labels()
+handles1, labels1 = axs[1][1].get_legend_handles_labels()
+handles2, labels2 = axs[2][1].get_legend_handles_labels()
+handles = handles + handles1 + handles2
+labels = labels + labels1 + labels2
+
+
+desired_order = [0, 3, 6, 1, 4, 7, 2, 5, 8]
+# Reorder handles and labels
+reordered_handles = [handles[i] for i in desired_order]
+reordered_labels = [labels[i] for i in desired_order]
+
+axs[0][0].legend(handles=reordered_handles, labels=reordered_labels, title_fontsize=14, loc='upper left',
+                 bbox_to_anchor=(-0.09, 2),
+                 fontsize=13, ncol=3, labelspacing=0.1, handletextpad=0.2, markerscale=0.1,
+                 columnspacing=0.5, borderpad=0.2, frameon=False)
+
+
+fig.savefig("curves_smoothness_score.png", bbox_inches='tight')
 plt.show()
+
+
+
+

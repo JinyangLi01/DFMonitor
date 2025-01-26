@@ -1,7 +1,3 @@
-smoothness
-black_time_decay,0.02052015459538967
-black_traditional,nan
-white_time_decay,0.021910819078227835
-white_traditional,nan
-hispanic_time_decay,0.051097439148341264
-hispanic_traditional,nan
+version https://git-lfs.github.com/spec/v1
+oid sha256:2bc720002d245133e49527596c7003232fc58aeb1f6a6e12d5903580089d600e
+size 203
