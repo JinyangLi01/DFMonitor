@@ -75,26 +75,17 @@ class DF_CoverageRatio_Dynamic_Window_Bit:
         try:
             series = self.groups[col_name]
             group_idx = series[series == col_value].index[0]
-            # Perform operations for the matched group
-            if not self.uf[group_idx]:
-                self.delta[group_idx] += 1 - self.threshold
-            else:
-                if self.delta[group_idx] >= 1 - self.threshold:
-                    self.delta[group_idx] -= 1 - self.threshold
-                else:
-                    self.delta[group_idx] = 1 - self.threshold - self.delta[group_idx]
-                    self.uf[group_idx] = False
         except KeyError:
-            # Handle cases where the value is not found in `groups`
-            for group_idx in self.groups.index:
-                if self.uf[group_idx]:
-                    self.delta[group_idx] += self.threshold
-                else:
-                    if self.delta[group_idx] >= self.threshold:
-                        self.delta[group_idx] -= self.threshold
-                    else:
-                        self.delta[group_idx] = self.threshold - self.delta[group_idx]
-                        self.uf[group_idx] = True
+            return
+        # Perform operations for the matched group
+        if not self.uf[group_idx]:
+            self.delta[group_idx] += 1 - self.threshold
+        else:
+            if self.delta[group_idx] >= 1 - self.threshold:
+                self.delta[group_idx] -= 1 - self.threshold
+            else:
+                self.delta[group_idx] = 1 - self.threshold - self.delta[group_idx]
+                self.uf[group_idx] = False
 
         if not new_batch:
             self.Delta_b += self.Delta_in
