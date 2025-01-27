@@ -93,6 +93,8 @@ csv_writer.writerow(["ts_recv","ts_event","rtype","publisher_id","instrument_id"
                      "channel_id","order_id","flags","ts_in_delta","sequence","symbol","sector","ts_event_datetime",
                      "next_price_direction","predicted_direction","prediction_binary_correctness"])
 
+
+data_stream.reset_index(drop=True, inplace=True)
 # Online learning loop
 for idx, row in data_stream.iterrows():
     x = preprocess_row(row)
