@@ -1,0 +1,50 @@
+{
+    "job_id": "XNAS-20250127-JEPMK8SS9F",
+    "files": [
+        {
+            "filename": "condition.json",
+            "size": 122,
+            "hash": "sha256:8b50d53ab9b398641d63c238102005034e06ea9f0ccc37d3418acca30b8c2b1d",
+            "urls": {
+                "https": "https://api.databento.com/v0/batch/download/PSYSP6A7/XNAS-20250127-JEPMK8SS9F/condition.json",
+                "ftp": "ftp://ftp.databento.com/PSYSP6A7/XNAS-20250127-JEPMK8SS9F/condition.json"
+            }
+        },
+        {
+            "filename": "metadata.json",
+            "size": 1627,
+            "hash": "sha256:64d13f6e955d3d12796ecdf41698ac818bec8bcfe2fa628e34957188242a7954",
+            "urls": {
+                "https": "https://api.databento.com/v0/batch/download/PSYSP6A7/XNAS-20250127-JEPMK8SS9F/metadata.json",
+                "ftp": "ftp://ftp.databento.com/PSYSP6A7/XNAS-20250127-JEPMK8SS9F/metadata.json"
+            }
+        },
+        {
+            "filename": "symbology.json",
+            "size": 8840,
+            "hash": "sha256:480312694cca98e6e7abecce964e083058686818e10e8ddcd43cb6b1d90e3453",
+            "urls": {
+                "https": "https://api.databento.com/v0/batch/download/PSYSP6A7/XNAS-20250127-JEPMK8SS9F/symbology.json",
+                "ftp": "ftp://ftp.databento.com/PSYSP6A7/XNAS-20250127-JEPMK8SS9F/symbology.json"
+            }
+        },
+        {
+            "filename": "symbology.csv",
+            "size": 1055,
+            "hash": "sha256:6d5191d03881492d99cb5eef471302c805469bdecf2cb9e4c71ea8917a83c511",
+            "urls": {
+                "https": "https://api.databento.com/v0/batch/download/PSYSP6A7/XNAS-20250127-JEPMK8SS9F/symbology.csv",
+                "ftp": "ftp://ftp.databento.com/PSYSP6A7/XNAS-20250127-JEPMK8SS9F/symbology.csv"
+            }
+        },
+        {
+            "filename": "xnas-itch-20241015.mbo.csv.zst",
+            "size": 2118138006,
+            "hash": "sha256:f41d04beddd77a2ae81ff4a8792c432c7e4b54f76e82c5d19d47976cc7ad25f0",
+            "urls": {
+                "https": "https://api.databento.com/v0/batch/download/PSYSP6A7/XNAS-20250127-JEPMK8SS9F/xnas-itch-20241015.mbo.csv.zst",
+                "ftp": "ftp://ftp.databento.com/PSYSP6A7/XNAS-20250127-JEPMK8SS9F/xnas-itch-20241015.mbo.csv.zst"
+            }
+        }
+    ]
+}
