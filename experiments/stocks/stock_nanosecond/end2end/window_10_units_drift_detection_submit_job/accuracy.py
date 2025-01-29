@@ -70,8 +70,8 @@ if data[correctness_column].isna().any():
 
 
 
-time_start = pd.Timestamp('2024-10-15 14:00:08.00', tz='UTC')
-time_end = pd.Timestamp('2024-10-15 14:00:14.00', tz='UTC')
+time_start = pd.Timestamp('2024-10-15 14:00:05.00', tz='UTC')
+time_end = pd.Timestamp('2024-10-15 14:00:12.00', tz='UTC')
 
 
 data["ts_event"] = pd.to_datetime(data["ts_event"])
@@ -205,8 +205,8 @@ print(df[:2])
 
 
 
-draw_figure_start_time = pd.Timestamp('2024-10-15 14:00:09.00', tz='UTC')
-draw_figure_end_time = pd.Timestamp('2024-10-15 14:00:13.00', tz='UTC')
+draw_figure_start_time = pd.Timestamp('2024-10-15 14:00:10.00', tz='UTC')
+draw_figure_end_time = pd.Timestamp('2024-10-15 14:00:11.00', tz='UTC')
 
 
 df = df[(df["check_points"] >= draw_figure_start_time) & (df["check_points"] <= draw_figure_end_time)]
