@@ -1,3 +1,5 @@
+import pickle
+
 from river import linear_model
 from river import preprocessing
 from river import metrics
@@ -6,7 +8,7 @@ import math
 from sklearn.preprocessing import MinMaxScaler
 import csv
 import pandas as pd
-
+import logging
 
 
 # Load your data (replace 'your_data.csv' with your actual file)
@@ -15,8 +17,8 @@ date = "20241015"
 data_file_name = f"xnas-itch-{date}_{time_period}"
 # Load and preprocess data
 data_stream = pd.read_csv(f'../../../../../data/stocks_nanosecond/{data_file_name}.csv')
-time_start = pd.Timestamp('2024-10-15 14:00:00.00', tz='UTC')
-time_end = pd.Timestamp('2024-10-15 14:00:14.00', tz='UTC')
+time_start = pd.Timestamp('2024-10-15 14:00:04.00', tz='UTC')
+time_end = pd.Timestamp('2024-10-15 14:00:18.00', tz='UTC')
 data_stream["ts_event"] = pd.to_datetime(data_stream["ts_event"])
 data_stream = data_stream[(data_stream["ts_event"] >= time_start) & (data_stream["ts_event"] <= time_end)]
 
@@ -94,7 +96,7 @@ csv_writer.writerow(["ts_recv","ts_event","rtype","publisher_id","instrument_id"
                      "next_price_direction","predicted_direction","prediction_binary_correctness"])
 
 # Online learning loop
-for idx, row in data_stream.iterrows():
+for idx, row in data_stream.itertuples(index=False):
     x = preprocess_row(row)
     y = row['next_price_direction']
     decay_weight = row['decay_weight']
@@ -109,25 +111,23 @@ for idx, row in data_stream.iterrows():
                           row['order_id'], row['flags'], row['ts_in_delta'], row['sequence'],
                           row['symbol'], row['sector'], y, y_pred, int(y == y_pred)])
 
-    # Drift detection:
-    #   We feed ADWIN the absolute error for classification (0 or 1).
-    #   If drift is detected, we reset the model.
+    # Write results in batches
+    if len(batch_results) >= 1000:
+        pd.DataFrame(batch_results).to_csv(result_file_name, mode='a', header=False, index=False)
+        batch_results = []
+
+    # Drift detection and metric update
     if idx % 100 == 0:
         if drift_detector.update(abs(y - (y_pred if y_pred is not None else 0))):
-            print(f"Drift detected at index {idx}, resetting model...")
-            model = (
-                preprocessing.OneHotEncoder() |
-                preprocessing.StandardScaler() |
-                linear_model.LogisticRegression()
-            )
+            logging.info(f"Drift detected at index {idx}, resetting model...")
+            model = preprocessing.OneHotEncoder() | preprocessing.StandardScaler() | linear_model.LogisticRegression()
             drift_detector = drift.ADWIN()
 
-
-    # Write results in batches of 100
-    if len(batch_results) >= 1000:
-        csv_writer.writerows(batch_results)
-        batch_results = []
-        result_file.flush()
+        logging.info(f"Step {idx}, Accuracy: {metric.get():.4f}")
+    # Save the model every 1000 steps
+    if idx % 1000 == 0:
+        with open(f"model_checkpoint_{idx}.pkl", "wb") as f:
+            pickle.dump(model, f)
 
     # Update metric
     if y_pred is not None:
@@ -137,16 +137,11 @@ for idx, row in data_stream.iterrows():
     if idx % 100 == 0:
         print(f"Step {idx}, Accuracy: {metric.get():.4f}")
 
-
-
-# Write any remaining results in the batch buffer
+# Write remaining results
 if batch_results:
-    csv_writer.writerows(batch_results)
-    result_file.flush()
+    pd.DataFrame(batch_results).to_csv(result_file_name, mode='a', header=False, index=False)
 
-# Final accuracy
-print(f"Final Accuracy: {metric.get()}")
-result_file.close()
+logging.info(f"Final Accuracy: {metric.get()}")
 
 
 

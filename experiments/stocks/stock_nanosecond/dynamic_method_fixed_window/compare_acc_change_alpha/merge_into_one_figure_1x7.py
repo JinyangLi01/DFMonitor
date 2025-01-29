@@ -186,5 +186,5 @@ for line in x.get_lines():
     line.markersize = 70
 
 
-fig.savefig("compare_accuracy_time_decay_fixed_window_change_alpha.png")
+fig.savefig("compare_accuracy_time_decay_fixed_window_change_alpha_1x7.png")
 plt.show()

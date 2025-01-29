@@ -15,8 +15,8 @@ date = "20241015"
 data_file_name = f"xnas-itch-{date}_{time_period}"
 # Load and preprocess data
 data_stream = pd.read_csv(f'../../../../../data/stocks_nanosecond/{data_file_name}.csv')
-time_start = pd.Timestamp('2024-10-15 14:00:00.00', tz='UTC')
-time_end = pd.Timestamp('2024-10-15 14:00:14.00', tz='UTC')
+time_start = pd.Timestamp('2024-10-15 14:00:05.00', tz='UTC')
+time_end = pd.Timestamp('2024-10-15 14:00:18.00', tz='UTC')
 data_stream["ts_event"] = pd.to_datetime(data_stream["ts_event"])
 data_stream = data_stream[(data_stream["ts_event"] >= time_start) & (data_stream["ts_event"] <= time_end)]
 
@@ -46,6 +46,7 @@ data_stream[['delta_price', 'rolling_mean_price', 'rolling_mean_size', 'price_vo
 )
 
 data_stream.reset_index(drop=True, inplace=True)
+
 print(f"Total number of data points: {len_data}")
 
 
@@ -127,7 +128,7 @@ for idx, row in data_stream.iterrows():
     if len(batch_results) >= 1000:
         csv_writer.writerows(batch_results)
         batch_results = []
-        result_file.flush()
+        # result_file.flush()
 
     # Update metric
     if y_pred is not None:
