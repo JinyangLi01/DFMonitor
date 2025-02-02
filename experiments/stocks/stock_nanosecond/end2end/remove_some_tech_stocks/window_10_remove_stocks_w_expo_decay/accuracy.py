@@ -58,9 +58,9 @@ checking_interval = "100000 nanosecond"
 use_nanosecond = True
 
 
-
+drift_detector_flag = "no_drift_detection"
 # Prepare the result file for writing
-data_file_name = f"prediction_result_end2end_window_10_decay_rate_{get_integer(alpha)}_remove_stocks_w_expo_decay.csv"
+data_file_name = f"prediction_result_end2end_{drift_detector_flag}_window_10_decay_rate_{get_integer(alpha)}_remove_stocks_w_expo_decay.csv"
 data = pd.read_csv(data_file_name)
 
 if data[correctness_column].isna().any():
@@ -69,7 +69,7 @@ if data[correctness_column].isna().any():
 
 
 
-time_start = pd.Timestamp('2024-10-15 14:00:10.00', tz='UTC')
+time_start = pd.Timestamp('2024-10-15 14:00:8.00', tz='UTC')
 time_end = pd.Timestamp('2024-10-15 14:00:11.00', tz='UTC')
 
 
@@ -256,6 +256,6 @@ plt.tight_layout()
 # plt.legend(loc='upper left', bbox_to_anchor=(-0.25, 1.4), fontsize=11,
 #                ncol=2, labelspacing=0.5, handletextpad=0.2, markerscale=4, handlelength=1.5,
 #                columnspacing=0.6, borderpad=0.2, frameon=True)
-plt.savefig(f"StockAcc_end2end_alpha_{get_integer(alpha)}_remove_w_expo_decay.png",
+plt.savefig(f"StockAcc_end2end_{drift_detector_flag}_alpha_{get_integer(alpha)}_remove_w_expo_decay.png",
             bbox_inches='tight')
 plt.show()

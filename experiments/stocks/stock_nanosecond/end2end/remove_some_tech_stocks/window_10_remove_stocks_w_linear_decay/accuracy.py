@@ -53,7 +53,7 @@ label_ground_truth = "next_price_direction"
 correctness_column = "prediction_binary_correctness"
 use_two_counters = True
 time_unit = "10000 nanosecond"
-window_size_units = "10"
+window_size_units = "1"
 checking_interval = "100000 nanosecond"
 use_nanosecond = True
 
