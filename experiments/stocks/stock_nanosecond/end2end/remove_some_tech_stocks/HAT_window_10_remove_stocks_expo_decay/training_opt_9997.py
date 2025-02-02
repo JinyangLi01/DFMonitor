@@ -6,6 +6,7 @@ import math
 from sklearn.preprocessing import MinMaxScaler
 import csv
 import pandas as pd
+from river import tree
 
 def get_integer(alpha):
     while not math.isclose(alpha, round(alpha), rel_tol=1e-9):  # Use a small tolerance
@@ -39,24 +40,19 @@ data_stream['rolling_mean_price'] = data_stream['price'].rolling(window=5, min_p
 data_stream['rolling_mean_size'] = data_stream['size'].rolling(window=5, min_periods=1).mean()
 data_stream['price_volatility'] = data_stream['price'].rolling(window=5, min_periods=1).std().fillna(0)
 data_stream['price_momentum'] = data_stream['price'].diff(3).fillna(0)
+data_stream['price_change_direction'] = data_stream['delta_price'].apply(lambda x: 1 if x > 0 else 0)
+data_stream['volume_weighted_price'] = data_stream['price'] * data_stream['size']
 
-# Normalize features
-scaler = MinMaxScaler()
-data_stream[['delta_price', 'rolling_mean_price', 'rolling_mean_size', 'price_volatility', 'price_momentum']] = scaler.fit_transform(
-    data_stream[['delta_price', 'rolling_mean_price', 'rolling_mean_size', 'price_volatility', 'price_momentum']]
-)
+
 
 data_stream.reset_index(drop=True, inplace=True)
 
 print(f"Total number of data points: {len_data}")
 
 
-# Initialize the model
-model = (
-    preprocessing.OneHotEncoder() |
-    preprocessing.StandardScaler() |
-    linear_model.LogisticRegression()
-)
+# Initialize the Hoeffding Adaptive Tree
+model = tree.HoeffdingAdaptiveTreeClassifier()
+
 
 use_two_counters = True
 time_unit = "10000 nanosecond"
@@ -80,14 +76,8 @@ data_stream[date_column] = pd.to_datetime(data_stream[date_column])
 previous_event_timestamp = data_stream[date_column].iloc[0]
 
 
-# Precompute time deltas and decay weights
-data_stream['time_delta'] = data_stream['ts_event'].diff().dt.total_seconds().fillna(0) * 1e9
-data_stream['decay_weight'] = data_stream['time_delta'].apply(lambda x: decay_rate ** (x // window_size_nanoseconds))
-
-
-
 # Prepare the result file for writing
-result_file_name = f"prediction_result_end2end_no_drift_detection_window_{window_size_units}_decay_rate_{get_integer(decay_rate)}_remove_stocks_w_expo_decay.csv"
+result_file_name = f"prediction_result_end2end_HAT_window_{window_size_units}_remove_stocks_w_expo_decay.csv"
 result_file = open(result_file_name, mode='w', newline='')
 csv_writer = csv.writer(result_file, delimiter=',')
 
@@ -99,13 +89,7 @@ csv_writer.writerow(["ts_recv","ts_event","rtype","publisher_id","instrument_id"
 for idx, row in data_stream.iterrows():
     x = preprocess_row(row)
     y = row['next_price_direction']
-    decay_weight = row['decay_weight']
     y_pred = model.predict_one(x)
-
-    logistic_model = model.steps['LogisticRegression']  # Access the LogisticRegression model
-    for param in logistic_model.weights.keys():
-        logistic_model.weights[param] *= decay_weight
-
     model.learn_one(x, y)
 
     if idx < 1000:
@@ -116,18 +100,12 @@ for idx, row in data_stream.iterrows():
                           row['order_id'], row['flags'], row['ts_in_delta'], row['sequence'],
                           row['symbol'], row['sector'], y, y_pred, int(y == y_pred)])
 
-    # Drift detection:
-    #   We feed ADWIN the absolute error for classification (0 or 1).
-    #   If drift is detected, we reset the model.
-    # if idx % 100 == 0:
-    #     if drift_detector.update(abs(y - (y_pred if y_pred is not None else 0))):
-    #         print(f"Drift detected at index {idx}, resetting model...")
-    #         model = (
-    #             preprocessing.OneHotEncoder() |
-    #             preprocessing.StandardScaler() |
-    #             linear_model.LogisticRegression()
-    #         )
-    #         drift_detector = drift.ADWIN()
+    #
+    if drift_detector.update(abs(y - y_pred)):
+        print("Drift detected! Resetting model...")
+        model = tree.HoeffdingAdaptiveTreeClassifier(       )
+
+
 
 
     # Write results in batches of 100
