@@ -18,10 +18,17 @@ def get_integer(alpha):
 time_period = "14-00--14-10"
 date = "20241015"
 data_file_name = f"xnas-itch-{date}_{time_period}"
-# Load and preprocess data
-decay_rate = 8
-decay_function = "exponential_decay"
-data_stream = pd.read_csv(f'../{decay_function}_filtered_data_decay_rate_{decay_rate}.csv')
+data_stream = pd.read_csv(f'../../../../../data/stocks_nanosecond/{data_file_name}.csv')
+
+
+
+time_start = pd.Timestamp('2024-10-15 14:00:08.00', tz='UTC')
+time_end = pd.Timestamp('2024-10-15 14:00:11.00', tz='UTC')
+
+
+data_stream["ts_event"] = pd.to_datetime(data_stream["ts_event"])
+# get data between time_start and time_end
+data_stream = data_stream[(data_stream["ts_event"] >= time_start) & (data_stream["ts_event"] <= time_end)]
 
 
 

@@ -32,8 +32,8 @@ alpha = 0.9997
 time_period = "14-00--14-10"
 date = "20241015"
 data_file_name = f"xnas-itch-{date}_{time_period}"
-data_stream = pd.read_csv(f'../../../../../../data/stocks_nanosecond/{data_file_name}.csv')
-
+data_stream = pd.read_csv(f'../../../../../data/stocks_nanosecond/{data_file_name}.csv')
+print(data_stream.columns)
 
 date_column = 'ts_event'
 
@@ -54,15 +54,7 @@ data_stream[date_column] = pd.to_datetime(data_stream[date_column])
 # get data between time_start and time_end
 data_stream = data_stream[(data_stream[date_column] >= time_start) & (data_stream[date_column] <= time_end)]
 
-
-
-fig, ax = plt.subplots(figsize=(3.5, 1.8))
-plt.subplots_adjust(left=0.1, right=0.9, top=0.8, bottom=0.1)
-
-
-ax.plot(x_list, df[curve_names[i]].tolist(), linewidth=2, markersize=2, label=curve_names[i], linestyle='-',
-        marker='o', color=pair_colors[i], alpha=0.5)
-
+df["Technology"] = df["Technology"].apply(lambda x: 1 if x == "True" else 0)
 
 
 
@@ -70,7 +62,7 @@ ax.plot(x_list, df[curve_names[i]].tolist(), linewidth=2, markersize=2, label=cu
 print(len(df))
 
 # df["check_points"] = df["check_points"].apply(lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S").strftime("%m/%d/%Y"))
-check_points = df["timestamp"].tolist()
+check_points = df[date_column].tolist()
 x_list = np.arange(0, len(df))
 curve_names = df.columns.tolist()[:-1]
 

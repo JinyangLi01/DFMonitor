@@ -45,7 +45,7 @@ def get_integer(alpha):
 time_period = "14-00--14-10"
 date = "20241015"
 data_file_name = f"xnas-itch-{date}_{time_period}"
-data_stream = pd.read_csv(f'../../../../../../../data/stocks_nanosecond/{data_file_name}.csv')
+data_stream = pd.read_csv(f'../../../../../../data/stocks_nanosecond/{data_file_name}.csv')
 
 
 use_two_counters = True
