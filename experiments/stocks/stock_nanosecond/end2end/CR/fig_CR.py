@@ -39,10 +39,11 @@ df["timestamp"] = pd.to_datetime(df["timestamp"])
 print(len(df))
 print(df[:2])
 
+s = "9"
+e = "11"
 
-
-time_start = pd.Timestamp('2024-10-15 14:00:10.00', tz='UTC')
-time_end = pd.Timestamp('2024-10-15 14:00:11.00', tz='UTC')
+time_start = pd.Timestamp(f'2024-10-15 14:00:{s}.00', tz='UTC')
+time_end = pd.Timestamp(f'2024-10-15 14:00:{e}.00', tz='UTC')
 
 
 df["timestamp"] = pd.to_datetime(df["timestamp"])
@@ -97,6 +98,6 @@ plt.grid(True, axis='y')
 plt.legend(loc='upper left', bbox_to_anchor=(-0.25, 1.4), fontsize=11,
                ncol=2, labelspacing=0.5, handletextpad=0.2, markerscale=4, handlelength=1.5,
                columnspacing=0.6, borderpad=0.2, frameon=True)
-plt.savefig(f"dynamic_CR_alpha_{str(get_integer(alpha))}", bbox_inches='tight')
+plt.savefig(f"dynamic_CR_alpha_{str(get_integer(alpha))}_{s}_{e}", bbox_inches='tight')
 plt.show()
 

@@ -40,8 +40,8 @@ time_unit = "10000 nanosecond"
 window_size_units = "10"
 checking_interval = "100000 nanosecond"
 use_nanosecond = True
-window_size_nanoseconds = 2000000
-checking_interval_nanoseconds = 100000000
+window_size_nanoseconds = 100000
+checking_interval_nanoseconds = 100000
 
 
 
@@ -114,7 +114,7 @@ for idx, row in data_stream.iterrows():
         num_window = 0
         while (previous_event_timestamp + pd.Timedelta(
                 nanoseconds=window_size_nanoseconds)) < cur_timestamp:
-            previous_event_timestamp = previous_event_timestamp + + pd.Timedelta(
+            previous_event_timestamp = previous_event_timestamp + pd.Timedelta(
                 nanoseconds=window_size_nanoseconds)
             num_window += 1
             DFMonitor_baseline.new_window()

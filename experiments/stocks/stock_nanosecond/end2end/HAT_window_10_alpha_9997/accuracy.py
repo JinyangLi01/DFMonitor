@@ -69,7 +69,7 @@ if data[correctness_column].isna().any():
 
 
 
-time_start = pd.Timestamp('2024-10-15 14:00:8.00', tz='UTC')
+time_start = pd.Timestamp('2024-10-15 14:00:08.00', tz='UTC')
 time_end = pd.Timestamp('2024-10-15 14:00:11.00', tz='UTC')
 
 
