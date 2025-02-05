@@ -18,13 +18,14 @@ def get_integer(alpha):
 time_period = "14-00--14-10"
 date = "20241015"
 data_file_name = f"xnas-itch-{date}_{time_period}"
-fractions = 7
+fractions = 9
 data_stream = pd.read_csv(f'../random_filtered_data_fraction_{fractions}.csv')
 
 
 
 time_start = pd.Timestamp('2024-10-15 14:00:08.00', tz='UTC')
 time_end = pd.Timestamp('2024-10-15 14:00:11.00', tz='UTC')
+
 
 
 data_stream["ts_event"] = pd.to_datetime(data_stream["ts_event"])
@@ -41,16 +42,16 @@ def preprocess_row(r):
     x = r.drop(['next_price_direction', 'ts_recv', date_column, 'ts_event_datetime',
                   "publisher_id", "instrument_id", "channel_id", "order_id"]).to_dict()
     return x
-
-# Feature engineering
-data_stream['delta_price'] = data_stream['price'].diff().fillna(0)
-data_stream['rolling_mean_price'] = data_stream['price'].rolling(window=5, min_periods=1).mean()
-data_stream['rolling_mean_size'] = data_stream['size'].rolling(window=5, min_periods=1).mean()
-data_stream['price_volatility'] = data_stream['price'].rolling(window=5, min_periods=1).std().fillna(0)
-data_stream['price_momentum'] = data_stream['price'].diff(3).fillna(0)
-data_stream['price_change_direction'] = data_stream['delta_price'].apply(lambda x: 1 if x > 0 else 0)
-data_stream['volume_weighted_price'] = data_stream['price'] * data_stream['size']
-
+#
+# # Feature engineering
+# data_stream['delta_price'] = data_stream['price'].diff().fillna(0)
+# data_stream['rolling_mean_price'] = data_stream['price'].rolling(window=5, min_periods=1).mean()
+# data_stream['rolling_mean_size'] = data_stream['size'].rolling(window=5, min_periods=1).mean()
+# data_stream['price_volatility'] = data_stream['price'].rolling(window=5, min_periods=1).std().fillna(0)
+# data_stream['price_momentum'] = data_stream['price'].diff(3).fillna(0)
+# data_stream['price_change_direction'] = data_stream['delta_price'].apply(lambda x: 1 if x > 0 else 0)
+# data_stream['volume_weighted_price'] = data_stream['price'] * data_stream['size']
+#
 
 
 data_stream.reset_index(drop=True, inplace=True)
@@ -89,9 +90,15 @@ result_file_name = f"prediction_result_end2end_HAT_remove_stock_fraction_{fracti
 result_file = open(result_file_name, mode='w', newline='')
 csv_writer = csv.writer(result_file, delimiter=',')
 
+# csv_writer.writerow(["ts_recv","ts_event","rtype","publisher_id","instrument_id","action","side","price","size",
+#                      "channel_id","order_id","flags","ts_in_delta","sequence","symbol","sector",
+#                      "next_price_direction","predicted_direction","prediction_binary_correctness"])
+
 csv_writer.writerow(["ts_recv","ts_event","rtype","publisher_id","instrument_id","action","side","price","size",
                      "channel_id","order_id","flags","ts_in_delta","sequence","symbol","sector",
                      "next_price_direction","predicted_direction","prediction_binary_correctness"])
+
+
 
 # Online learning loop
 for idx, row in data_stream.iterrows():

@@ -60,7 +60,7 @@ use_nanosecond = True
 
 
 
-stock_fraction = 50
+stock_fraction = 97
 # Prepare the result file for writing
 data_file_name = f"prediction_result_end2end_HAT_remove_stock_fraction_{stock_fraction}_alpha_9997.csv"
 data = pd.read_csv(data_file_name)
