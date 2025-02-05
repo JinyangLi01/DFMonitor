@@ -18,7 +18,7 @@ def get_integer(alpha):
 time_period = "14-00--14-10"
 date = "20241015"
 data_file_name = f"xnas-itch-{date}_{time_period}"
-fractions = 70
+fractions = 50
 data_stream = pd.read_csv(f'../random_filtered_data_fraction_{fractions}.csv')
 
 

@@ -213,7 +213,7 @@ df = df[(df["check_points"] >= draw_figure_start_time) & (df["check_points"] <= 
 
 print(len(df))
 
-df.to_csv(f"accuracy_alpha_{str(get_integer(alpha))}.csv", index=False)
+df.to_csv(f"accuracy_alpha_{str(get_integer(alpha))}_remove_fraction_{stock_fraction}.csv", index=False)
 
 # df["check_points"] = df["check_points"].apply(lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S").strftime("%m/%d/%Y"))
 check_points = df["check_points"].tolist()

@@ -61,7 +61,7 @@ window_size_units = "10"
 checking_interval = "100000 nanosecond"
 use_nanosecond = True
 
-stock_sector = "Consumer Cyclical"
+stock_sector = "Communication Services"
 draw_figure_start_time = pd.Timestamp('2024-10-15 14:00:10.00', tz='UTC')
 draw_figure_end_time = pd.Timestamp('2024-10-15 14:00:11.00', tz='UTC')
 # curve_names = ['Technology', 'Communication Services', 'Consumer Cyclical']
@@ -70,11 +70,11 @@ removed_percentage = [50, 60, 70, 80, 90]
 fig, ax = plt.subplots(figsize=(3.5, 1.8))
 plt.subplots_adjust(left=0.1, right=0.9, top=0.8, bottom=0.1)
 
-idx=0
-for idx in range(0, len(removed_percentage)):
+idx=1
+for idx in range(1, len(removed_percentage)):
     stock_fraction = removed_percentage[idx]
     print("stock fraction", stock_fraction, "color", pair_colors[idx])
-    data_file_name = f"accuracy_alpha_9997_remove_fraction_{int(stock_fraction/10)}.csv"
+    data_file_name = f"accuracy_alpha_9997_remove_fraction_{int(stock_fraction)}.csv"
     df = pd.read_csv(data_file_name)
     df["check_points"] = pd.to_datetime(df["check_points"])
     print(len(df))
