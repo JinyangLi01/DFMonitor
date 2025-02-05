@@ -60,7 +60,7 @@ use_nanosecond = True
 
 
 
-stock_fraction = 5
+stock_fraction = 8
 # Prepare the result file for writing
 data_file_name = f"prediction_result_end2end_HAT_remove_stock_fraction_{stock_fraction}_alpha_9997.csv"
 data = pd.read_csv(data_file_name)
@@ -185,16 +185,6 @@ merged_df.to_csv(filename, index=False)
 
 
 
-with open(filename, 'r') as f:
-    contents = f.read()
-if "]" in contents:
-    updated_contents = contents.replace("]\"", "")
-    updated_contents = updated_contents.replace("\"[", "")
-    with open(filename, 'w') as f:
-        f.write(updated_contents)
-
-
-#
 # ================================== draw the figure ===========================================
 
 df = pd.read_csv(filename)
@@ -215,7 +205,7 @@ df = df[(df["check_points"] >= draw_figure_start_time) & (df["check_points"] <= 
 
 print(len(df))
 
-df.to_csv(f"accuracy_alpha_{str(get_integer(alpha))}.csv", index=False)
+df.to_csv(f"accuracy_alpha_{str(get_integer(alpha))}_remove_fraction_{stock_fraction}.csv", index=False)
 
 # df["check_points"] = df["check_points"].apply(lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S").strftime("%m/%d/%Y"))
 check_points = df["check_points"].tolist()
