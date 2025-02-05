@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from numpy import dtype
 import math
 
-from algorithm.dynamic_window import Accuracy_workload as workload
+from algorithm.dynamic_window import CR_workload as workload
 import seaborn as sns
 import matplotlib.dates as mdates
 
@@ -29,7 +29,7 @@ def get_integer(alpha):
 
 
 alpha = 0.9997
-fractions=10
+fractions = 5
 filename = f"dynamic_CR_random_decay_fraction_{fractions}_alpha_9997.csv"
 
 df = pd.read_csv(filename)
@@ -85,7 +85,7 @@ for i in range(len(curve_names)):
 
 plt.xlabel('',
            fontsize=14, labelpad=5).set_position((0.47, 0))
-plt.ylabel('Accuracy', fontsize=13, labelpad=-1)
+plt.ylabel('CR', fontsize=13, labelpad=-1)
 plt.xticks([], [])
 
 # # Manually place the label for 0.6 with a slight adjustment

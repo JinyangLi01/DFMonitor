@@ -28,7 +28,7 @@ def get_integer(alpha):
 
 
 # Load your data (replace 'your_data.csv' with your actual file)
-fraction = 1
+fraction = 5
 data_stream = pd.read_csv(f'../random_filtered_data_fraction_{fraction}.csv')
 
 #

@@ -218,13 +218,10 @@ check_points = df["check_points"].tolist()
 x_list = np.arange(0, len(df))
 curve_names = df.columns.tolist()[:-1]
 
-curve_names = ['Technology', 'Consumer Cyclical', 'Communication Services']
-
-# pair_colors = [scale_lightness(matplotlib.colors.ColorConverter.to_rgb("navy"), 2.2), 'cyan',
-#                '#287c37', '#cccc00']
+curve_names = ['Technology', 'Communication Services', 'Consumer Cyclical']
 pair_colors = ["blue", "darkorange", "green", "red", "cyan", "black", "magenta"]
-#
-#
+
+
 # num_lines = len(x_list)
 # pair_colors = cmaps.set1.colors
 
