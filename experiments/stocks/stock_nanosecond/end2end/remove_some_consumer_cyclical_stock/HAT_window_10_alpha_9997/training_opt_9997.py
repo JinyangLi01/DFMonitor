@@ -14,17 +14,15 @@ def get_integer(alpha):
     return int(alpha)
 
 
-# Load your data (replace 'your_data.csv' with your actual file)
-time_period = "14-00--14-10"
-date = "20241015"
-data_file_name = f"xnas-itch-{date}_{time_period}"
-fractions = 5
+fractions = 9
 data_stream = pd.read_csv(f'../random_filtered_data_fraction_{fractions}.csv')
 
 
 
-time_start = pd.Timestamp('2024-10-15 14:00:08.00', tz='UTC')
-time_end = pd.Timestamp('2024-10-15 14:00:11.00', tz='UTC')
+
+time_start = pd.Timestamp('2024-10-15 14:00:00.00', tz='UTC')
+time_end = pd.Timestamp('2024-10-15 14:00:18.00', tz='UTC')
+
 
 
 data_stream["ts_event"] = pd.to_datetime(data_stream["ts_event"])
@@ -74,8 +72,6 @@ window_size_nanoseconds = int(time_unit.split(' ')[0]) * int(window_size_units)
 metric = metrics.Accuracy()
 drift_detector = drift.ADWIN()
 
-# Decay rate (lambda)
-decay_rate = 0.9997
 date_column = 'ts_event'
 
 time_delta = 0
@@ -85,7 +81,7 @@ previous_event_timestamp = data_stream[date_column].iloc[0]
 
 
 # Prepare the result file for writing
-result_file_name = f"prediction_result_end2end_HAT_remove_stock_fraction_{fractions}_alpha_{get_integer(decay_rate)}.csv"
+result_file_name = f"prediction_result_end2end_HAT_remove_stock_fraction_{fractions}.csv"
 result_file = open(result_file_name, mode='w', newline='')
 csv_writer = csv.writer(result_file, delimiter=',')
 

@@ -41,10 +41,8 @@ def get_integer(alpha):
     return int(alpha)
 
 
-time_period = "14-00--14-10"
-date = "20241015"
-len_chunk = 1
-alpha = 0.9997
+
+alpha = 0.99995
 
 
 
@@ -59,9 +57,10 @@ checking_interval = "100000 nanosecond"
 use_nanosecond = True
 
 
+
 stock_fraction = 5
 # Prepare the result file for writing
-data_file_name = f"prediction_result_end2end_HAT_remove_stock_fraction_{stock_fraction}_alpha_9997.csv"
+data_file_name = f"prediction_result_end2end_HAT_remove_stock_fraction_{stock_fraction}.csv"
 data = pd.read_csv(data_file_name)
 
 
@@ -72,8 +71,9 @@ if data[correctness_column].isna().any():
 
 
 
-time_start = pd.Timestamp('2024-10-15 14:00:8.00', tz='UTC')
-time_end = pd.Timestamp('2024-10-15 14:00:11.00', tz='UTC')
+time_start = pd.Timestamp('2024-10-15 14:00:00.00', tz='UTC')
+time_end = pd.Timestamp('2024-10-15 14:00:18.00', tz='UTC')
+
 
 
 data["ts_event"] = pd.to_datetime(data["ts_event"])
@@ -184,15 +184,6 @@ merged_df.to_csv(filename, index=False)
 
 
 
-with open(filename, 'r') as f:
-    contents = f.read()
-if "]" in contents:
-    updated_contents = contents.replace("]\"", "")
-    updated_contents = updated_contents.replace("\"[", "")
-    with open(filename, 'w') as f:
-        f.write(updated_contents)
-
-
 #
 # ================================== draw the figure ===========================================
 
@@ -205,9 +196,8 @@ print(df[:2])
 
 
 
-
-draw_figure_start_time = pd.Timestamp('2024-10-15 14:00:10.00', tz='UTC')
-draw_figure_end_time = pd.Timestamp('2024-10-15 14:00:11.00', tz='UTC')
+draw_figure_start_time = pd.Timestamp('2024-10-15 14:00:05.00', tz='UTC')
+draw_figure_end_time = pd.Timestamp('2024-10-15 14:00:18.00', tz='UTC')
 
 
 df = df[(df["check_points"] >= draw_figure_start_time) & (df["check_points"] <= draw_figure_end_time)]

@@ -28,7 +28,7 @@ def get_integer(alpha):
 
 
 # Load your data (replace 'your_data.csv' with your actual file)
-fraction = 5
+fraction = 7
 data_stream = pd.read_csv(f'../random_filtered_data_fraction_{fraction}.csv')
 
 #
@@ -61,7 +61,7 @@ monitored_groups = [{"sector": 'Technology'}, {"sector": 'Consumer Cyclical'}, {
                     {"sector": 'Energy'}]
 sectors_list = [x['sector'] for x in monitored_groups]
 print(data_stream[:5])
-alpha = 0.9997
+alpha = 0.99995
 threshold = 0.3
 
 

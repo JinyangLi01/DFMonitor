@@ -28,8 +28,8 @@ def get_integer(alpha):
 
 
 
-alpha = 0.9997
-fractions=8
+alpha = 0.99995
+fractions = 8
 filename = f"dynamic_CR_random_decay_fraction_{fractions}_alpha_9997.csv"
 
 df = pd.read_csv(filename)

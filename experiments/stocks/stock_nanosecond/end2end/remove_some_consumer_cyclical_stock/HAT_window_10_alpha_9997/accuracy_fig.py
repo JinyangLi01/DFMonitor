@@ -41,14 +41,12 @@ def get_integer(alpha):
     return int(alpha)
 
 
-time_period = "14-00--14-10"
-date = "20241015"
-len_chunk = 1
-alpha = 0.9997
+
+alpha = 0.99995
 
 
 
-threshold = 0.4
+
 label_prediction = "predicted_direction"
 label_ground_truth = "next_price_direction"
 correctness_column = "prediction_binary_correctness"
@@ -59,9 +57,9 @@ checking_interval = "100000 nanosecond"
 use_nanosecond = True
 
 
-stock_fraction = 5
+stock_fraction = 9
 # Prepare the result file for writing
-data_file_name = f"accuracy_alpha_9997_remove_fraction_5.csv"
+data_file_name = f"accuracy_alpha_99995_remove_fraction_{stock_fraction}.csv"
 df = pd.read_csv(data_file_name)
 
 
@@ -72,8 +70,8 @@ print(df[:2])
 
 
 
-draw_figure_start_time = pd.Timestamp('2024-10-15 14:00:10.00', tz='UTC')
-draw_figure_end_time = pd.Timestamp('2024-10-15 14:00:11.00', tz='UTC')
+draw_figure_start_time = pd.Timestamp('2024-10-15 14:00:05.00', tz='UTC')
+draw_figure_end_time = pd.Timestamp('2024-10-15 14:00:18.00', tz='UTC')
 
 
 df = df[(df["check_points"] >= draw_figure_start_time) & (df["check_points"] <= draw_figure_end_time)]
@@ -88,34 +86,37 @@ curve_names = df.columns.tolist()[:-1]
 curve_names = ['Technology', 'Communication Services', 'Consumer Cyclical']
 pair_colors = ["blue", "darkorange", "green", "red", "cyan", "black", "magenta"]
 
-# num_lines = len(x_list)
-# pair_colors = cmaps.set1.colors
+# Generate x-axis ticks at every whole second in the time range
+start_floor = draw_figure_start_time.floor('s')  # Floor to nearest second
+end_ceil = draw_figure_end_time.ceil('s')  # Ceiling to nearest second
+xticks_times = pd.date_range(start=start_floor, end=end_ceil, freq='1s')
+
+
 
 fig, ax = plt.subplots(figsize=(3.5, 1.8))
-plt.subplots_adjust(left=0.1, right=0.9, top=0.8, bottom=0.1)
+plt.subplots_adjust(left=0.1, right=0.9, top=0.8, bottom=0.3)
 
 for i in range(len(curve_names)):
-    ax.plot(x_list, df[curve_names[i]].tolist(), linewidth=1, markersize=1, label=curve_names[i], linestyle='-',
+    ax.plot(check_points, df[curve_names[i]].tolist(), linewidth=1, markersize=1, label=curve_names[i], linestyle='-',
             marker='o', color=pair_colors[i], alpha=0.5)
 
 
+ax.set_xticks(xticks_times)
+ax.xaxis.set_major_formatter(mdates.DateFormatter('%S'))
+plt.xticks(rotation=0, ha='right', fontsize=10)  # Rotate labels to avoid overlap
 
 
 
-
-plt.xlabel('',
-           fontsize=14, labelpad=5).set_position((0.47, 0))
+# plt.xlabel('',
+#            fontsize=14, labelpad=5).set_position((0.47, 0))
 plt.ylabel('Accuracy', fontsize=13, labelpad=-1)
-plt.xticks([], [])
-plt.yticks([0.5, 0.6, 0.7], fontsize=13)
-plt.ylim(0.5, 0.7)
-
-# # Manually place the label for 0.6 with a slight adjustment
-# plt.text(-845, 0.58, '0.6', fontsize=17, va='bottom')  # Adjust the 0.6 label higher
+plt.yticks([0.55, 0.6, 0.65], fontsize=13)
+plt.ylim(0.55, 0.65)
+plt.grid(True)
 
 
 plt.grid(True, axis='y')
-plt.tight_layout()
+
 # plt.legend(loc='upper left', bbox_to_anchor=(-0.25, 1.4), fontsize=11,
 #                ncol=2, labelspacing=0.5, handletextpad=0.2, markerscale=4, handlelength=1.5,
 #                columnspacing=0.6, borderpad=0.2, frameon=True)

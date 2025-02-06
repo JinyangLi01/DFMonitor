@@ -74,8 +74,6 @@ window_size_nanoseconds = int(time_unit.split(' ')[0]) * int(window_size_units)
 metric = metrics.Accuracy()
 drift_detector = drift.ADWIN()
 
-# Decay rate (lambda)
-# decay_rate = 0.9997
 date_column = 'ts_event'
 
 time_delta = 0
