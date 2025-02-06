@@ -44,7 +44,7 @@ def get_integer(alpha):
 
 threshold = 0.5
 
-alpha = 0.99995
+alpha = 0.9997
 label_prediction = "predicted_direction"
 label_ground_truth = "next_price_direction"
 correctness_column = "prediction_binary_correctness"
@@ -226,7 +226,7 @@ for i in range(len(curve_names)):
 
 
 
-
+plt.grid(True)
 plt.xlabel('',
            fontsize=14, labelpad=5).set_position((0.47, 0))
 plt.ylabel('Accuracy', fontsize=13, labelpad=-1)

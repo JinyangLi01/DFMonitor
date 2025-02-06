@@ -44,7 +44,7 @@ def get_integer(alpha):
 time_period = "14-00--14-10"
 date = "20241015"
 len_chunk = 1
-alpha = 0.9997
+alpha = 0.99995
 
 
 
@@ -60,7 +60,7 @@ use_nanosecond = True
 
 
 # Prepare the result file for writing
-data_file_name = f"prediction_result_end2end_HAT_window_10_remove_stocks_w_expo_decay.csv"
+data_file_name = f"prediction_result_end2end_HAT_window_10_original_data.csv"
 data = pd.read_csv(data_file_name)
 
 if data[correctness_column].isna().any():
@@ -69,8 +69,8 @@ if data[correctness_column].isna().any():
 
 
 
-time_start = pd.Timestamp('2024-10-15 14:00:08.00', tz='UTC')
-time_end = pd.Timestamp('2024-10-15 14:00:11.00', tz='UTC')
+time_start = pd.Timestamp('2024-10-15 14:00:00.00', tz='UTC')
+time_end = pd.Timestamp('2024-10-15 14:00:18.00', tz='UTC')
 
 
 data["ts_event"] = pd.to_datetime(data["ts_event"])
@@ -174,8 +174,8 @@ for col in accuracy_columns:
 print(merged_df[:5])
 
 # Write the updated DataFrame to a CSV
-filename = (f"stocks_compare_Accuracy_decay_rate_{str(get_integer(alpha))}"
-            f"_window_{window_size_units}_remove_stocks_w_expo_decay.csv")
+filename = (f"stocks_compare_Accuracy"
+            f"_window_{window_size_units}_decay_rate_{str(get_integer(alpha))}.csv")
 
 merged_df.to_csv(filename, index=False)
 
@@ -203,8 +203,8 @@ print(df[:2])
 
 
 
-draw_figure_start_time = pd.Timestamp('2024-10-15 14:00:10.00', tz='UTC')
-draw_figure_end_time = pd.Timestamp('2024-10-15 14:00:11.00', tz='UTC')
+draw_figure_start_time = pd.Timestamp('2024-10-15 14:00:05.00', tz='UTC')
+draw_figure_end_time = pd.Timestamp('2024-10-15 14:00:18.00', tz='UTC')
 
 
 df = df[(df["check_points"] >= draw_figure_start_time) & (df["check_points"] <= draw_figure_end_time)]
@@ -253,6 +253,6 @@ plt.tight_layout()
 # plt.legend(loc='upper left', bbox_to_anchor=(-0.25, 1.4), fontsize=11,
 #                ncol=2, labelspacing=0.5, handletextpad=0.2, markerscale=4, handlelength=1.5,
 #                columnspacing=0.6, borderpad=0.2, frameon=True)
-plt.savefig(f"StockAcc_end2end_HAT_alpha_{get_integer(alpha)}_remove_w_expo_decay.png",
+plt.savefig(f"StockAcc_end2end_HAT_alpha_{get_integer(alpha)}.png",
             bbox_inches='tight')
 plt.show()

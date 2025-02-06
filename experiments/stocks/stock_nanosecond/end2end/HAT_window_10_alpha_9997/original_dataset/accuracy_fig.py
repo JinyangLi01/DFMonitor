@@ -41,8 +41,6 @@ def get_integer(alpha):
     return int(alpha)
 
 
-time_period = "14-00--14-10"
-date = "20241015"
 len_chunk = 1
 alpha = 0.99995
 
@@ -59,9 +57,9 @@ checking_interval = "100000 nanosecond"
 use_nanosecond = True
 
 
-stock_fraction = 7
+stock_fraction = 9
 # Prepare the result file for writing
-data_file_name = f"accuracy_alpha_99995_remove_fraction_{stock_fraction*10}.csv"
+data_file_name = f"accuracy_alpha_{get_integer(alpha)}.csv"
 df = pd.read_csv(data_file_name)
 
 
@@ -104,7 +102,7 @@ for i in range(len(curve_names)):
 
 
 ax.set_xticks(xticks_times)
-ax.xaxis.set_major_formatter(mdates.DateFormatter('  %S'))  # Show full time
+ax.xaxis.set_major_formatter(mdates.DateFormatter('%S'))
 plt.xticks(rotation=0, ha='right', fontsize=10)  # Rotate labels to avoid overlap
 
 
@@ -112,8 +110,8 @@ plt.xticks(rotation=0, ha='right', fontsize=10)  # Rotate labels to avoid overla
 # plt.xlabel('',
 #            fontsize=14, labelpad=5).set_position((0.47, 0))
 plt.ylabel('Accuracy', fontsize=13, labelpad=-1)
-plt.yticks([0.5, 0.6, 0.7], fontsize=13)
-plt.ylim(0.5, 0.7)
+plt.yticks([0.55, 0.6, 0.65], fontsize=13)
+plt.ylim(0.55, 0.65)
 plt.grid(True)
 
 
@@ -122,6 +120,6 @@ plt.grid(True, axis='y')
 # plt.legend(loc='upper left', bbox_to_anchor=(-0.25, 1.4), fontsize=11,
 #                ncol=2, labelspacing=0.5, handletextpad=0.2, markerscale=4, handlelength=1.5,
 #                columnspacing=0.6, borderpad=0.2, frameon=True)
-plt.savefig(f"StockAcc_end2end_HAT_alpha_{get_integer(alpha)}_remove_stock_fraction_{stock_fraction*10}.png",
+plt.savefig(f"StockAcc_end2end_HAT_alpha_{get_integer(alpha)}.png",
             bbox_inches='tight')
 plt.show()
