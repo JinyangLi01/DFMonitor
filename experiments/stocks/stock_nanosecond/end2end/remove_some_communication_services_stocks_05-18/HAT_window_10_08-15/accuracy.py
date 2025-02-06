@@ -234,8 +234,7 @@ plt.xticks([], [])
 plt.yticks([0.5, 0.6, 0.7], fontsize=13)
 plt.ylim(0.5, 0.7)
 
-# # Manually place the label for 0.6 with a slight adjustment
-# plt.text(-845, 0.58, '0.6', fontsize=17, va='bottom')  # Adjust the 0.6 label higher
+
 
 
 plt.grid(True, axis='y')

@@ -59,12 +59,10 @@ checking_interval = "100000 nanosecond"
 use_nanosecond = True
 
 
-stock_fraction = 7
+stock_fraction = 9
 # Prepare the result file for writing
 data_file_name = f"accuracy_alpha_99995_remove_fraction_{stock_fraction*10}.csv"
 df = pd.read_csv(data_file_name)
-
-
 df["check_points"] = pd.to_datetime(df["check_points"])
 print(len(df))
 print(df[:2])

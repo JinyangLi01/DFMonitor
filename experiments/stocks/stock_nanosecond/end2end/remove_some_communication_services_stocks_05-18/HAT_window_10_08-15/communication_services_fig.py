@@ -15,7 +15,6 @@ import seaborn as sns
 import matplotlib.dates as mdates
 import numpy as np
 
-
 # sns.set_style("whitegrid")
 sns.set_palette("Paired")
 sns.set_context("paper", font_scale=2)
@@ -44,13 +43,8 @@ def get_integer(alpha):
     return int(alpha)
 
 
-time_period = "14-00--14-10"
-date = "20241015"
-len_chunk = 1
-alpha = 0.9997
 
-
-
+alpha = 0.99995
 threshold = 0.4
 label_prediction = "predicted_direction"
 label_ground_truth = "next_price_direction"
@@ -60,56 +54,57 @@ time_unit = "10000 nanosecond"
 window_size_units = "10"
 checking_interval = "100000 nanosecond"
 use_nanosecond = True
-
-stock_sector = "Communication Services"
-draw_figure_start_time = pd.Timestamp('2024-10-15 14:00:10.00', tz='UTC')
-draw_figure_end_time = pd.Timestamp('2024-10-15 14:00:11.00', tz='UTC')
-# curve_names = ['Technology', 'Communication Services', 'Consumer Cyclical']
+curve_names = ['Technology', 'Communication Services', 'Consumer Cyclical']
 pair_colors = ["blue", "darkorange", "green", "red", "cyan", "black", "magenta"]
-removed_percentage = [95, 92, 90, 80, 70]
-fig, ax = plt.subplots(figsize=(3.5, 1.8))
-plt.subplots_adjust(left=0.1, right=0.9, top=0.8, bottom=0.1)
+removed_percentage = [70, 80, 90]
 
-idx=0
-for idx in range(0, len(removed_percentage)):
-    stock_fraction = removed_percentage[idx]
-    print("stock fraction", stock_fraction, "color", pair_colors[idx])
-    data_file_name = f"accuracy_alpha_9997_remove_fraction_{int(stock_fraction)}.csv"
+draw_figure_start_time = pd.Timestamp('2024-10-15 14:00:05.00', tz='UTC')
+draw_figure_end_time = pd.Timestamp('2024-10-15 14:00:18.00', tz='UTC')
+
+fig, axes = plt.subplots(1, 3, figsize=(8, 1.5))
+plt.subplots_adjust(left=0.1, right=0.98, top=0.8, bottom=0.1, wspace=0.3)
+
+
+for j in range(len(removed_percentage)):
+    stock_fraction = removed_percentage[j]
+    data_file_name = f"accuracy_alpha_99995_remove_fraction_{stock_fraction}.csv"
     df = pd.read_csv(data_file_name)
     df["check_points"] = pd.to_datetime(df["check_points"])
     print(len(df))
-    # print(df[:2])
+    print(df[:2])
     df = df[(df["check_points"] >= draw_figure_start_time) & (df["check_points"] <= draw_figure_end_time)]
-
-    # df["check_points"] = df["check_points"].apply(lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S").strftime("%m/%d/%Y"))
     check_points = df["check_points"].tolist()
     x_list = np.arange(0, len(df))
-    curve_names = df.columns.tolist()[:-1]
-    ax.plot(x_list, df[stock_sector].tolist(), linewidth=1, markersize=1, label=f"Remove {stock_fraction}%", linestyle='-',
-            marker='o', color=pair_colors[idx], alpha=0.5)
+    start_floor = draw_figure_start_time.floor('s')  # Floor to nearest second
+    end_ceil = draw_figure_end_time.ceil('s')  # Ceiling to nearest second
+    xticks_times = pd.date_range(start=start_floor, end=end_ceil, freq='1s')
+    ax = axes[j]
+    for i in range(len(curve_names)):
+        ax.plot(check_points, df[curve_names[i]].tolist(), linewidth=1, markersize=1, label=curve_names[i],
+                linestyle='-',
+                marker='o', color=pair_colors[i], alpha=0.5)
+    ax.set_xticks([xticks_times[k] for k in range(0, len(xticks_times), 2)])
+    ax.set_xticklabels([5, 7, 9, 11, 13, 15, 17], fontsize=14)
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%S'))
+    ax.set_ylabel('Accuracy', fontsize=14, labelpad=-1).set_position([0.1, 1])
+    ax.set_yticks([0.55, 0.6, 0.65])
+    ax.set_yticklabels([0.55, 0.6, 0.65], fontsize=14)
+    ax.set_ylim(0.55, 0.65)
+    ax.grid(True)
+    ax.tick_params(axis='x', which='major', pad=2)
+    ax.tick_params(axis='y', which='major', pad=2)
+
+handles, labels = [], []
+for ax in axes:
+    for line in ax.get_lines():
+        handles.append(line)
+        labels.append(line.get_label())
+    break
 
 
-
-
-
-
-
-plt.xlabel('',
-           fontsize=14, labelpad=5).set_position((0.47, 0))
-plt.ylabel('Accuracy', fontsize=13, labelpad=-1)
-plt.xticks([], [])
-plt.yticks([0.5, 0.6, 0.7], fontsize=13)
-plt.ylim(0.5, 0.7)
-
-# # Manually place the label for 0.6 with a slight adjustment
-# plt.text(-845, 0.58, '0.6', fontsize=17, va='bottom')  # Adjust the 0.6 label higher
-
-
-plt.grid(True, axis='y')
-plt.tight_layout()
-# plt.legend(loc='upper left', bbox_to_anchor=(-0.25, 1.4), fontsize=11,
-#                ncol=2, labelspacing=0.5, handletextpad=0.2, markerscale=4, handlelength=1.5,
-#                columnspacing=0.6, borderpad=0.2, frameon=True)
+plt.legend(handles, labels, loc='upper center', bbox_to_anchor=(-1, 1.4), fontsize=14,
+               ncol=3, labelspacing=0.5, handletextpad=0.2, markerscale=6, handlelength=1.5,
+               columnspacing=0.6, borderpad=0.2, frameon=True)
 plt.savefig(f"StockAcc_end2end_HAT_alpha_{get_integer(alpha)}_remove_stock_different_fraction.png",
             bbox_inches='tight')
 plt.show()
