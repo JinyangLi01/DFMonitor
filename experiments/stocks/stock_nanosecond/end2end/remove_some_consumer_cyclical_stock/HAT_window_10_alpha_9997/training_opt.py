@@ -14,7 +14,7 @@ def get_integer(alpha):
     return int(alpha)
 
 
-fractions = 9
+fractions = 3
 data_stream = pd.read_csv(f'../random_filtered_data_fraction_{fractions}.csv')
 
 
