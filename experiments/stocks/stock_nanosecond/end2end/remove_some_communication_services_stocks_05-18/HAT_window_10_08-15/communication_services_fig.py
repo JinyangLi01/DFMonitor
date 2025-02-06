@@ -23,7 +23,7 @@ sns.set_context("paper", font_scale=2)
 
 plt.figure(figsize=(6, 3.5))
 plt.rcParams['font.size'] = 20
-
+plt.rcParams['font.family'] = 'serif'
 
 # # activate latex text rendering
 # rc('text', usetex=True)
@@ -61,8 +61,8 @@ removed_percentage = [70, 80, 90]
 draw_figure_start_time = pd.Timestamp('2024-10-15 14:00:05.00', tz='UTC')
 draw_figure_end_time = pd.Timestamp('2024-10-15 14:00:18.00', tz='UTC')
 
-fig, axes = plt.subplots(1, 3, figsize=(8, 1.5))
-plt.subplots_adjust(left=0.1, right=0.98, top=0.8, bottom=0.1, wspace=0.3)
+fig, axes = plt.subplots(1, 3, figsize=(7, 1.4))
+plt.subplots_adjust(left=0.1, right=0.98, top=0.8, bottom=0.1, wspace=0.4)
 
 
 for j in range(len(removed_percentage)):
@@ -84,15 +84,22 @@ for j in range(len(removed_percentage)):
                 linestyle='-',
                 marker='o', color=pair_colors[i], alpha=0.5)
     ax.set_xticks([xticks_times[k] for k in range(0, len(xticks_times), 2)])
-    ax.set_xticklabels([5, 7, 9, 11, 13, 15, 17], fontsize=14)
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%S'))
-    ax.set_ylabel('Accuracy', fontsize=14, labelpad=-1).set_position([0.1, 1])
+    ax.set_xticklabels(['05', '07', '09', '11', '13', '15', '17'], fontsize=13, rotation=0)
+    # ax.xaxis.set_major_formatter(mdates.DateFormatter('%S'))
+    # ax.set_ylabel('Accuracy', fontsize=14, labelpad=-1).set_position([0.08, 0.5])
     ax.set_yticks([0.55, 0.6, 0.65])
-    ax.set_yticklabels([0.55, 0.6, 0.65], fontsize=14)
+    ax.set_yticklabels([0.55, '0.60', 0.65], fontsize=14)
     ax.set_ylim(0.55, 0.65)
     ax.grid(True)
     ax.tick_params(axis='x', which='major', pad=2)
-    ax.tick_params(axis='y', which='major', pad=2)
+    ax.tick_params(axis='y', which='major', pad=1)
+    xlabel = f"({chr(97 + j)}) remove ${stock_fraction}$% stocks"
+    ax.set_xlabel(xlabel, fontsize=13, labelpad=0).set_position([0.38, 1])
+
+
+#
+# fig.supxlabel('Time (s) 14:00:05.00 to 14:00:18.00', fontsize=14, y =-0.25)
+
 
 handles, labels = [], []
 for ax in axes:
@@ -102,7 +109,8 @@ for ax in axes:
     break
 
 
-plt.legend(handles, labels, loc='upper center', bbox_to_anchor=(-1, 1.4), fontsize=14,
+
+plt.legend(handles, labels, loc='upper center', bbox_to_anchor=(-1.05, 1.46), fontsize=14,
                ncol=3, labelspacing=0.5, handletextpad=0.2, markerscale=6, handlelength=1.5,
                columnspacing=0.6, borderpad=0.2, frameon=True)
 plt.savefig(f"StockAcc_end2end_HAT_alpha_{get_integer(alpha)}_remove_stock_different_fraction.png",
