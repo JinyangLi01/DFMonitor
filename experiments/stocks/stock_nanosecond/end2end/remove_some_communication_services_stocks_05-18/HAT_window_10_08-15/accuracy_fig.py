@@ -14,8 +14,8 @@ import numpy as np
 
 
 # sns.set_style("whitegrid")
-sns.set_palette("Paired")
-sns.set_context("paper", font_scale=2)
+# sns.set_palette("Paired")
+# sns.set_context("paper", font_scale=2)
 
 # Set the font size for labels, legends, and titles
 
@@ -81,10 +81,11 @@ print(len(df))
 # df["check_points"] = df["check_points"].apply(lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S").strftime("%m/%d/%Y"))
 check_points = df["check_points"].tolist()
 x_list = np.arange(0, len(df))
-curve_names = df.columns.tolist()[:-1]
 
-curve_names = ['Technology', 'Communication Services', 'Consumer Cyclical']
-pair_colors = ["blue", "darkorange", "green", "red", "cyan", "black", "magenta"]
+curve_names = ['Technology', 'Consumer Cyclical', 'Communication Services']
+
+curve_colors = sns.color_palette(palette=['blue', 'limegreen', '#ffb400', 'darkviolet', 'black', 'cyan',
+                                          "red", 'magenta'])
 
 # Generate x-axis ticks at every whole second in the time range
 start_floor = draw_figure_start_time.floor('s')  # Floor to nearest second
@@ -98,7 +99,7 @@ plt.subplots_adjust(left=0.1, right=0.9, top=0.8, bottom=0.3)
 
 for i in range(len(curve_names)):
     ax.plot(check_points, df[curve_names[i]].tolist(), linewidth=1, markersize=1, label=curve_names[i], linestyle='-',
-            marker='o', color=pair_colors[i], alpha=0.5)
+            marker='o', color=curve_colors[i], alpha=0.5)
 
 
 ax.set_xticks(xticks_times)

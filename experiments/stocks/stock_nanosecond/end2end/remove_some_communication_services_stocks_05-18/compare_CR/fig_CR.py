@@ -28,9 +28,9 @@ def get_integer(alpha):
 
 
 
-alpha = 0.9997
-fractions = 70
-filename = f"dynamic_CR_random_decay_fraction_{fractions}_alpha_9997.csv"
+alpha = 0.99995
+fractions = 90
+filename = f"dynamic_CR_random_decay_fraction_{fractions}_alpha_{get_integer(alpha)}.csv"
 
 df = pd.read_csv(filename)
 
@@ -41,8 +41,8 @@ print(df[:2])
 
 
 
-time_start = pd.Timestamp('2024-10-15 14:00:10.00', tz='UTC')
-time_end = pd.Timestamp('2024-10-15 14:00:11.00', tz='UTC')
+time_start = pd.Timestamp('2024-10-15 14:00:05.50', tz='UTC')
+time_end = pd.Timestamp('2024-10-15 14:00:18.00', tz='UTC')
 
 
 df["timestamp"] = pd.to_datetime(df["timestamp"])
@@ -59,24 +59,17 @@ print(len(df))
 # df["check_points"] = df["check_points"].apply(lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S").strftime("%m/%d/%Y"))
 check_points = df["timestamp"].tolist()
 x_list = np.arange(0, len(df))
-curve_names = df.columns.tolist()[:-1]
+curve_names = ['Technology', 'Consumer Cyclical', 'Communication Services']
 
-curve_names = ["Technology", "Communication Services",
-               "Consumer Cyclical"]
-
-# pair_colors = [scale_lightness(matplotlib.colors.ColorConverter.to_rgb("navy"), 2.2), 'cyan',
-#                '#287c37', '#cccc00']
-pair_colors = ["blue", "darkorange", "green", "red", "cyan", "black", "magenta"]
-#
-# num_lines = len(x_list)
-# pair_colors = cmaps.set1.colors
+curve_colors = sns.color_palette(palette=['blue', 'limegreen', '#ffb400', 'darkviolet', 'black', 'cyan',
+                                          "red", 'magenta'])
 
 fig, ax = plt.subplots(figsize=(3.5, 1.8))
 plt.subplots_adjust(left=0.1, right=0.9, top=0.8, bottom=0.1)
 
 for i in range(len(curve_names)):
     ax.plot(x_list, df[curve_names[i]].tolist(), linewidth=2, markersize=2, label=curve_names[i], linestyle='-',
-            marker='o', color=pair_colors[i], alpha=0.5)
+            marker='o', color=curve_colors[i], alpha=0.5)
 
 
 

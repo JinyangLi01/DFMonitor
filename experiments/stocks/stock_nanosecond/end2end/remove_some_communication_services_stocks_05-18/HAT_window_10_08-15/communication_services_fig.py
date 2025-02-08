@@ -1,34 +1,16 @@
-import argparse
-import colorsys
-import csv
 
+import colorsys
 import pandas as pd
 import matplotlib.pyplot as plt
-from numpy import dtype
 import math
-import sys
-
-from scipy.fftpack import idctn
-
-from algorithm.per_item import Accuracy_workload as workload
 import seaborn as sns
-import matplotlib.dates as mdates
 import numpy as np
 
-# sns.set_style("whitegrid")
+
+
 sns.set_palette("Paired")
 sns.set_context("paper", font_scale=2)
-
-# Set the font size for labels, legends, and titles
-
-plt.figure(figsize=(6, 3.5))
-plt.rcParams['font.size'] = 20
 plt.rcParams['font.family'] = 'serif'
-
-# # activate latex text rendering
-# rc('text', usetex=True)
-# rc('axes', linewidth=2)
-# rc('font', weight='bold')
 
 
 def scale_lightness(rgb, scale_l):
@@ -54,15 +36,17 @@ time_unit = "10000 nanosecond"
 window_size_units = "10"
 checking_interval = "100000 nanosecond"
 use_nanosecond = True
-curve_names = ['Technology', 'Communication Services', 'Consumer Cyclical']
-pair_colors = ["blue", "darkorange", "green", "red", "cyan", "black", "magenta"]
+curve_names = ['Technology', 'Consumer Cyclical', 'Communication Services']
+
+pair_colors = sns.color_palette(palette=['blue', 'limegreen', '#ffb400', 'darkviolet', 'black', 'cyan',
+                                          "red", 'magenta'])
 removed_percentage = [70, 80, 90]
 
 draw_figure_start_time = pd.Timestamp('2024-10-15 14:00:05.00', tz='UTC')
 draw_figure_end_time = pd.Timestamp('2024-10-15 14:00:18.00', tz='UTC')
 
-fig, axes = plt.subplots(1, 3, figsize=(7, 1.4))
-plt.subplots_adjust(left=0.1, right=0.98, top=0.8, bottom=0.1, wspace=0.4)
+fig, axes = plt.subplots(1, 3, figsize=(7, 1.0))
+plt.subplots_adjust(left=0.1, right=0.98, top=0.8, bottom=0.1, wspace=0.35)
 
 
 for j in range(len(removed_percentage)):
@@ -93,12 +77,8 @@ for j in range(len(removed_percentage)):
     ax.grid(True)
     ax.tick_params(axis='x', which='major', pad=2)
     ax.tick_params(axis='y', which='major', pad=1)
-    xlabel = f"({chr(97 + j)}) remove ${stock_fraction}$% stocks"
+    xlabel = f"({chr(97 + j)}) ${stock_fraction}$% removed"
     ax.set_xlabel(xlabel, fontsize=13, labelpad=0).set_position([0.38, 1])
-
-
-#
-# fig.supxlabel('Time (s) 14:00:05.00 to 14:00:18.00', fontsize=14, y =-0.25)
 
 
 handles, labels = [], []
@@ -110,9 +90,9 @@ for ax in axes:
 
 
 
-plt.legend(handles, labels, loc='upper center', bbox_to_anchor=(-1.05, 1.46), fontsize=14,
-               ncol=3, labelspacing=0.5, handletextpad=0.2, markerscale=6, handlelength=1.5,
-               columnspacing=0.6, borderpad=0.2, frameon=True)
+plt.legend(handles, labels, loc='upper center', bbox_to_anchor=(-1.0, 1.64), fontsize=14,
+               ncol=3, labelspacing=0.3, handletextpad=0.2, markerscale=6, handlelength=1.5,
+               columnspacing=0.3, borderpad=0.2, frameon=True)
 plt.savefig(f"StockAcc_end2end_HAT_alpha_{get_integer(alpha)}_remove_stock_different_fraction.png",
             bbox_inches='tight')
 plt.show()

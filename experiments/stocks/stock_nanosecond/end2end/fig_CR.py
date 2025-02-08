@@ -52,8 +52,7 @@ check_points = df["timestamp"].tolist()
 x_list = np.arange(0, len(df))
 curve_names = df.columns.tolist()[:-1]
 
-curve_names = ["Technology", "Communication Services",
-               "Consumer Cyclical"]
+curve_names = ["Technology", "Consumer Cyclical", "Communication Services"]
 
 # pair_colors = [scale_lightness(matplotlib.colors.ColorConverter.to_rgb("navy"), 2.2), 'cyan',
 #                '#287c37', '#cccc00']
