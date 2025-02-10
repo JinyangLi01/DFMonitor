@@ -13,6 +13,21 @@ data_stream = pd.read_csv(f'../../../../data/stocks_nanosecond/{data_file_name}.
 len_data = len(data_stream)
 len_chunk = 1
 
+
+
+time_start = pd.Timestamp('2024-10-15 14:00:03.00', tz='UTC')
+time_end = pd.Timestamp('2024-10-15 14:00:18.00', tz='UTC')
+
+
+data_stream["ts_event"] = pd.to_datetime(data_stream["ts_event"])
+# get data between time_start and time_end
+data_stream = data_stream[(data_stream["ts_event"] >= time_start) & (data_stream["ts_event"] <= time_end)]
+
+
+
+
+
+
 # Prepare the result file for writing
 result_file_name = f"prediction_result_{data_file_name}_chunk_size_{len_chunk}_v3.csv"
 result_file = open(result_file_name, mode='w', newline='')

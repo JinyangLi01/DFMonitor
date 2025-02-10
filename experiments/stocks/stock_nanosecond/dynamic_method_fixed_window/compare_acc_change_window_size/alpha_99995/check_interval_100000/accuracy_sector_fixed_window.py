@@ -50,7 +50,8 @@ data_file_name = f"../../../../predict_results/prediction_result_{data_file_name
 data = pd.read_csv(data_file_name)
 #
 time_start = pd.Timestamp('2024-10-15 14:00:08.00', tz='UTC')
-time_end = pd.Timestamp('2024-10-15 14:00:11.00', tz='UTC')
+time_end = pd.Timestamp('2024-10-15 14:00:14.00', tz='UTC')
+
 
 data["ts_event"] = pd.to_datetime(data["ts_event"])
 # get data between time_start and time_end
@@ -83,18 +84,19 @@ label_ground_truth = "next_price_direction"
 correctness_column = "prediction_binary_correctness"
 use_two_counters = True
 time_unit = "10000 nanosecond"
-# window_size_units = "10"
+window_size_units = "10"
 checking_interval = "100000 nanosecond"
 use_nanosecond = True
 
-
-parser = argparse.ArgumentParser(description="Sample script")
-parser.add_argument("window_size_units", type=int)
-
-args = parser.parse_args()
-window_size_units = args.window_size_units
+#
+# parser = argparse.ArgumentParser(description="Sample script")
+# parser.add_argument("window_size_units", type=int)
+#
+# args = parser.parse_args()
+# window_size_units = args.window_size_units
 print(window_size_units)
 window_size_units = str(window_size_units)
+
 
 DFMonitor_bit, DFMonitor_counter, uf_list, accuracy_list, counter_list_correct, counter_list_incorrect, \
     window_reset_times, check_points, elapsed_time_DFMonitor_bit, elapsed_time_DFMonitor_counter, \
@@ -175,8 +177,6 @@ merged_df.to_csv(filename, index=False)
 
 
 
-
-
 with open(filename, 'r') as f:
     contents = f.read()
 if "]" in contents:
@@ -186,9 +186,8 @@ if "]" in contents:
         f.write(updated_contents)
 
 
-
+#
 # ================================== draw the figure ===========================================
-
 
 df = pd.read_csv(filename)
 
@@ -200,8 +199,8 @@ print(df[:2])
 
 
 
-draw_figure_start_time = pd.Timestamp('2024-10-15 14:00:10.00', tz='UTC')
-draw_figure_end_time = pd.Timestamp('2024-10-15 14:00:11.00', tz='UTC')
+draw_figure_start_time = pd.Timestamp('2024-10-15 14:00:09.00', tz='UTC')
+draw_figure_end_time = pd.Timestamp('2024-10-15 14:00:13.00', tz='UTC')
 
 
 df = df[(df["check_points"] >= draw_figure_start_time) & (df["check_points"] <= draw_figure_end_time)]
@@ -213,12 +212,13 @@ check_points = df["check_points"].tolist()
 x_list = np.arange(0, len(df))
 curve_names = df.columns.tolist()[:-1]
 
-curve_names = ["Technology", "CommunicationServices", "ConsumerDefensive", "FinancialServices",
-               "ConsumerCyclical", "Energy", "Healthcare"]
+curve_names = ['Technology', 'ConsumerCyclical', 'CommunicationServices', 'ConsumerDefensive',
+               'Healthcare']
 
 # pair_colors = [scale_lightness(matplotlib.colors.ColorConverter.to_rgb("navy"), 2.2), 'cyan',
 #                '#287c37', '#cccc00']
 pair_colors = ["blue", "darkorange", "green", "red", "cyan", "black", "magenta"]
+#
 #
 # num_lines = len(x_list)
 # pair_colors = cmaps.set1.colors
@@ -254,5 +254,4 @@ plt.savefig(f"StockAcc_{date}_{time_period}_a{str(get_integer(alpha))}_tu{time_u
             f"_ci{checking_interval}_"
             f"start_{time_start}_end_{time_end}_fig_{draw_figure_start_time}_to_{draw_figure_end_time}.png",
             bbox_inches='tight')
-
 plt.show()
