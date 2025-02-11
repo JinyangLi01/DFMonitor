@@ -178,6 +178,7 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_form
             DFMonitor_counter.batch_update()
             DFMonitor_bit.batch_update()
             window_reset_times.append(current_time)
+            total_num_time_window += 1
 
         last_event_time = current_time
         last_clock = current_time
