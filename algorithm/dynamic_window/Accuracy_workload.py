@@ -74,8 +74,6 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_form
     time_unit_scale = base_conversion.get(time_unit_str, 1) * time_unit_val
     checking_interval_val, checking_interval_str = checking_interval.split(" ")
 
-
-
     window_manager = DynamicWindowManager(T_in, T_b)
 
 
@@ -141,6 +139,7 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_form
         current_clock = row[date_column]
         while (current_clock - last_accuracy_check).total_seconds() * (1e9 if use_nanosecond else 1) >= (
                 checking_interval_nanosecond if use_nanosecond else checking_interval_seconds):
+            print("checking at ", current_clock)
             check_points.append(last_accuracy_check)
             time1 = time.time()
             cur_uf_counter = DFMonitor_counter.get_uf_list()
@@ -165,6 +164,8 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_form
         time_diff = (current_clock - last_event_time).total_seconds() if not use_nanosecond else (
                 current_clock - last_event_time).nanoseconds
         time_diff_units = time_diff / time_unit_scale
+
+        # print("time_diff_units", time_diff_units)
 
         last_clock = current_clock
         current_time = row[date_column]
