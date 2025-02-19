@@ -40,6 +40,8 @@ len_chunk = 1
 data_file_name = f"../predict_results/prediction_result_{data_file_name}_chunk_size_{len_chunk}_v3.csv"
 data = pd.read_csv(data_file_name)
 
+
+
 time_start = pd.Timestamp('2024-10-15 14:00:05.00', tz='UTC')
 time_end = pd.Timestamp('2024-10-15 14:00:18.00', tz='UTC')
 
@@ -65,7 +67,7 @@ monitored_groups = [{"sector": 'Technology'}, {'sector': 'Communication Services
                     {"sector": 'Consumer Defensive'}, {"sector": 'Consumer Cyclical'}, {"sector": 'Financial Services'},
                     {"sector": 'Healthcare'}, {"sector": 'Industrials'}, {"sector": "Basic Materials"}]
 print(data[:5])
-alpha = 0.99999
+alpha = 0.99995
 
 
 threshold = 0.3
@@ -78,7 +80,7 @@ window_size_units = "20000"
 checking_interval = "200 millisecond"
 use_nanosecond = True
 
-
+data[correctness_column] = data[label_prediction] == data[label_ground_truth]
 
 ######################################## Fixed window ########################################
 

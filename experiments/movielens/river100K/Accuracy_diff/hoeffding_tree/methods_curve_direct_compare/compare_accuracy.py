@@ -51,15 +51,16 @@ label_prediction = "prediction"
 label_ground_truth = "rating"
 correctness_column = "diff_binary_correctness"
 use_two_counters = True
-time_unit = "12 hour"
-checking_interval = "100000 nanosecond"
+time_unit = "1 hour"
+window_size_units = 24
+checking_interval = "24 hour"
 use_nanosecond = False
 
 
-######################################## Dynamic window ########################################
+####################################### Dynamic window ########################################
 
-Tb = 10
-Tin = 5
+Tb = 24*7
+Tin = 24
 
 
 DFMonitor_bit, DFMonitor_counter, uf_list, accuracy_list, counter_list_correct, counter_list_incorrect, \
@@ -96,7 +97,7 @@ with open(filename, "w", newline='') as csvfile:
 
 ######################################## Fixed window ########################################
 
-window_size_units = "24*3"
+window_size_units = "24*7"
 
 DFMonitor_bit, DFMonitor_counter, uf_list, accuracy_list, counter_list_correct, counter_list_incorrect, \
     window_reset_times, check_points, elapsed_time_DFMonitor_bit, elapsed_time_DFMonitor_counter, \
@@ -133,7 +134,7 @@ with open(filename, "w", newline='') as csvfile:
 
 ######################################## traditional ########################################
 
-
+#
 #
 # window_size = "1W"
 # method_name = "hoeffding_classifier"
@@ -186,14 +187,14 @@ with open(filename, "w", newline='') as csvfile:
 #
 #
 #
-
-
-
-
-
-
-
-
-
-
-
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#

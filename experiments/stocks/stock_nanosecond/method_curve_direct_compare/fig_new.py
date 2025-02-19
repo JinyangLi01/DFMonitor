@@ -333,7 +333,7 @@ axs[0][1].bar(["Fixed Window", "Adaptive Window", "Traditional Method"],
            smoothness_scores_normalized_tech.values(), color=bar_colors[:3], width=0.4,
               label = ["Tech Fixed", "Tech Adaptive", "Tech Traditional"])
 axs[0][1].set_title("(b) Tech Smoothness", y=-0.15, pad=-10, fontsize=14).set_position([0.32, -0.14])
-
+axs[0][1].bar_label(axs[0][1].containers[0], fontsize=14)
 
 # axs[0][1].set_yscale("symlog", linthresh=0.1)
 axs[0][1].set_yticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"], fontsize=14)

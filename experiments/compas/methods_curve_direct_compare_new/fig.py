@@ -279,14 +279,19 @@ smoothness_scores_normalized_FPR_hispanic["hispanic_adaptive_window_roughness"] 
 
 
 bar_colors = ["blue", "hotpink",  "Lime",  "red",  "DarkGrey", "cyan",  "green", "darkorchid","gold", ]
-axs[0][1].bar(range(len(smoothness_scores_normalized_FPR_white)), smoothness_scores_normalized_FPR_white.values(), width=0.4,
+bars = axs[0][1].bar(range(len(smoothness_scores_normalized_FPR_white)), smoothness_scores_normalized_FPR_white.values(), width=0.4,
               label = ["White fixed", "White adaptive", "White traditional"],
               color=bar_colors[:3])
-axs[1][1].bar(range(len(smoothness_scores_normalized_FPR_black)), smoothness_scores_normalized_FPR_black.values(), width=0.4,
+axs[0][1].bar_label(bars, label_type='edge', fontsize=13, fmt='%.1f', padding=-1)
+
+
+bars = axs[1][1].bar(range(len(smoothness_scores_normalized_FPR_black)), smoothness_scores_normalized_FPR_black.values(), width=0.4,
 color=bar_colors[3:6],
               label = ["Black fixed", "Black adaptive", "Black traditional"])
-axs[2][1].bar(range(len(smoothness_scores_normalized_FPR_hispanic)), smoothness_scores_normalized_FPR_hispanic.values(), width=0.4,
+axs[1][1].bar_label(bars, label_type='edge', fontsize=13, fmt='%.1f', padding=-1)
+bars = axs[2][1].bar(range(len(smoothness_scores_normalized_FPR_hispanic)), smoothness_scores_normalized_FPR_hispanic.values(), width=0.4,
 color=bar_colors[6:], label = ["Hispanic fixed", "Hispanic adaptive", "Hispanic traditional"])
+axs[2][1].bar_label(bars, label_type='edge', fontsize=13, fmt='%.1f', padding=-1)
 
 axs[0][1].set_title('(b) White Smoothness', y=-0.15, pad=-10, fontsize=13)
 axs[0][1].set_yticks([0,0.5,1.0], ['0', '0.5', '1.0'], fontsize=13)
@@ -294,6 +299,7 @@ axs[0][1].grid(True, axis="x", linestyle='--', alpha=0.6)
 axs[0][1].grid(True, axis="y", linestyle='--', alpha=0.6)
 axs[0][1].set_xticks([], [], rotation=0, fontsize=12)
 axs[0][1].tick_params(axis='x', which='major', pad=1)
+
 
 axs[1][1].set_title('(d) Black Smoothness', y=-0.15, pad=-10, fontsize=13)
 axs[1][1].set_yticks([0,0.5,1.0], ['0', '0.5', '1.0'], fontsize=13)
@@ -328,7 +334,7 @@ reordered_handles = [handles[i] for i in desired_order]
 reordered_labels = [labels[i] for i in desired_order]
 
 axs[0][0].legend(reordered_handles, reordered_labels, title_fontsize=14, loc='upper left',
-                 bbox_to_anchor=(-0.15, 2.15),handlelength=1.5,
+                 bbox_to_anchor=(-0.15, 2.25),handlelength=1.5,
                  fontsize=13, ncol=3, labelspacing=0.2, handletextpad=0.3, markerscale=1,
                  columnspacing=0.5, borderpad=0.2, frameon=False)
 
