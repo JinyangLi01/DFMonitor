@@ -52,7 +52,7 @@ correctness_column = "diff_binary_correctness"
 use_two_counters = True
 time_unit = "1 hour"
 # window_size_units = "24*7*4*2"
-checking_interval = "24 hour"
+checking_interval = "7 day"
 use_nanosecond = False
 
 
@@ -76,44 +76,44 @@ colors_set2 = ["#ff7f0e", "#ffbb78", "#d62728"]  # Orange, light orange, red
 curve_colors = sns.color_palette("magma", 3) + sns.color_palette("viridis", 3)
 curve_colors = ["blue", "red", "hotpink", "DarkGrey", "Lime", "cyan"]
 
-######################################## Dynamic fixed window ########################################
+####################################### Dynamic fixed window ########################################
 
 
-#
-# # Inset zoom
-# from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-# # axins = inset_axes(axs[0][0], width="30%", height="30%", loc="upper right")
-#
-# df_fixed = pd.read_csv(f"fixed_window_{checking_interval}.csv")
-#
-# x_list = np.arange(len(df_fixed))
-# axs[0][0].plot(x_list, df_fixed['male_time_decay'], linewidth=1.5, markersize=2.5, label = 'male fixed window',
-#             linestyle='-', marker='o',
-#             color=curve_colors[0])
-# axs[1][0].plot(x_list, df_fixed['female_time_decay'], linewidth=1.5, markersize=2.5, label = 'female fixed window',
-#             linestyle='-', marker='o',
-#             color=curve_colors[1])
-#
-#
-#
-# ######################################## Dynamic adaptive window ########################################
-#
-# Tb = 24*7
-# Tin = 24
-#
-# df_adaptive = pd.read_csv(f"adaptive_window_{checking_interval}.csv")
-# x_list = np.arange(len(df_adaptive))
-# axs[0][0].plot(x_list, df_adaptive["male_time_decay"], linewidth=1.5, markersize=2.5, label='male adaptive window',
-#             linestyle='-', marker='o',
-#             color=curve_colors[2])
-# axs[1][0].plot(x_list, df_adaptive["female_time_decay"], linewidth=1.5, markersize=2.5, label='female adaptive window',
-#             linestyle='-', marker='o',
-#             color=curve_colors[3])
-#
-#
-#
-# ######################################## traditional ########################################
-#
+
+# Inset zoom
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+# axins = inset_axes(axs[0][0], width="30%", height="30%", loc="upper right")
+
+df_fixed = pd.read_csv(f"fixed_window_{checking_interval}.csv")
+
+x_list = np.arange(len(df_fixed))
+axs[0][0].plot(x_list, df_fixed['male_time_decay'], linewidth=1.5, markersize=2.5, label = 'male fixed window',
+            linestyle='-', marker='o',
+            color=curve_colors[0])
+axs[1][0].plot(x_list, df_fixed['female_time_decay'], linewidth=1.5, markersize=2.5, label = 'female fixed window',
+            linestyle='-', marker='o',
+            color=curve_colors[1])
+
+
+
+######################################## Dynamic adaptive window ########################################
+
+Tb = 24*7
+Tin = 24
+
+df_adaptive = pd.read_csv(f"adaptive_window_{checking_interval}.csv")
+x_list = np.arange(len(df_adaptive))
+axs[0][0].plot(x_list, df_adaptive["male_time_decay"], linewidth=1.5, markersize=2.5, label='male adaptive window',
+            linestyle='-', marker='o',
+            color=curve_colors[2])
+axs[1][0].plot(x_list, df_adaptive["female_time_decay"], linewidth=1.5, markersize=2.5, label='female adaptive window',
+            linestyle='-', marker='o',
+            color=curve_colors[3])
+
+
+
+######################################## traditional ########################################
+
 
 
 window_size = "1W"
@@ -185,130 +185,130 @@ axs[1][0].grid(True, axis="x", linestyle='--', alpha=0.6)
 
 fig.savefig("curves.png", bbox_inches='tight')
 
-#
-# ######################################## roughness ########################################
-#
-# def roughness2smoothness(roughness_FPR):
-#     print("Roughness: ", roughness_FPR)
-#
-#     # Scale roughness to smoothness
-#     max_roughness = max(roughness_FPR.values())
-#     smoothness_scores = {key: 1 - (value / max_roughness) for key, value in roughness_FPR.items()}
-#     print("Smoothness Scores (Before Normalization):", smoothness_scores)
-#
-#     # # Normalize smoothness scores to [0, 1]
-#     # max_smoothness = max(smoothness_scores.values())
-#     # min_smoothness = min(smoothness_scores.values())
-#     # normalized_smoothness = {key: score/max_smoothness
-#     #                          for key, score in smoothness_scores.items()}
-#     # print("Normalized Smoothness Scores:", normalized_smoothness)
-#     # print("\n")
-#     return smoothness_scores
-#
-#
-# smooth_male = {}
-# smooth_female = {}
-#
-# with open("roughness_compas_FPR.csv", "w", newline='') as csvfile:
-#     writer = csv.writer(csvfile, delimiter=',')
-#     writer.writerow(["smoothness", "roughness", "check_points"])
-#     writer.writerow(["male_fixed_window", np.std(np.diff(df_fixed["male_time_decay"]) / np.diff(x_list))])
-#     smooth_male["male_fixed_window_smoothness"] = np.std(np.diff(df_fixed["male_time_decay"]) / np.diff(x_list))
-#
-#     writer.writerow(["male_adaptive_window", np.std(np.diff(df_adaptive["male_time_decay"]) / np.diff(x_list))])
-#     smooth_male["male_adaptive_window_smoothness"] = np.std(np.diff(df_fixed["male_time_decay"]) / np.diff(x_list))
-#
-#     tra = df_traditional["calculated_value"].tolist()
-#     tra = [x for x in tra if str(x) != 'nan']
-#     dydx = np.diff(tra) / np.diff(np.arange(0, len(tra)))
-#     sm = np.std(dydx)
-#     writer.writerow(["male_traditional", sm])
-#     smooth_male["male_traditional_smoothness"] = sm
-#
-#
-# print(smooth_male)
-#
-# # smoothness_scores_male = [1/sd for sd in list(smooth_male.values())]  # Example data
-# # # Normalize based on the maximum value observed
-# # max_smoothness_male = max(smoothness_scores_male)
-# # smoothness_scores_normalized_male = [score / max_smoothness_male for score in smoothness_scores_male]
-# smoothness_scores_normalized_male = roughness2smoothness(smooth_male)
-# print("Normalized Smoothness Scores male fixed, adaptive, tradidtional:", smoothness_scores_normalized_male)
-#
-#
-# with open("roughness_compas_FPR.csv", "a", newline='') as csvfile:
-#     writer = csv.writer(csvfile, delimiter=',')
-#     # do the same for females
-#     writer.writerow(["female_fixed_window", np.std(np.diff(df_fixed["female_time_decay"]) / np.diff(x_list))])
-#     smooth_female["female_fixed_window_smoothness"] = np.std(np.diff(df_fixed["female_time_decay"]) / np.diff(x_list))
-#     writer.writerow(["female_adaptive_window", np.std(np.diff(df_adaptive["female_time_decay"]) / np.diff(x_list))])
-#     smooth_female["female_adaptive_window_smoothness"] = np.std(np.diff(df_adaptive["female_time_decay"]) / np.diff(x_list))
-#     tra = df_traditional["calculated_value"].tolist()
-#     tra = [x for x in tra if str(x) != 'nan']
-#     dydx = np.diff(tra) / np.diff(np.arange(0, len(tra)))
-#     sm = np.std(dydx)
-#     writer.writerow(["female_traditional_smoothness", sm])
-#     smooth_female["female_traditional_smoothness"] = sm
-#
-#
-# print(smooth_female)
-#
-# # smoothness_scores_female = [1/sd for sd in list(smooth_female.values())]  # Example data
-# # # Normalize based on the maximum value observed
-# # max_smooth_female = max(smoothness_scores_female)
-# # smoothness_scores_normalized_female = [score / max_smooth_female for score in smoothness_scores_female]
-# smoothness_scores_normalized_female = roughness2smoothness(smooth_female)
-# print("Normalized smoothness Scores female fixed, adaptive, traditional:", smoothness_scores_normalized_female)
-#
-#
-# bar_colors = ["blue", "hotpink",  "Lime",  "red",  "DarkGrey", "cyan"]
-#
-#
-#
-# # Male Smoothness Bar Chart
-# bars = axs[0][1].bar(["Fixed Window", "Adaptive Window", "Traditional Method"],
-#            smoothness_scores_normalized_male.values(), color=bar_colors[:3], width=0.4,
-#               label = ["Male Fixed", "Male Adaptive", "Male Traditional"])
-# axs[0][1].set_title("(b) Male Smoothness Score", y=-0.15, pad=-10, fontsize=14).set_position([0.32, -0.14])
-# axs[0][1].bar_label(bars, label_type='edge', fontsize=13, fmt='%.1f', padding=-1)
-#
-#
-# axs[0][1].set_yticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"], fontsize=14)
-# axs[0][1].grid(True, linestyle='--', alpha=0.6)
-# axs[0][1].set_xticks([], [], rotation=0, fontsize=14)
-# # axs[0][1].set_ylabel('Normalized Smoothness Score', fontsize=14, labelpad=-1).set_position([0.4, -0.1])
-#
-#
-# # Female Smoothness Bar Chart
-# bars = axs[1][1].bar(["Fixed Window", "Adaptive Window", "Traditional Method"],
-#            smoothness_scores_normalized_female.values(), color=bar_colors[3:], width=0.4,
-#               label = ["Female Fixed", "Female Adaptive", "Female Traditional"])
-# axs[1][1].set_title("(d) Female Smoothness Score", y=-0.15, pad=-10, fontsize=14).set_position([0.32, -0.14])
-# axs[1][1].set_yticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"], fontsize=14)
-# axs[1][1].grid(True, linestyle='--', alpha=0.6)
-# axs[1][1].set_xticks([], [], rotation=0, fontsize=14)
-# axs[0][1].bar_label(bars, label_type='edge', fontsize=13, fmt='%.1f', padding=-1)
-#
-#
-# handles, labels = axs[0][1].get_legend_handles_labels()
-# handles1, labels1 = axs[1][1].get_legend_handles_labels()
-# handles = handles + handles1
-# labels = labels + labels1
-# desired_order = [0, 3,  1,4,  2, 5]  # Reorder as needed
-#
-# # Reorder handles and labels
-# reordered_handles = [handles[i] for i in desired_order]
-# reordered_labels = [labels[i] for i in desired_order]
-#
-# axs[0][0].legend(reordered_handles, reordered_labels, title_fontsize=14, loc='upper left',
-#                  bbox_to_anchor=(-0.1, 1.8),
-#                  fontsize=13, ncol=3, labelspacing=0.2, handletextpad=0.4, markerscale=1,
-#                  columnspacing=0.8, borderpad=0.2, frameon=False)
-#
-#
-# fig.savefig("curves_smoothness_score.png", bbox_inches='tight')
-# plt.show()
-#
-#
-#
-#
+
+######################################## roughness ########################################
+
+def roughness2smoothness(roughness_FPR):
+    print("Roughness: ", roughness_FPR)
+
+    # Scale roughness to smoothness
+    max_roughness = max(roughness_FPR.values())
+    smoothness_scores = {key: 1 - (value / max_roughness) for key, value in roughness_FPR.items()}
+    print("Smoothness Scores (Before Normalization):", smoothness_scores)
+
+    # # Normalize smoothness scores to [0, 1]
+    # max_smoothness = max(smoothness_scores.values())
+    # min_smoothness = min(smoothness_scores.values())
+    # normalized_smoothness = {key: score/max_smoothness
+    #                          for key, score in smoothness_scores.items()}
+    # print("Normalized Smoothness Scores:", normalized_smoothness)
+    # print("\n")
+    return smoothness_scores
+
+
+smooth_male = {}
+smooth_female = {}
+
+with open("roughness_compas_FPR.csv", "w", newline='') as csvfile:
+    writer = csv.writer(csvfile, delimiter=',')
+    writer.writerow(["smoothness", "roughness", "check_points"])
+    writer.writerow(["male_fixed_window", np.std(np.diff(df_fixed["male_time_decay"]) / np.diff(x_list))])
+    smooth_male["male_fixed_window_smoothness"] = np.std(np.diff(df_fixed["male_time_decay"]) / np.diff(x_list))
+
+    writer.writerow(["male_adaptive_window", np.std(np.diff(df_adaptive["male_time_decay"]) / np.diff(x_list))])
+    smooth_male["male_adaptive_window_smoothness"] = np.std(np.diff(df_fixed["male_time_decay"]) / np.diff(x_list))
+
+    tra = df_traditional["calculated_value"].tolist()
+    tra = [x for x in tra if str(x) != 'nan']
+    dydx = np.diff(tra) / np.diff(np.arange(0, len(tra)))
+    sm = np.std(dydx)
+    writer.writerow(["male_traditional", sm])
+    smooth_male["male_traditional_smoothness"] = sm
+
+
+print(smooth_male)
+
+# smoothness_scores_male = [1/sd for sd in list(smooth_male.values())]  # Example data
+# # Normalize based on the maximum value observed
+# max_smoothness_male = max(smoothness_scores_male)
+# smoothness_scores_normalized_male = [score / max_smoothness_male for score in smoothness_scores_male]
+smoothness_scores_normalized_male = roughness2smoothness(smooth_male)
+print("Normalized Smoothness Scores male fixed, adaptive, tradidtional:", smoothness_scores_normalized_male)
+
+
+with open("roughness_compas_FPR.csv", "a", newline='') as csvfile:
+    writer = csv.writer(csvfile, delimiter=',')
+    # do the same for females
+    writer.writerow(["female_fixed_window", np.std(np.diff(df_fixed["female_time_decay"]) / np.diff(x_list))])
+    smooth_female["female_fixed_window_smoothness"] = np.std(np.diff(df_fixed["female_time_decay"]) / np.diff(x_list))
+    writer.writerow(["female_adaptive_window", np.std(np.diff(df_adaptive["female_time_decay"]) / np.diff(x_list))])
+    smooth_female["female_adaptive_window_smoothness"] = np.std(np.diff(df_adaptive["female_time_decay"]) / np.diff(x_list))
+    tra = df_traditional["calculated_value"].tolist()
+    tra = [x for x in tra if str(x) != 'nan']
+    dydx = np.diff(tra) / np.diff(np.arange(0, len(tra)))
+    sm = np.std(dydx)
+    writer.writerow(["female_traditional_smoothness", sm])
+    smooth_female["female_traditional_smoothness"] = sm
+
+
+print(smooth_female)
+
+# smoothness_scores_female = [1/sd for sd in list(smooth_female.values())]  # Example data
+# # Normalize based on the maximum value observed
+# max_smooth_female = max(smoothness_scores_female)
+# smoothness_scores_normalized_female = [score / max_smooth_female for score in smoothness_scores_female]
+smoothness_scores_normalized_female = roughness2smoothness(smooth_female)
+print("Normalized smoothness Scores female fixed, adaptive, traditional:", smoothness_scores_normalized_female)
+
+
+bar_colors = ["blue", "hotpink",  "Lime",  "red",  "DarkGrey", "cyan"]
+
+
+
+# Male Smoothness Bar Chart
+bars = axs[0][1].bar(["Fixed Window", "Adaptive Window", "Traditional Method"],
+           smoothness_scores_normalized_male.values(), color=bar_colors[:3], width=0.4,
+              label = ["Male Fixed", "Male Adaptive", "Male Traditional"])
+axs[0][1].set_title("(b) Male Smoothness Score", y=-0.15, pad=-10, fontsize=14).set_position([0.32, -0.14])
+axs[0][1].bar_label(bars, label_type='edge', fontsize=13, fmt='%.1f', padding=0)
+
+
+axs[0][1].set_yticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"], fontsize=14)
+axs[0][1].grid(True, linestyle='--', alpha=0.6)
+axs[0][1].set_xticks([], [], rotation=0, fontsize=14)
+# axs[0][1].set_ylabel('Normalized Smoothness Score', fontsize=14, labelpad=-1).set_position([0.4, -0.1])
+
+
+# Female Smoothness Bar Chart
+bars = axs[1][1].bar(["Fixed Window", "Adaptive Window", "Traditional Method"],
+           smoothness_scores_normalized_female.values(), color=bar_colors[3:], width=0.4,
+              label = ["Female Fixed", "Female Adaptive", "Female Traditional"])
+axs[1][1].set_title("(d) Female Smoothness Score", y=-0.15, pad=-10, fontsize=14).set_position([0.32, -0.14])
+axs[1][1].set_yticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"], fontsize=14)
+axs[1][1].grid(True, linestyle='--', alpha=0.6)
+axs[1][1].set_xticks([], [], rotation=0, fontsize=14)
+axs[1][1].bar_label(bars, label_type='edge', fontsize=13, fmt='%.1f', padding=0)
+
+
+handles, labels = axs[0][1].get_legend_handles_labels()
+handles1, labels1 = axs[1][1].get_legend_handles_labels()
+handles = handles + handles1
+labels = labels + labels1
+desired_order = [0, 3,  1,4,  2, 5]  # Reorder as needed
+
+# Reorder handles and labels
+reordered_handles = [handles[i] for i in desired_order]
+reordered_labels = [labels[i] for i in desired_order]
+
+axs[0][0].legend(reordered_handles, reordered_labels, title_fontsize=14, loc='upper left',
+                 bbox_to_anchor=(-0.1, 1.9),
+                 fontsize=13, ncol=3, labelspacing=0.2, handletextpad=0.4, markerscale=1,
+                 columnspacing=0.8, borderpad=0.2, frameon=False)
+
+
+fig.savefig("curves_smoothness_score.png", bbox_inches='tight')
+plt.show()
+
+
+
+

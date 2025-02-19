@@ -133,7 +133,7 @@ def traverse_data_DFMonitor_and_baseline(timed_data, date_column, date_time_form
         )
 
     for index, row in timed_data.iterrows():
-        if index % 100 == 0:
+        if index % 1000 == 0:
             print(f"Processing row {index} out of {len(timed_data)}")
         label = "correct" if int(timed_data.loc[index, correctness_column]) == 1 else "incorrect"
         current_clock = row[date_column]

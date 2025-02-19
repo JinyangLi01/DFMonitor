@@ -52,8 +52,7 @@ label_ground_truth = "rating"
 correctness_column = "diff_binary_correctness"
 use_two_counters = True
 time_unit = "1 hour"
-window_size_units = 24
-checking_interval = "24 hour"
+checking_interval = "7 day"
 use_nanosecond = False
 
 
