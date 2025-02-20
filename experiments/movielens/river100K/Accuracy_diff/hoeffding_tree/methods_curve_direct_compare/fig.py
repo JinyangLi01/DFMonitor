@@ -70,7 +70,7 @@ curve_colors = [scale_lightness(matplotlib.colors.ColorConverter.to_rgb("navy"),
                '#287c37', '#cccc00',
                '#730a47', '#9966cc']
 
-colors_set1 = ["#1f77b4", "#76b7b2", "#17becf"]  # Blue, teal, light blue
+colors_set1 = [".2f77b4", "#76b7b2", "#17becf"]  # Blue, teal, light blue
 colors_set2 = ["#ff7f0e", "#ffbb78", "#d62728"]  # Orange, light orange, red
 
 curve_colors = sns.color_palette("magma", 3) + sns.color_palette("viridis", 3)
@@ -233,7 +233,7 @@ print(smooth_male)
 # max_smoothness_male = max(smoothness_scores_male)
 # smoothness_scores_normalized_male = [score / max_smoothness_male for score in smoothness_scores_male]
 smoothness_scores_normalized_male = roughness2smoothness(smooth_male)
-print("Normalized Smoothness Scores male fixed, adaptive, tradidtional:", smoothness_scores_normalized_male)
+print("Normalized Smoothness Scores male fixed, adaptive, traditional:", smoothness_scores_normalized_male)
 
 
 with open("roughness_compas_FPR.csv", "a", newline='') as csvfile:
@@ -270,7 +270,7 @@ bars = axs[0][1].bar(["Fixed Window", "Adaptive Window", "Traditional Method"],
            smoothness_scores_normalized_male.values(), color=bar_colors[:3], width=0.4,
               label = ["Male Fixed", "Male Adaptive", "Male Traditional"])
 axs[0][1].set_title("(b) Male Smoothness Score", y=-0.15, pad=-10, fontsize=14).set_position([0.32, -0.14])
-axs[0][1].bar_label(bars, label_type='edge', fontsize=13, fmt='%.1f', padding=0)
+axs[0][1].bar_label(bars, label_type='edge', fontsize=13, fmt='%.2f', padding=0)
 
 
 axs[0][1].set_yticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"], fontsize=14)
@@ -287,7 +287,7 @@ axs[1][1].set_title("(d) Female Smoothness Score", y=-0.15, pad=-10, fontsize=14
 axs[1][1].set_yticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"], fontsize=14)
 axs[1][1].grid(True, linestyle='--', alpha=0.6)
 axs[1][1].set_xticks([], [], rotation=0, fontsize=14)
-axs[1][1].bar_label(bars, label_type='edge', fontsize=13, fmt='%.1f', padding=0)
+axs[1][1].bar_label(bars, label_type='edge', fontsize=13, fmt='%.2f', padding=0)
 
 
 handles, labels = axs[0][1].get_legend_handles_labels()

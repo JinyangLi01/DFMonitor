@@ -122,7 +122,7 @@ with open(filename, "w", newline='') as csvfile:
 
 ######################################## Dynamic window ########################################
 T_b = 50
-T_in = 5
+T_in = 7
 
 DFMonitor_bit, DFMonitor_counter, uf_list, accuracy_list, counter_list_correct, counter_list_incorrect, \
     window_reset_times, check_points, elapsed_time_DFMonitor_bit, elapsed_time_DFMonitor_counter, \

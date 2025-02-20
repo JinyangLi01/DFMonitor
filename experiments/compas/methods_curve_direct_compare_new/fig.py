@@ -282,16 +282,16 @@ bar_colors = ["blue", "hotpink",  "Lime",  "red",  "DarkGrey", "cyan",  "green",
 bars = axs[0][1].bar(range(len(smoothness_scores_normalized_FPR_white)), smoothness_scores_normalized_FPR_white.values(), width=0.4,
               label = ["White fixed", "White adaptive", "White traditional"],
               color=bar_colors[:3])
-axs[0][1].bar_label(bars, label_type='edge', fontsize=13, fmt='%.1f', padding=-1)
+axs[0][1].bar_label(bars, label_type='edge', fontsize=13, fmt='%.2f', padding=-1)
 
 
 bars = axs[1][1].bar(range(len(smoothness_scores_normalized_FPR_black)), smoothness_scores_normalized_FPR_black.values(), width=0.4,
 color=bar_colors[3:6],
               label = ["Black fixed", "Black adaptive", "Black traditional"])
-axs[1][1].bar_label(bars, label_type='edge', fontsize=13, fmt='%.1f', padding=-1)
+axs[1][1].bar_label(bars, label_type='edge', fontsize=13, fmt='%.2f', padding=-1)
 bars = axs[2][1].bar(range(len(smoothness_scores_normalized_FPR_hispanic)), smoothness_scores_normalized_FPR_hispanic.values(), width=0.4,
 color=bar_colors[6:], label = ["Hispanic fixed", "Hispanic adaptive", "Hispanic traditional"])
-axs[2][1].bar_label(bars, label_type='edge', fontsize=13, fmt='%.1f', padding=-1)
+axs[2][1].bar_label(bars, label_type='edge', fontsize=13, fmt='%.2f', padding=-1)
 
 axs[0][1].set_title('(b) White Smoothness', y=-0.15, pad=-10, fontsize=13)
 axs[0][1].set_yticks([0,0.5,1.0], ['0', '0.5', '1.0'], fontsize=13)

@@ -95,8 +95,7 @@ axs[2][0].plot(df_fixed['check_points'], df_fixed['CommunicationServices_time_de
 
 ######################################## Dynamic adaptive window ########################################
 
-Tb = 24*7
-Tin = 24
+
 
 df_adaptive = pd.read_csv(f"adaptive_window_{checking_interval}.csv")
 df_adaptive['check_points'] = pd.to_datetime(df_adaptive['check_points'])  # Ensure datetime format
@@ -252,6 +251,8 @@ smoothness_scores_normalized_tech = roughness2smoothness(smooth_tech)
 # max_smoothness_tech = max(smoothness_scores_tech)
 # smoothness_scores_normalized_tech = [score / max_smoothness_tech for score in smoothness_scores_tech]
 print("Normalized Smoothness Scores Tech:", smoothness_scores_normalized_tech)
+print("Normalized Smoothness Scores tech fixed, adaptive, traditional:", smoothness_scores_normalized_tech)
+
 
 
 
@@ -288,6 +289,9 @@ print(smooth_consumer_cyclical)
 smoothness_scores_normalized_consumer_cyclical = roughness2smoothness(smooth_consumer_cyclical)
 print("Normalized Smoothness Scores Consumer Cyclical:", smoothness_scores_normalized_consumer_cyclical)
 
+
+
+
 # Repeat for Communication Services
 with open("roughness_compas_FPR.csv", "a", newline='') as csvfile:
     writer = csv.writer(csvfile, delimiter=',')
@@ -321,6 +325,19 @@ smoothness_scores_normalized_communication_services = roughness2smoothness(smoot
 print("Normalized Smoothness Scores Communication Services:", smoothness_scores_normalized_communication_services)
 
 
+#
+# print("Technology Fixed Window Derivatives:", dydx_tech_fixed)
+# print("Technology Adaptive Window Derivatives:", dydx_tech_adaptive)
+# print("Technology Traditional Derivatives:", dydx_tech_traditional)
+#
+# print("Consumer Cyclical Fixed Window Derivatives:", dydx_consumer_fixed)
+# print("Consumer Cyclical Adaptive Window Derivatives:", dydx_consumer_adaptive)
+# print("Consumer Cyclical Traditional Derivatives:", dydx_consumer_traditional)
+#
+# print("Communication Services Fixed Window Derivatives:", dydx_comm_fixed)
+# print("Communication Services Adaptive Window Derivatives:", dydx_comm_adaptive)
+# print("Communication Services Traditional Derivatives:", dydx_comm_traditional)
+
 
 
 
@@ -328,12 +345,11 @@ bar_colors = ["blue", "hotpink",  "Lime",  "red",  "DarkGrey", "cyan",  "green",
 
 
 
-# Male Smoothness Bar Chart
-axs[0][1].bar(["Fixed Window", "Adaptive Window", "Traditional Method"],
+bars = axs[0][1].bar(["Fixed Window", "Adaptive Window", "Traditional Method"],
            smoothness_scores_normalized_tech.values(), color=bar_colors[:3], width=0.4,
               label = ["Tech Fixed", "Tech Adaptive", "Tech Traditional"])
+axs[0][1].bar_label(bars, label_type='edge', fontsize=13, fmt='%.2f', padding=0)
 axs[0][1].set_title("(b) Tech Smoothness", y=-0.15, pad=-10, fontsize=14).set_position([0.32, -0.14])
-axs[0][1].bar_label(axs[0][1].containers[0], fontsize=14)
 
 # axs[0][1].set_yscale("symlog", linthresh=0.1)
 axs[0][1].set_yticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"], fontsize=14)
@@ -342,11 +358,12 @@ axs[0][1].set_xticks([], [], rotation=0, fontsize=14)
 # axs[0][1].set_ylabel('Normalized Smoothness Score', fontsize=14, labelpad=-1).set_position([0.4, -0.1])
 
 
-# Female Smoothness Bar Chart
-axs[1][1].bar(["Fixed Window", "Adaptive Window", "Traditional Method"],
+
+bars = axs[1][1].bar(["Fixed Window", "Adaptive Window", "Traditional Method"],
            smoothness_scores_normalized_consumer_cyclical.values(), color=bar_colors[3:6], width=0.4,
               label = ["Con. Cyclical Fixed", "Con. Cyclical Adaptive",
                        "Con. Cyclical Traditional"])
+axs[1][1].bar_label(bars, label_type='edge', fontsize=13, fmt='%.2f', padding=0)
 axs[1][1].set_title("(d) Cons. Cyclical Smoothness", y=-0.15, pad=-10, fontsize=14).set_position([0.32, -0.14])
 # axs[1][1].set_yscale("symlog", linthresh=0.1)
 axs[1][1].set_yticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"], fontsize=14)
@@ -355,10 +372,12 @@ axs[1][1].set_xticks([], [], rotation=0, fontsize=14)
 
 
 
-axs[2][1].bar(["Fixed Window", "Adaptive Window", "Traditional Method"],
+bars = axs[2][1].bar(["Fixed Window", "Adaptive Window", "Traditional Method"],
               smoothness_scores_normalized_communication_services.values(), color=bar_colors[6:], width=0.4,
                   label = ["Comm. Serv. Fixed", "Comm. Serv. Adaptive",
                            "Comm. Serv. Traditional"])
+axs[2][1].bar_label(bars, label_type='edge', fontsize=13, fmt='%.2f', padding=0)
+
 axs[2][1].set_title("(f) Comm. Serv. Smoothness", y=-0.15, pad=-10, fontsize=14).set_position([0.32, -0.14])
 # axs[2][1].set_yscale("symlog", linthresh=0.1)
 axs[2][1].set_yticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"], fontsize=14)
@@ -381,7 +400,7 @@ reordered_handles = [handles[i] for i in desired_order]
 reordered_labels = [labels[i] for i in desired_order]
 
 axs[0][0].legend(handles=reordered_handles, labels=reordered_labels, title_fontsize=14, loc='upper left',
-                 bbox_to_anchor=(-0.13, 2.1), handlelength=1.5,
+                 bbox_to_anchor=(-0.13, 2.2), handlelength=1.5,
                  fontsize=13, ncol=3, labelspacing=0.1, handletextpad=0.2, markerscale=0.1,
                  columnspacing=0.5, borderpad=0.2, frameon=False)
 
@@ -391,34 +410,34 @@ plt.show()
 
 
 
-
-plt.figure(figsize=(10, 6))
-
-# Plot each curve for comparison
-plt.plot(df_fixed['check_points'], df_fixed['Technology_time_decay'], label='Fixed Window', linestyle='-')
-plt.plot(df_adaptive['check_points'], df_adaptive['Technology_time_decay'], label='Adaptive Window', linestyle='--')
-plt.plot(np.arange(0, len(tra)), tra, label='Traditional Method', linestyle=':')
-
-plt.xlabel('Time')
-plt.ylabel('Values')
-plt.title('Comparison of Fixed, Adaptive, and Traditional Methods')
-plt.legend()
-plt.show()
-
-plt.figure(figsize=(10, 6))
-
-# Derivative comparisons
-plt.plot(time_intervals_fixed[:-1], np.abs(np.diff(df_fixed["Technology_time_decay"]) / np.diff(time_intervals_fixed)), label='Fixed Window Derivative', linestyle='-')
-plt.plot(time_intervals_adaptive[:-1], np.abs(np.diff(df_adaptive["Technology_time_decay"]) / np.diff(time_intervals_adaptive)), label='Adaptive Window Derivative', linestyle='--')
-plt.plot(time_intervals_traditional[:-1], np.abs(np.diff(tra) / np.diff(time_intervals_traditional)), label='Traditional Derivative', linestyle=':')
-
-plt.xlabel('Time')
-plt.ylabel('Rate of Change')
-plt.title('Comparison of Derivatives (Smoothness)')
-plt.legend()
-plt.show()
-
-
+#
+# plt.figure(figsize=(10, 6))
+#
+# # Plot each curve for comparison
+# plt.plot(df_fixed['check_points'], df_fixed['Technology_time_decay'], label='Fixed Window', linestyle='-')
+# plt.plot(df_adaptive['check_points'], df_adaptive['Technology_time_decay'], label='Adaptive Window', linestyle='--')
+# plt.plot(np.arange(0, len(tra)), tra, label='Traditional Method', linestyle=':')
+#
+# plt.xlabel('Time')
+# plt.ylabel('Values')
+# plt.title('Comparison of Fixed, Adaptive, and Traditional Methods')
+# plt.legend()
+# plt.show()
+#
+# plt.figure(figsize=(10, 6))
+#
+# # Derivative comparisons
+# plt.plot(time_intervals_fixed[:-1], np.abs(np.diff(df_fixed["Technology_time_decay"]) / np.diff(time_intervals_fixed)), label='Fixed Window Derivative', linestyle='-')
+# plt.plot(time_intervals_adaptive[:-1], np.abs(np.diff(df_adaptive["Technology_time_decay"]) / np.diff(time_intervals_adaptive)), label='Adaptive Window Derivative', linestyle='--')
+# plt.plot(time_intervals_traditional[:-1], np.abs(np.diff(tra) / np.diff(time_intervals_traditional)), label='Traditional Derivative', linestyle=':')
+#
+# plt.xlabel('Time')
+# plt.ylabel('Rate of Change')
+# plt.title('Comparison of Derivatives (Smoothness)')
+# plt.legend()
+# plt.show()
+#
+#
 
 # Standard deviation of derivatives
 fixed_roughness = np.std(np.diff(df_fixed["Technology_time_decay"]) / np.diff(time_intervals_fixed))
