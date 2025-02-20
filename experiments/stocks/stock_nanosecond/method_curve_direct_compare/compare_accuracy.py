@@ -76,14 +76,13 @@ label_ground_truth = "next_price_direction"
 correctness_column = "prediction_binary_correctness"
 use_two_counters = True
 time_unit = "10000 nanosecond"
-window_size_units = "20000"
 checking_interval = "200 millisecond"
 use_nanosecond = True
 
 data[correctness_column] = data[label_prediction] == data[label_ground_truth]
 
 ######################################## Fixed window ########################################
-
+window_size_units = "10"
 
 DFMonitor_bit, DFMonitor_counter, uf_list, accuracy_list, counter_list_correct, counter_list_incorrect, \
             window_reset_times, check_points, elapsed_time_DFMonitor_bit, elapsed_time_DFMonitor_counter, \
@@ -122,8 +121,8 @@ with open(filename, "w", newline='') as csvfile:
 
 
 ######################################## Dynamic window ########################################
-T_b = 100
-T_in = 30
+T_b = 50
+T_in = 5
 
 DFMonitor_bit, DFMonitor_counter, uf_list, accuracy_list, counter_list_correct, counter_list_incorrect, \
     window_reset_times, check_points, elapsed_time_DFMonitor_bit, elapsed_time_DFMonitor_counter, \

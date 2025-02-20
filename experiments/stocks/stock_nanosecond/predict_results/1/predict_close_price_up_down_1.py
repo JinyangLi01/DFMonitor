@@ -8,7 +8,7 @@ from sklearn.preprocessing import MinMaxScaler
 time_period = "14-00--14-10"
 date = "20241015"
 data_file_name = f"xnas-itch-{date}_{time_period}"
-data_stream = pd.read_csv(f'../../../../data/stocks_nanosecond/{data_file_name}.csv')
+data_stream = pd.read_csv(f'../../../../../data/stocks_nanosecond/{data_file_name}.csv')
 
 len_data = len(data_stream)
 len_chunk = 1
@@ -29,7 +29,7 @@ data_stream = data_stream[(data_stream["ts_event"] >= time_start) & (data_stream
 
 
 # Prepare the result file for writing
-result_file_name = f"prediction_result_{data_file_name}_chunk_size_{len_chunk}_v3.csv"
+result_file_name = f"prediction_result_{data_file_name}.csv"
 result_file = open(result_file_name, mode='w', newline='')
 csv_writer = csv.writer(result_file, delimiter=',')
 
@@ -105,10 +105,10 @@ for idx, row in data_stream.iterrows():
     y_pred = model.predict_one(x)
 
     # Drift detection
-    if drift_detector.update(abs(y - (y_pred if y_pred is not None else 0))):
-        print(f"Drift detected at index {idx}, resetting model...")
-        model = models[model_name]
-        drift_detector = drift.ADWIN()
+    # if drift_detector.update(abs(y - (y_pred if y_pred is not None else 0))):
+    #     print(f"Drift detected at index {idx}, resetting model...")
+    #     model = models[model_name]
+    #     drift_detector = drift.ADWIN()
 
     model.learn_one(x, y)
 
@@ -116,9 +116,6 @@ for idx, row in data_stream.iterrows():
                           row['action'], row['side'], row['price'], row['size'], row['channel_id'],
                           row['order_id'], row['flags'], row['ts_in_delta'], row['sequence'],
                           row['symbol'], row['sector'], y, y_pred, int(y == y_pred)])
-
-    # Initialize multiple models for comparison
-
 
     # Write results in batches of 100
     if len(batch_results) >= 100:
