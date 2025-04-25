@@ -84,24 +84,25 @@ label_ground_truth = "next_price_direction"
 correctness_column = "prediction_binary_correctness"
 use_two_counters = True
 time_unit = "10000 nanosecond"
-# window_size_units = "10"
+window_size_units = "100"
 checking_interval = "100000 nanosecond"
 use_nanosecond = True
 
 
-parser = argparse.ArgumentParser(description="Sample script")
-parser.add_argument("window_size_units", type=int)
+# parser = argparse.ArgumentParser(description="Sample script")
+# parser.add_argument("window_size_units", type=int)
+#
+# args = parser.parse_args()
+# window_size_units = args.window_size_units
+# print(window_size_units)
+# window_size_units = str(window_size_units)
 
-args = parser.parse_args()
-window_size_units = args.window_size_units
-print(window_size_units)
-window_size_units = str(window_size_units)
 
-
-DFMonitor_bit, DFMonitor_counter, uf_list, accuracy_list, counter_list_correct, counter_list_incorrect, \
-    window_reset_times, check_points, elapsed_time_DFMonitor_bit, elapsed_time_DFMonitor_counter, \
-            total_time_insertion_bit, total_time_insertion_counter, \
-            total_time_new_window_bit, total_time_new_window_counter, total_num_accuracy_check \
+DFMonitor_bit, DFMonitor_counter, uf_list, accuracy_list, counter_list_correct, counter_list_incorrect,\
+            window_reset_time_list, check_points, elapsed_time_DFMonitor_bit, elapsed_time_DFMonitor_counter,\
+            total_time_new_window_bit, total_time_new_window_counter,\
+            total_time_insertion_bit, total_time_insertion_counter, total_num_accuracy_check,\
+            total_time_query_bit, total_time_query_counter, total_num_time_window \
     = workload.traverse_data_DFMonitor_and_baseline(data, date_column,
                                                     date_time_format,
                                                     monitored_groups,
@@ -118,7 +119,7 @@ uf_list_final = uf_list[-1]
 # save the result to a file
 Technology_time_decay = [x[0] for x in accuracy_list]
 
-print("number of window reset times", len(window_reset_times))
+print("number of window reset times", len(window_reset_time_list))
 
 df = pd.DataFrame(accuracy_list, columns=["Technology_time_decay", "CommunicationServices_time_decay", "Energy_time_decay",
                      "ConsumerDefensive_time_decay", "ConsumerCyclical_time_decay",
@@ -128,7 +129,7 @@ df = pd.DataFrame(accuracy_list, columns=["Technology_time_decay", "Communicatio
 df["check_points"] = check_points
 
 # Create a DataFrame from window_reset_times if they are not already in the df
-window_reset_df = pd.DataFrame({"check_points": pd.to_datetime(window_reset_times)})
+window_reset_df = pd.DataFrame({"check_points": pd.to_datetime(window_reset_time_list)})
 window_reset_df["window_reset"] = "reset"
 # Set the existing DataFrame's reset flag to 'not_reset'
 df["window_reset"] = "not_reset"

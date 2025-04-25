@@ -56,7 +56,7 @@ sorted_sector_list = ['Technology', 'Consumer Cyclical', 'Communication Services
                           'Healthcare', 'Financial Services']
 
 
-window_size_units_list = [10, 10000, 30000]
+window_size_units_list = [1, 5, 10]
 
 
 alpha=0.9997

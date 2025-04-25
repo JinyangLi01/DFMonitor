@@ -67,9 +67,13 @@ correctness_column = "prediction_binary_correctness"
 # use_nanosecond = True
 
 
+sector_list = ['Technology', 'Consumer Cyclical', 'Communication Services']
+
+data = data[data["sector"].isin(sector_list)]
+
 
 # Define the time window dynamically
-time_window_str = "10ms"
+time_window_str = "1s"
 time_window = pd.to_timedelta(time_window_str)  # Convert to Timedelta
 
 # Generate time windows dynamically based on time_window and time range
