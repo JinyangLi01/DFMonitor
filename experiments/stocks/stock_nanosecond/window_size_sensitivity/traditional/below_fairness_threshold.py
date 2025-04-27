@@ -52,15 +52,15 @@ use_nanosecond = True
 
 
 
-monitored_groups = [{"sector": 'Technology'}, {"sector": 'Consumer Cyclical'}, {'sector': 'Communication Services'},
-                    {"sector": 'Consumer Defensive'}, {"sector": 'Energy'}, {"sector": 'Healthcare'},
-                    {"sector": 'Financial Services'}]
-
-sorted_sector_list = ['Technology', 'Consumer Cyclical', 'Communication Services', 'Consumer Defensive', 'Energy',
-                          'Healthcare', 'Financial Services']
+sector_list = ['Technology', 'Consumer Cyclical', 'Communication Services']
+#
+# window_size_unit_list = ["100ms", "200ms", "500ms", "1s", "2s", "5s"]
 
 
-alpha=0.9
+window_size_unit_list = ["100ms", "200ms", "500ms", "1s", "2s", "5s"]
+
+
+
 fairness_threshold = 0.6
 
 time_start_picture = 0
@@ -77,8 +77,8 @@ time_end = pd.Timestamp('2024-10-15 14:00:14.00', tz='UTC')
 
 
 
-window_size_units_list = [100, 200, 400, 600, 800, 1000, 2000, 4000, 6000]
-curve_names = ["Technology_time_decay", "ConsumerCyclical_time_decay", "CommunicationServices_time_decay",]
+window_size_units_list = ["100ms", "200ms", "500ms", "1s", "2s", "5s"]
+curve_names = ["Technology", "Consumer Cyclical", "Communication Services",]
 
 
 def merge_overlapping_intervals(intervals, tolerance_ns=10000):
@@ -117,9 +117,9 @@ def get_below_threshold_intervals(df, fairness_threshold, fairness_column="fairn
     for index, row in df.iterrows():
         if row[fairness_column] < fairness_threshold:
             if current_interval is None:
-                current_interval = [row["check_points"], row["check_points"]]
+                current_interval = [row["ts_event"], row["ts_event"]]
             else:
-                current_interval[1] = row["check_points"]
+                current_interval[1] = row["ts_event"]
         else:
             if current_interval is not None:
                 below_threshold_intervals.append(current_interval)
@@ -171,39 +171,33 @@ def get_all_interval_coverage(intervals_by_window, window_sizes):
     return coverage_dict
 
 below_threshold_intervals = []
+result_file_list = dict()
+for window_size in window_size_unit_list:
+    file_name = f"traditional_accuracy_time_window_{window_size}.csv"
+    df = pd.read_csv(file_name)
+    # df = df[df['sector'].isin(sorted_sector_list)]
+    df = df[df['sector'].isin(sector_list)]
+    result_file_list[window_size] = df
 
 for curve in curve_names:
     num_detected = []
     below_threshold_intervals_per_window_size = []
     for a, window_size in enumerate(window_size_units_list):
-        filename = (f"stocks_compare_Accuracy_sector_{date}_{time_period}_alpha_{str(get_integer(alpha))}"
-                    f"_time_unit_{time_unit}*{window_size}_check_interval_{checking_interval}_start_time_"
-                    f"{time_start}_end_time_{time_end}.csv")
-        with open(filename, 'r') as f:
-            contents = f.read()
-        if "]\"" in contents or "\"[" in contents:
-            updated_contents = contents.replace("]\"", "")
-            updated_contents = updated_contents.replace("\"[", "")
-            with open(filename, 'w') as f:
-                f.write(updated_contents)
-
-        df = pd.read_csv(filename)
+        df = result_file_list[window_size]
+        df = df[df["sector"] == curve]
+        df["ts_event"] = pd.to_datetime(df["ts_event"], utc=True, format="mixed")
         df_below_threshold = []
-        df["check_points"] = pd.to_datetime(df["check_points"])
-        # print(alpha, len(df))
-        # print(df.columns)
-        # Remove timezone from warm_up_time
-        time_start_picture = pd.Timestamp('2024-10-15 14:00:08.00', tz='UTC')
-        time_end_picture = pd.Timestamp('2024-10-15 14:00:14.00', tz='UTC')
+        # df["ts_event"] = pd.to_datetime(df["ts_event"])
+        time_start_picture = pd.Timestamp('2024-10-15 14:00:10.00', tz='UTC')
+        time_end_picture = pd.Timestamp('2024-10-15 14:00:11.00', tz='UTC')
         total_duration_ns = (time_end_picture - time_start_picture).total_seconds() * 1e9
-        df["check_points"] = pd.to_datetime(df["check_points"])
         # get data between time_start and time_end
-        df = df[(df["check_points"] >= time_start_picture) & (df["check_points"] <= time_end_picture)]
-        # print("len of selected data", len(df))
-        # df["check_points"] = df["check_points"].apply(lambda x: datetime.strptime(x, "%Y-%m-%d %H:%M:%S").strftime("%m/%d/%Y"))
-        check_points = df["check_points"].tolist()
+
+        df = df[(df["ts_event"] >= time_start_picture) & (df["ts_event"] <= time_end_picture)]
+
+        ts_event = df["ts_event"].tolist()
         x_list = np.arange(0, len(df))
-        below_threshold_intervals = get_below_threshold_intervals(df, fairness_threshold, curve)
+        below_threshold_intervals = get_below_threshold_intervals(df, fairness_threshold, "accuracy")
         below_threshold_intervals = merge_overlapping_intervals(below_threshold_intervals)
         # print(curve, len(below_threshold_intervals), below_threshold_intervals)
         # print("window_size", window_size, "number of below threshold intervals", len(df_below_threshold))

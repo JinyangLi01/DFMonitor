@@ -56,7 +56,8 @@ sorted_sector_list = ['Technology', 'Consumer Cyclical', 'Communication Services
                           'Healthcare', 'Financial Services']
 
 
-window_size_units_list = [12000, 30000, 100000]
+
+window_size_units_list = [10000, 30000, 100000]
 
 
 alpha=0.1
@@ -67,8 +68,8 @@ time_end_picture = 0
 fig, axes = plt.subplots(1, 3, figsize=(7, 1.4))
 plt.subplots_adjust(top=0.85, bottom=0.33, hspace=0, wspace=0.25, left=0.05, right=0.99)
 
-time_start = pd.Timestamp('2024-10-15 14:00:08.00', tz='UTC')
-time_end = pd.Timestamp('2024-10-15 14:00:14.00', tz='UTC')
+time_start = pd.Timestamp('2024-10-15 14:00:05.00', tz='UTC')
+time_end = pd.Timestamp('2024-10-15 14:00:18.00', tz='UTC')
 
 
 # Choose some timestamps for labeling on the x-axis
@@ -103,8 +104,8 @@ for a, window_size in enumerate(window_size_units_list):
     print(alpha, len(df))
     print(df.columns)
     # Remove timezone from warm_up_time
-    time_start_picture = pd.Timestamp('2024-10-15 14:00:10.00', tz='UTC')
-    time_end_picture = pd.Timestamp('2024-10-15 14:00:11.00', tz='UTC')
+    time_start_picture = pd.Timestamp('2024-10-15 14:00:05.00', tz='UTC')
+    time_end_picture = pd.Timestamp('2024-10-15 14:00:18.00', tz='UTC')
     total_duration_ns = (time_end_picture - time_start_picture).total_seconds() * 1e9
 
     df["check_points"] = pd.to_datetime(df["check_points"])

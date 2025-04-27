@@ -60,7 +60,7 @@ sorted_sector_list = ['Technology', 'Consumer Cyclical', 'Communication Services
                           'Healthcare', 'Financial Services']
 
 
-alpha=0.9
+alpha=0.1
 fairness_threshold = 0.6
 
 time_start_picture = 0
@@ -77,7 +77,7 @@ time_end = pd.Timestamp('2024-10-15 14:00:14.00', tz='UTC')
 
 
 
-window_size_units_list = [100, 200, 400, 600, 800, 1000, 2000, 4000, 6000]
+window_size_units_list = [1000, 5000, 10000, 30000, 50000]
 curve_names = ["Technology_time_decay", "ConsumerCyclical_time_decay", "CommunicationServices_time_decay",]
 
 
@@ -193,8 +193,8 @@ for curve in curve_names:
         # print(alpha, len(df))
         # print(df.columns)
         # Remove timezone from warm_up_time
-        time_start_picture = pd.Timestamp('2024-10-15 14:00:08.00', tz='UTC')
-        time_end_picture = pd.Timestamp('2024-10-15 14:00:14.00', tz='UTC')
+        time_start_picture = pd.Timestamp('2024-10-15 14:00:10.00', tz='UTC')
+        time_end_picture = pd.Timestamp('2024-10-15 14:00:11.00', tz='UTC')
         total_duration_ns = (time_end_picture - time_start_picture).total_seconds() * 1e9
         df["check_points"] = pd.to_datetime(df["check_points"])
         # get data between time_start and time_end
