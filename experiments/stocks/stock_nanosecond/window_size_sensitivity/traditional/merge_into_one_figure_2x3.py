@@ -30,7 +30,7 @@ sector_list = ['Technology', 'Consumer Cyclical', 'Communication Services']
 # window_size_unit_list = ["100ms", "200ms", "500ms", "1s", "2s", "5s"]
 
 
-window_size_unit_list = ["100ms", "300ms", "500ms", "700ms", "900ms", "1s"]
+window_size_unit_list = ["10ms", "20ms", "50ms", "100ms", "200ms", "500ms"]
 
 
 result_file_list = dict()
@@ -54,8 +54,8 @@ plt.subplots_adjust(top=0.92, bottom=0.18, hspace=0.6, wspace=0.27, left=0.09, r
 
 
 
-time_start = pd.Timestamp('2024-10-15 14:00:05.00', tz='UTC')
-time_end = pd.Timestamp('2024-10-15 14:00:18.00', tz='UTC')
+time_start = pd.Timestamp('2024-10-15 14:00:10.00', tz='UTC')
+time_end = pd.Timestamp('2024-10-15 14:00:11.00', tz='UTC')
 
 curve_colors = sns.color_palette(palette=['black', '#09339e', '#5788ee', '#00b9bc', '#7fffff', '#81db46',
                                           '#41ab5d', '#006837'])
@@ -90,6 +90,11 @@ for i in range(0, len(window_size_unit_list)):
                          x='ts_event',
                          y='accuracy', hue='sector', legend=False, marker='o', linestyle='-', linewidth=1.5,
                          markersize=3, palette=curve_colors, hue_order=sector_order)
+    elif i == 2:
+        g = sns.lineplot(ax=axes[i//3][i%3], data=result_file_list[window_size_unit_list[i]],
+                            x='ts_event',
+                            y='accuracy', hue='sector', legend=False, marker='o', linestyle='-', linewidth=2,
+                            markersize=4, palette=curve_colors, hue_order=sector_order)
     elif i == len(window_size_unit_list)-1:
         g = sns.lineplot(ax=axes[i//3][i%3], data=result_file_list[window_size_unit_list[i]],
                          x='ts_event',
@@ -105,7 +110,10 @@ for i in range(0, len(window_size_unit_list)):
     axes[i//3][i%3].tick_params(axis='both', which='major', labelsize=15, pad=1.5)
     # axes[i//3][i%3].set_yticks([0, 0.5, 1.0])
     axes[i//3][i%3].set_ylabel('')
-    axes[i//3][i%3].set_xlabel(xlabel, fontsize=14, labelpad=0).set_position([0.5, 1])
+    if i == len(window_size_unit_list) - 1:
+        axes[i // 3][i % 3].set_xlabel(xlabel, fontsize=14, labelpad=16).set_position([0.5, 4])
+    else:
+        axes[i // 3][i % 3].set_xlabel(xlabel, fontsize=14, labelpad=0).set_position([0.5, 1])
 
 
     # Define the common x-tick labels for the first subplot
@@ -120,7 +128,7 @@ for i in range(0, len(window_size_unit_list)):
         lst = result_file_list[window_size]['ts_event'].unique().tolist()
         timestamp_values = np.array([pd.Timestamp(time).value for time in lst])  # Convert to numeric values
         tick_idx = []
-        df_below_threshold = result_file_list[window_size][result_file_list[window_size]['accuracy'] < 0.3]
+        df_below_threshold = result_file_list[window_size][result_file_list[window_size]['accuracy'] < 0.1]
         df_below_threshold = df_below_threshold[1:]
 
         # for tick_time in manual_ticks:
@@ -139,15 +147,15 @@ for i in range(0, len(window_size_unit_list)):
 
     else:
         if i == 1:
-            df_below_threshold = result_file_list[window_size][result_file_list[window_size]['accuracy'] < 0.5]
+            df_below_threshold = result_file_list[window_size][result_file_list[window_size]['accuracy'] < 0.6]
         elif i == 2:
-            df_below_threshold = result_file_list[window_size][result_file_list[window_size]['accuracy'] < 0.56]
+            df_below_threshold = result_file_list[window_size][result_file_list[window_size]['accuracy'] < 0.6]
         elif i == 3:
-            df_below_threshold = result_file_list[window_size][result_file_list[window_size]['accuracy'] < 0.597]
+            df_below_threshold = result_file_list[window_size][result_file_list[window_size]['accuracy'] < 0.6]
         elif i == 4:
-            df_below_threshold = result_file_list[window_size][result_file_list[window_size]['accuracy'] < 0.62]
+            df_below_threshold = result_file_list[window_size][result_file_list[window_size]['accuracy'] < 0.6]
         elif i == 5:
-            df_below_threshold = result_file_list[window_size][result_file_list[window_size]['accuracy'] < 0.65]
+            df_below_threshold = result_file_list[window_size][result_file_list[window_size]['accuracy'] < 0.6]
 
     # Extract unique timestamps where accuracy is below the threshold
     unique_below_threshold_times = df_below_threshold["ts_event"].unique()
@@ -164,18 +172,27 @@ for i in range(0, len(window_size_unit_list)):
         # Interpolate the approximate index for each time point where accuracy < 55%
         interpolated_index = np.interp(tick_timestamp, timestamp_values, range(len(lst)))
         tick_idx.append(interpolated_index)
-
-        # Create simplified label for the tick (e.g., just the minute and seconds)
-        tick_labels.append(pd.Timestamp(tick_time).strftime(':%S'))
+    if i < 3:
+        tick_labels = [' '] * len(tick_idx)
+    # elif i == 5:
+    #     tick_idx = [0]
+    #     tick_labels = [" "]
+    else:
+        tick_labels = [pd.Timestamp(tick_time).strftime('.%f')[:-3] for tick_time in unique_below_threshold_times]
 
     # Set these timestamps as xticks with the simplified labels
     axes[i//3][i%3].set_xticks(tick_idx)
-    axes[i//3][i%3].set_xticklabels(tick_labels, rotation=0, fontsize=14, fontweight='bold')
+    if i >= 3:
+        # Set the tick labels for the last two subplots
+        axes[i//3][i%3].set_xticklabels(tick_labels, rotation=0, fontsize=12)
+    else:
+        # Set the tick labels for the first subplot
+        axes[i//3][i%3].set_xticklabels(tick_labels, rotation=0, fontsize=12)
 
 
-first_label = axes[0][1].get_xticklabels()[2]
-first_label.set_transform(first_label.get_transform() + Affine2D().translate(-4, 0))  # Shift 5 points left
-
+# first_label = axes[0][1].get_xticklabels()[2]
+# first_label.set_transform(first_label.get_transform() + Affine2D().translate(-4, 0))  # Shift 5 points left
+#
 
 
 
@@ -221,7 +238,7 @@ updated_labels = list(current_labels)
 
 # Set the updated ticks and labels
 axes[1][1].set_xticks(updated_ticks)
-axes[1][1].set_xticklabels(updated_labels, rotation=0, fontsize=14)
+axes[1][1].set_xticklabels(updated_labels, rotation=0, fontsize=12)
 
 
 
@@ -233,34 +250,36 @@ plt.draw()
 axes[0][0].set_ylabel('Accuracy', fontsize=14, labelpad=-1)
 axes[1][0].set_ylabel('Accuracy', fontsize=14, labelpad=-1)
 
+
+
 axes[0][0].set_ylim(0.0, 1)
-axes[0][0].set_yscale("symlog", linthresh=0.68)
-axes[0][0].set_yticks([0.1, 0.3, 0.5, 0.7], ["0.1", "0.3", "0.5", "0.7"], fontsize=14)
+axes[0][0].set_yscale("symlog", linthresh=0.9)
+axes[0][0].set_yticks([0.0, 0.2, 0.4, 0.6, 0.8], ["0.0", "0.2", "0.4", "0.6", "0.8"], fontsize=14)
 
-axes[0][1].set_ylim(0.4, 0.9)
-axes[0][1].set_yscale("symlog", linthresh=0.68)
-axes[0][1].set_yticks([0.5, 0.6, 0.7], ["0.50", "0.60", "0.70"], fontsize=14)
+axes[0][1].set_ylim(0.0, 1)
+axes[0][1].set_yscale("symlog", linthresh=0.9)
+axes[0][1].set_yticks([0.0, 0.2, 0.4, 0.6, 0.8], ["0.0", "0.2", "0.4", "0.6", "0.8"], fontsize=14)
 
-axes[0][2].set_ylim(0.5, 0.75)
-axes[0][2].set_yscale("symlog", linthresh=0.68)
-axes[0][2].set_yticks([0.5, 0.6, 0.7], ["0.50", "0.60", "0.70"], fontsize=14)
+axes[0][2].set_ylim(0.0, 1)
+axes[0][2].set_yscale("symlog", linthresh=0.9)
+axes[0][2].set_yticks([0.0, 0.2, 0.4, 0.6, 0.8], ["0.0", "0.2", "0.4", "0.6", "0.8"], fontsize=14)
 
 
-axes[1][0].set_ylim(0.57, 0.7)
-axes[1][0].set_yscale("symlog", linthresh=0.66)
+axes[1][0].set_ylim(0.55, 0.8)
+axes[1][0].set_yscale("symlog", linthresh=0.7)
 axes[1][0].set_yticks([0.6, 0.65, 0.7], ["0.60", "0.65", "0.70"], fontsize=14)
 
 
 
-axes[1][1].set_ylim(0.57, 0.7)
-axes[1][1].set_yscale("symlog", linthresh=0.66)
+axes[1][1].set_ylim(0.57, 0.75)
+axes[1][1].set_yscale("symlog", linthresh=0.7)
 axes[1][1].set_yticks([ 0.6, 0.65, 0.7], ["0.60", "0.65", "0.70"], fontsize=14)
 
 
 
 
-axes[1][2].set_ylim(0.57, 0.7)
-axes[1][2].set_yscale("symlog", linthresh=0.66)
+axes[1][2].set_ylim(0.59, 0.7)
+axes[1][2].set_yscale("symlog", linthresh=0.7)
 axes[1][2].set_yticks([ 0.6, 0.65, 0.7], ["0.60", "0.65", "0.70"], fontsize=14)
 
 

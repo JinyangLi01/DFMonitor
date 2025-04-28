@@ -37,7 +37,7 @@ date = "20241015"
 data_file_name = f"xnas-itch-{date}_{time_period}"
 len_chunk = 1
 # Prepare the result file for writing
-data_file_name = f"../predict_results/prediction_result_{data_file_name}_chunk_size_{len_chunk}_v3.csv"
+data_file_name = f"../../predict_results/prediction_result_{data_file_name}_chunk_size_{len_chunk}_v3.csv"
 data = pd.read_csv(data_file_name)
 
 
@@ -45,8 +45,8 @@ sector_list = ['Technology', 'Consumer Cyclical', 'Communication Services']
 
 data = data[data["sector"].isin(sector_list)]
 
-time_start = pd.Timestamp('2024-10-15 14:00:05.00', tz='UTC')
-time_end = pd.Timestamp('2024-10-15 14:00:18.00', tz='UTC')
+time_start = pd.Timestamp('2024-10-15 14:00:10.00', tz='UTC')
+time_end = pd.Timestamp('2024-10-15 14:00:11.00', tz='UTC')
 
 data["ts_event"] = pd.to_datetime(data["ts_event"])
 # get data between time_start and time_end
@@ -72,7 +72,7 @@ correctness_column = "prediction_binary_correctness"
 
 
 # Define the time window dynamically
-time_window_str = "9s"
+time_window_str = "300ms"
 time_window = pd.to_timedelta(time_window_str)  # Convert to Timedelta
 
 # Generate time windows dynamically based on time_window and time range
