@@ -30,7 +30,7 @@ sector_list = ['Technology', 'Consumer Cyclical', 'Communication Services']
 # window_size_unit_list = ["100ms", "200ms", "500ms", "1s", "2s", "5s"]
 
 
-window_size_unit_list = ["20ms", "100ms", "500ms"]
+window_size_unit_list = ["20ms", "100ms", "200ms"]
 
 
 result_file_list = dict()

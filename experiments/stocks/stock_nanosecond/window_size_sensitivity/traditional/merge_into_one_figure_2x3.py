@@ -128,7 +128,7 @@ for i in range(0, len(window_size_unit_list)):
         lst = result_file_list[window_size]['ts_event'].unique().tolist()
         timestamp_values = np.array([pd.Timestamp(time).value for time in lst])  # Convert to numeric values
         tick_idx = []
-        df_below_threshold = result_file_list[window_size][result_file_list[window_size]['accuracy'] < 0.1]
+        df_below_threshold = result_file_list[window_size][result_file_list[window_size]['accuracy'] < 0.6]
         df_below_threshold = df_below_threshold[1:]
 
         # for tick_time in manual_ticks:
@@ -156,7 +156,7 @@ for i in range(0, len(window_size_unit_list)):
             df_below_threshold = result_file_list[window_size][result_file_list[window_size]['accuracy'] < 0.6]
         elif i == 5:
             df_below_threshold = result_file_list[window_size][result_file_list[window_size]['accuracy'] < 0.6]
-
+    print("len(df_below_threshold)", len(df_below_threshold))
     # Extract unique timestamps where accuracy is below the threshold
     unique_below_threshold_times = df_below_threshold["ts_event"].unique()
 
